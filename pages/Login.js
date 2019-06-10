@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert } from 'react-native';
+import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,ProgressViewIOS } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class Login extends React.Component {
@@ -7,14 +7,13 @@ export default class Login extends React.Component {
   
   constructor(props) {
     super(props);
-    this.state = { email: null,password:null,API:null };
+    this.state = { email: null,password:null,API:null,progress:0 };
   }
   componentWillMount() {
       var API = this.props.navigation.state.params.API;
       this.setState({ API: API });
   }
   login(){
-    this.props.navigation.navigate('Home');
     var formData  = new FormData();
     formData.append("email",this.state.email);
     formData.append("password",this.state.password);
@@ -44,11 +43,11 @@ export default class Login extends React.Component {
               login = true;
           }
         });
-        // if(login){
-        //   this.props.navigation.navigate('Home');
-        // }else{
-        //   Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
-        // }
+        if(login){
+          this.props.navigation.navigate('Home');
+        }else{
+          Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
+        }
 
     });
   }

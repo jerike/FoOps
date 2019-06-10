@@ -3,17 +3,18 @@ import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight 
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
-import MapScreen from './MapScreen';
+import MapView from 'react-native-maps';
 import Filter from './Filter';
+
 
 const severe_title=["優先處理","次要處理","待處理","正常"];
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
 
-class Home extends React.Component {
+export default class MapScreen extends React.Component {
     constructor () {
       super()
       this.state = {
-        selectedIndex: 1
+        selectedIndex: null
       }
       this.updateIndex = this.updateIndex.bind(this)
     }
@@ -109,7 +110,7 @@ class Home extends React.Component {
         const component1 = () => <Text>篩選</Text>
         const component2 = () => <Text>列表</Text>
         const component3 = () => <Text>地圖</Text>
-        const buttons = [{ element: component1 }, { element: component2 }, { element: component3 }]
+        const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter} = this.state;
         const filter_option = {
             modalVisible:this.state.modalVisible,
@@ -210,7 +211,6 @@ class Home extends React.Component {
                 justifyContent: 'space-around',
               }}
             />
-            <Filter filter_option={filter_option}/>
             <ButtonGroup
               onPress={this.updateIndex}
               selectedIndex={selectedIndex}
@@ -219,9 +219,14 @@ class Home extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-            <ScrollView style={{flexDirection:'column' }}>
-                 {items}
-            </ScrollView>
+             <MapView
+                initialRegion={{
+                  latitude: 37.78825,
+                  longitude: -122.4324,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+              />
         </View>
          
         );
@@ -279,10 +284,4 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
     }
 });
-const TabNavigator = createDrawerNavigator({
-  "篩選": { screen: Home },
-  "列表": { screen: Home },
-  "地圖": { screen: MapScreen },
-});
 
-export default createAppContainer(TabNavigator);
