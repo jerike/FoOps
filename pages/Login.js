@@ -14,6 +14,8 @@ export default class Login extends React.Component {
       this.setState({ API: API });
   }
   login(){
+    this.props.navigation.navigate('Home');
+    return false;
     var formData  = new FormData();
     formData.append("email",this.state.email);
     formData.append("password",this.state.password);
@@ -43,11 +45,12 @@ export default class Login extends React.Component {
               login = true;
           }
         });
-        if(login){
-          this.props.navigation.navigate('Home');
-        }else{
-          Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
-        }
+
+        // if(login){
+        //   this.props.navigation.navigate('Home');
+        // }else{
+        //   Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
+        // }
 
     });
   }

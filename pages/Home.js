@@ -13,27 +13,51 @@ class Home extends React.Component {
     constructor () {
       super()
       this.state = {
-        selectedIndex: 1
+        selectedIndex: 1,
+        sel_work_area:null,
+        power_min:0,
+        power_max:100,
+        day_min:0,
+        day_max:100,
+        sel_work_area:null,
+        sel_severe_data:null,
+        sel_scooter_status:null,
+        all_work_area:[],
+        sel_scooter:{},
+        sel_condition:[],
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
+<<<<<<< HEAD
+=======
+      this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
+      this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
+      this.get_power_change=this.get_power_change.bind(this);
+>>>>>>> 457f7b19d706ca011a3a787b5ceccac00b6fd854
     }
     componentWillMount() {
         var API = this.props.navigation.state.params.API;
         this.setState({ API: API,search:'',modalVisible: false,scooter:[],condition:[] });
+        this.get_scooter(API);
         this.get_scooter_status(API);
+        
+    }
+    //取得電動車資訊
+    get_scooter(API){
+        var theTime = new Date();
+        var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+        this.setState({reload_time:reload_time});
         fetch(API+'/scooter',{
             method: 'GET',
             credentials: 'include'
-          })
-          .then((response) => {
-                return response.json();
-          })
-          .then((json) => {
-              this.setState({scooter:json.data});
-          }); 
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((json) => {
+          this.setState({scooter:json.data});
+        }); 
     }
-
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -106,17 +130,173 @@ class Home extends React.Component {
         });
         return result;
     }
+    get_power_change(value){
+        this.setState({power_min:value.selectedMinimum,power_max:value.selectedMaximum});
+        setTimeout(()=>{
+          this.filter_scooter_by_power();
+        },10);
+    }
+    filter_scooter_by_power(){
+        var result = new Array();
+        this.state.scooter.map(function(m, i){
+            var pushed = true;
+            //判斷狀態
+            if(m.power >= this.state.power_min && m.power <= this.state.power_max){
+              pushed = true;
+            }else{
+              pushed = false;
+            }
+            if(pushed){
+              result.push(m);
+            }
+        }.bind(this));
+        this.setState({ scooter:result });
+    }
+    get_days_change(value){
+        this.setState({day_min:value.selectedMinimum,day_max:value.selectedMaximum});
+        setTimeout(()=>{
+          this.filter_scooter_by_rent_days();
+        },10);
+    }
+    filter_scooter_by_rent_days(){
+        var result = new Array();
+        this.state.scooter.map(function(m, i){
+            var pushed = true;
+            if(this.state.day_max == 100){
+                if(m.range_days >= this.state.day_min){
+                  pushed = true;
+                }else{
+                  pushed = false;
+                }
+            }else{
+                if(m.range_days >= this.state.day_min && m.range_days <= this.state.day_max){
+                    pushed = true;
+                }else{
+                  pushed = false;
+                }
+            }
+            if(pushed){
+              result.push(m);
+            }
+        }.bind(this));
+        this.setState({ scooter:result });
+    }
+    // 選擇工作區域
+    onChangeWorkArea(area){
+        // 帶入區域內經緯度資料
+        if(this.state.sel_work_area == null){
+            this.setState({sel_work_area:area}, () => {
+                this.get_scooter_in_work_area();
+            });
+        }else{
+            this.setState({sel_work_area:null}, () => {
+                this.get_scooter();
+            });
+        }
+    }
+    get_scooter_in_work_area(API){
+        // console.log(this.state.sel_work_area);
+        var area = this.state.sel_work_area;
+        var result = [];
+        if(area != null){
+            fetch(API+'/scooter/work_area/'+area,{
+                  method: 'GET'
+              })
+            .then((response) => response.json())
+            .then((json) => {
+                var zone = [];
+                zone.push(json);
+                this.state.scooter.map(function(m, i){
+                    var istrue = this.checkzone('in',zone,m.location);
+                    if(istrue){
+                      result.push(m);
+                    }
+                }.bind(this));
+                this.setState({ scooter:result });
+            });
+        }
+    }
+
+    // 選擇車輛狀況
+    onChangeSever(e){
+        if(this.state.sel_severe_data == null){
+            this.setState({sel_severe_data:e}, () => {
+                this.get_scooter_by_severe();
+            });
+        }else{
+            this.setState({sel_severe_data:null}, () => {
+                this.get_scooter();
+            });
+        }
+    }
+    get_scooter_by_severe(){
+        var severe = this.state.sel_severe_data;
+        var result = [];
+        if(severe != ""){
+            this.state.scooter.map(function(m, i){
+                if(m.severe == severe){
+                  result.push(m);
+                }
+            }.bind(this));
+            this.setState({ scooter:result });
+        }
+    }
+    // 選擇服務狀態
+    onChangeScooterStatus(e){
+        if(this.state.sel_scooter_status == null){
+            this.setState({sel_scooter_status:e.type}, () => {
+                this.get_scooter_by_status();
+            });
+        }else{
+            this.setState({sel_scooter_status:null}, () => {
+                this.get_scooter();
+            });
+        }
+    }
+    get_scooter_by_status(){
+        var status = this.state.sel_scooter_status;
+        var result = [];
+        if(status != ""){
+            this.state.scooter.map(function(m, i){
+                if(m.status == status){
+                  result.push(m);
+                }
+            }.bind(this));
+            this.setState({ scooter:result });
+        }
+    }
+
     render() {
         const component1 = () => <Text>篩選</Text>
         const component2 = () => <Text>列表</Text>
         const component3 = () => <Text>地圖</Text>
         const buttons = [{ element: component1 }, { element: component2 }, { element: component3 }]
         const {search,selectedIndex,scooter} = this.state;
-        const filter_option = {
+        var filter_option = {
+            power_min:this.state.power_min,
+            power_max:this.state.power_max,
+            day_min:this.state.day_min,
+            day_max:this.state.day_max,
+            sel_work_area:this.state.sel_work_area,
+            sel_severe_data:this.state.sel_severe_data,
+            sel_scooter_status:this.state.sel_scooter_status,
+            work_area:this.state.work_area,
+            severe_title:this.state.severe_title,
+            scootet_status:this.state.scootet_status,
+            onChangeWorkArea:this.onChangeWorkArea,
+            onChangeScooterStatus:this.onChangeScooterStatus,
+            onChangeSever:this.onChangeSever,
+            power_change:this.get_power_change,
+            days_change:this.days_change,
+            scooter:this.state.scooter,
+            sel_task:this.state.sel_task,
+            onChangeTask:this.onChangeTask,
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
             condition:this.state.condition
         }
+
+
         var items = scooter.map(function(m,i){
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
