@@ -6,13 +6,26 @@ import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,CheckBox,Slid
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RangeSlider from 'react-native-range-slider'
 
+const work_area = [] 
+for(var i=0 ; i<6 ; i++){
+    work_area.push({area:"區域"+(parseInt(i)+1),value:"KS_Zone"+(parseInt(i)+1)})
+} 
+const severe_title=["優先處理","次要處理","待處理","正常"];
+
+const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
+
 export default class Filter extends React.Component {
     constructor () {
       super()
       this.state = {
         selectedIndex: 2,
         value:100,
-        wab1:false
+        wab1:false,
+        wab2:false,
+        wab3:false,
+        wab4:false,
+        wab5:false,
+        wab6:false,
       }
       this.updateIndex = this.updateIndex.bind(this)
     }
@@ -24,6 +37,76 @@ export default class Filter extends React.Component {
         const buttons = ['Hello', 'World', 'Buttons','Hello', 'World', 'Buttons']
         const { selectedIndex } = this.state
         var total = filter_option.scooter.length;
+        var work_area_btns = []
+        work_area.map(function(m,i){
+            var btn = <Button
+              title={m.area}
+              type="outline"
+              style={styles.work_area_btn}
+              buttonStyle={styles.Wa_buttonStyle}
+              titleStyle={styles.titleStyle}
+              onPress={()=>filter_option.onChangeWorkArea(m.value)}
+            />
+            if (filter_option.sel_work_area == m.value) {
+              btn = <Button
+                title={m.area}
+                style={styles.work_area_btn}
+                icon={<Icon name="check-circle" size={15}  color="white" />}
+                buttonStyle={styles.Wa_buttonStyleActive}
+                titleStyle={styles.titleStyleActive}
+                onPress={()=>filter_option.onChangeWorkArea(m.value)}
+              />
+            }
+            work_area_btns.push(btn);
+        });
+        var severe_btns = []
+        severe_title.map(function(m,i){
+            var index = parseInt(i) + 1;
+            var btn = <Button
+              title={m}
+              type="outline"
+              style={styles.work_area_btn}
+              buttonStyle={{borderColor:'rgb(255, 204, 34)',}}
+              titleStyle={styles.titleStyle}
+              onPress={()=>filter_option.onChangeSever(index)}
+            />
+            if(filter_option.sel_severe_data === index) {
+              btn = <Button
+                title={m}
+                style={styles.work_area_btn}
+                icon={<Icon name="check-circle" size={15}  color="white" />}
+                buttonStyle={{borderColor:'rgb(255, 204, 34)',backgroundColor:'rgb(255, 204, 34)',color:'#fff'}}
+                titleStyle={styles.titleStyleActive}
+                onPress={()=>filter_option.onChangeSever(index)}
+              />
+            }
+            severe_btns.push(btn);
+        });
+        var scooter_status_btns = []
+        scootet_status.map(function(m,i){
+            var btn = <Button
+              title={m.title}
+              type="outline"
+              style={styles.work_area_btn}
+              buttonStyle={{ borderColor:'#f00'}}
+              titleStyle={styles.titleStyle}
+              onPress={()=>filter_option.onChangeScooterStatus(m.type)}
+            />
+            if(filter_option.sel_scooter_status === m.type) {
+              btn = <Button
+                title={m.title}
+                style={styles.work_area_btn}
+                icon={<Icon name="check-circle" size={15}  color="white" />}
+                buttonStyle={{ borderColor:'#f00',backgroundColor:'#f00',color:'#fff'}}
+                titleStyle={styles.titleStyleActive}
+                onPress={()=>filter_option.onChangeScooterStatus(m.type)}
+              />
+            }
+            scooter_status_btns.push(btn);
+            
+        });
+
+
         return (
             <Modal
               animationType="slide"
@@ -33,146 +116,19 @@ export default class Filter extends React.Component {
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   <View style={{  justifyContent: "flex-start", alignItems: "flex-end" }}>
-<<<<<<< HEAD
-                     <Icon name='close'  onPress={() => {
-=======
                      <Icon name='close' size={20}  onPress={() => {
->>>>>>> 457f7b19d706ca011a3a787b5ceccac00b6fd854
                         filter_option.setModalVisible(!filter_option.modalVisible);
                       }} />
                   </View>
                   <ScrollView style={{flexDirection:'column' }}>
-<<<<<<< HEAD
-                  {
-                    filter_option.condition.map((l, i) => (
-                    <ListItem
-                      key={i}
-                      title={l.description}
-                      
-                    />
-                    ))
-                  }                    
-                  </ScrollView>
-=======
                     <View style={styles.row_view}>
-                        <Button
-                          title="區域 1"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          icon={
-                                
-                                  this.state.wab1 && (<Icon
-                                        name="check-circle"
-                                        size={15}
-                                        color="white"
-                                      />)
-                                
-                              }
-                          buttonStyle={[
-                                        !this.state.wab1 && styles.Wa_buttonStyle,
-                                        this.state.wab1 && styles.Wa_buttonStyleActive,
-                                      ]}
-                          titleStyle={[
-                                        !this.state.wab1 && styles.titleStyle,
-                                        this.state.wab1 && styles.titleStyleActive,
-                                      ]}
-                          onPress={()=>this.setState({wab1:!this.state.wab1})}
-                        />
-                         <Button
-                          title="區域 2"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.Wa_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="區域 3"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.Wa_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="區域 4"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.Wa_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="區域 5"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.Wa_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="區域 6"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.Wa_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
+                        {work_area_btns}
                     </View>
                     <View style={styles.row_view}>
-                        <Button
-                          title="優先處理"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.ss_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="次要處理"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.ss_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="待處理"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.ss_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="正常"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.ss_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
+                        {severe_btns}
                     </View>
                     <View style={styles.row_view}>
-                        <Button
-                          title="尚未服務"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.service_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="預約中"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.service_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="使用中"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.service_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
-                         <Button
-                          title="暫停服務"
-                          type="outline"
-                          style={styles.work_area_btn}
-                          buttonStyle={styles.service_buttonStyle}
-                          titleStyle={styles.titleStyle}
-                        />
+                        {scooter_status_btns}
                     </View>
                     <View style={styles.slider_view}>
                       <Text>電量</Text>
@@ -223,7 +179,6 @@ export default class Filter extends React.Component {
                       }}
                     />
                   </View>
->>>>>>> 457f7b19d706ca011a3a787b5ceccac00b6fd854
                 </SafeAreaView>
             </Modal>
         );
@@ -279,7 +234,8 @@ const styles = StyleSheet.create({
   },
   titleStyleActive:{
     fontSize:11,
-    color:'#fff'
+    color:'#fff',
+    paddingLeft:5
   },
   footer_view:{
     flex:0.3,flexDirection:'row', alignItems: 'center', justifyContent: 'center',

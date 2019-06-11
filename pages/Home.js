@@ -28,12 +28,10 @@ class Home extends React.Component {
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
-<<<<<<< HEAD
-=======
       this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
+      this.onChangeSever=this.onChangeSever.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
->>>>>>> 457f7b19d706ca011a3a787b5ceccac00b6fd854
     }
     componentWillMount() {
         var API = this.props.navigation.state.params.API;
@@ -181,16 +179,74 @@ class Home extends React.Component {
         }.bind(this));
         this.setState({ scooter:result });
     }
+    //檢查區域區外
+    checkzone =(option,zone,location)=>{
+        var result = true;
+        var check = zone.map(function(d,k){
+            var position = this.isptinpoly(location.lng,location.lat,d);
+            return position;
+        }.bind(this));
+
+        if(option == "out"){
+          if(check.indexOf(true) != -1){
+            result = false;
+          }else{
+            result = true;
+          }
+        }
+        else{
+          if(check.indexOf(true) != -1){
+            result = true;
+          }else{
+            result = false;
+          }
+        }
+
+        return result;
+    }
+    isptinpoly = (ALon, ALat, APoints) => {
+        var iSum = 0,
+          iCount;
+        var dLon1, dLon2, dLat1, dLat2, dLon;
+        if (APoints.length < 3) return false;
+        iCount = APoints.length;
+        for (var i = 0; i < iCount; i++) {
+          if (i == iCount - 1) {
+            dLon1 = APoints[i].lng;
+            dLat1 = APoints[i].lat;
+            dLon2 = APoints[0].lng;
+            dLat2 = APoints[0].lat;
+          } else {
+            dLon1 = APoints[i].lng;
+            dLat1 = APoints[i].lat;
+            dLon2 = APoints[i + 1].lng;
+            dLat2 = APoints[i + 1].lat;
+          }
+          //以下語句判斷A點是否在邊的兩端點的水平平行線之間，在則可能有交點，開始判斷交點是否在左射線上
+          if (((ALat >= dLat1) && (ALat < dLat2)) || ((ALat >= dLat2) && (ALat < dLat1))) {
+            if (Math.abs(dLat1 - dLat2) > 0) {
+              //得到A點向左射線與邊的交點的x坐標：
+              dLon = dLon1 - ((dLon1 - dLon2) * (dLat1 - ALat)) / (dLat1 - dLat2);
+              if (dLon < ALon)
+                iSum++;
+            }
+          }
+        }
+        if (iSum % 2 != 0)
+          return true;
+        return false;
+    }
     // 選擇工作區域
     onChangeWorkArea(area){
+
         // 帶入區域內經緯度資料
         if(this.state.sel_work_area == null){
             this.setState({sel_work_area:area}, () => {
-                this.get_scooter_in_work_area();
+                this.get_scooter_in_work_area(this.state.API);
             });
         }else{
             this.setState({sel_work_area:null}, () => {
-                this.get_scooter();
+                this.get_scooter(this.state.API);
             });
         }
     }
@@ -225,7 +281,7 @@ class Home extends React.Component {
             });
         }else{
             this.setState({sel_severe_data:null}, () => {
-                this.get_scooter();
+                this.get_scooter(this.state.API);
             });
         }
     }
@@ -242,14 +298,14 @@ class Home extends React.Component {
         }
     }
     // 選擇服務狀態
-    onChangeScooterStatus(e){
+    onChangeScooterStatus(type){
         if(this.state.sel_scooter_status == null){
-            this.setState({sel_scooter_status:e.type}, () => {
+            this.setState({sel_scooter_status:type}, () => {
                 this.get_scooter_by_status();
             });
         }else{
             this.setState({sel_scooter_status:null}, () => {
-                this.get_scooter();
+                this.get_scooter(this.state.API);
             });
         }
     }
@@ -292,8 +348,7 @@ class Home extends React.Component {
             sel_task:this.state.sel_task,
             onChangeTask:this.onChangeTask,
             modalVisible:this.state.modalVisible,
-            setModalVisible:this.setModalVisible,
-            condition:this.state.condition
+            setModalVisible:this.setModalVisible
         }
 
 

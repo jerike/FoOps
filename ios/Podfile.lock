@@ -22,7 +22,6 @@ PODS:
     - GoogleMaps
   - Google-Maps-iOS-Utils/QuadTree (2.1.0):
     - GoogleMaps
-
   - GoogleMaps (2.5.0):
     - GoogleMaps/Maps (= 2.5.0)
   - GoogleMaps/Base (2.5.0)
@@ -144,7 +143,6 @@ SPEC CHECKSUMS:
   react-native-google-maps: 568cb03d0eae7fef93626f65d05be55642404ed4
   react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
   yoga: 03ff42a6f223fb88deeaed60249020d80c3091ee
-
 
 PODFILE CHECKSUM: 54707b4926f17c1e38485b4d87b923de623db7ad
 
