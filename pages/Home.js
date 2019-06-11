@@ -15,7 +15,8 @@ class Home extends React.Component {
       this.state = {
         selectedIndex: 1
       }
-      this.updateIndex = this.updateIndex.bind(this)
+      this.updateIndex = this.updateIndex.bind(this);
+      this.setModalVisible=this.setModalVisible.bind(this);
     }
     componentWillMount() {
         var API = this.props.navigation.state.params.API;
@@ -113,7 +114,8 @@ class Home extends React.Component {
         const {search,selectedIndex,scooter} = this.state;
         const filter_option = {
             modalVisible:this.state.modalVisible,
-            setModalVisible:this.setModalVisible
+            setModalVisible:this.setModalVisible,
+            condition:this.state.condition
         }
         var items = scooter.map(function(m,i){
             var stats_type = this.get_status_type(m.status);

@@ -14,21 +14,26 @@ export default class Filter extends React.Component {
               animationType="slide"
               transparent={false}
               visible={filter_option.modalVisible}
-              onRequestClose={() => {
-                Alert.alert('Modal has been closed.');
-              }}>
-              <View style={{marginTop: 22}}>
-                <View>
-                  <Text>Hello World!</Text>
-
-                  <TouchableHighlight
-                    onPress={() => {
-                      filter_option.setModalVisible(!filter_option.modalVisible);
-                    }}>
-                    <Text>Hide Modal</Text>
-                  </TouchableHighlight>
-                </View>
-              </View>
+              presentationStyle="fullScreen"
+              >
+              <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end" }}>
+                     <Icon name='close'  onPress={() => {
+                        filter_option.setModalVisible(!filter_option.modalVisible);
+                      }} />
+                  </View>
+                  <ScrollView style={{flexDirection:'column' }}>
+                  {
+                    filter_option.condition.map((l, i) => (
+                    <ListItem
+                      key={i}
+                      title={l.description}
+                      
+                    />
+                    ))
+                  }                    
+                  </ScrollView>
+                </SafeAreaView>
             </Modal>
         );
     }
