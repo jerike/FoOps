@@ -3,7 +3,7 @@ import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight 
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
-import MapView from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Filter from './Filter';
 
 
@@ -220,6 +220,7 @@ export default class MapScreen extends React.Component {
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
              <MapView
+             provider={PROVIDER_GOOGLE}
                 initialRegion={{
                   latitude: 37.78825,
                   longitude: -122.4324,
