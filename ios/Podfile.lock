@@ -93,9 +93,10 @@ PODS:
 DEPENDENCIES:
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - Google-Maps-iOS-Utils
   - GoogleMaps
-  - react-native-google-maps (from `../node_modules/react-native-maps/`)
-  - react-native-maps (from `../node_modules/react-native-maps/`)
+  - react-native-google-maps (from `../node_modules/react-native-maps`)
+  - react-native-maps (from `../node_modules/react-native-maps`)
   - React/Core (from `../node_modules/react-native`)
   - React/CxxBridge (from `../node_modules/react-native`)
   - React/DevSupport (from `../node_modules/react-native`)
@@ -109,7 +110,7 @@ DEPENDENCIES:
   - React/RCTText (from `../node_modules/react-native`)
   - React/RCTVibration (from `../node_modules/react-native`)
   - React/RCTWebSocket (from `../node_modules/react-native`)
-  - yoga (from `../node_modules/react-native/ReactCommon/yoga`)
+  - yoga (from `../node_modules/react-native/ReactCommon/yoga/yoga.podspec`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -126,11 +127,11 @@ EXTERNAL SOURCES:
   React:
     :path: "../node_modules/react-native"
   react-native-google-maps:
-    :path: "../node_modules/react-native-maps/"
+    :path: "../node_modules/react-native-maps"
   react-native-maps:
-    :path: "../node_modules/react-native-maps/"
+    :path: "../node_modules/react-native-maps"
   yoga:
-    :path: "../node_modules/react-native/ReactCommon/yoga"
+    :path: "../node_modules/react-native/ReactCommon/yoga/yoga.podspec"
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
@@ -144,6 +145,6 @@ SPEC CHECKSUMS:
   react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
   yoga: 03ff42a6f223fb88deeaed60249020d80c3091ee
 
-PODFILE CHECKSUM: 54707b4926f17c1e38485b4d87b923de623db7ad
+PODFILE CHECKSUM: d451e4716fdc88ec5bca2aa3783bb3759f104598
 
 COCOAPODS: 1.7.1

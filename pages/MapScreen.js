@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import Filter from './Filter';
 
 
@@ -14,9 +14,10 @@ export default class MapScreen extends React.Component {
     constructor () {
       super()
       this.state = {
-        selectedIndex: null
+        selectedIndex: null,
       }
-      this.updateIndex = this.updateIndex.bind(this)
+      this.updateIndex = this.updateIndex.bind(this);
+      this.onMarkerClick = this.onMarkerClick.bind(this);
     }
     componentWillMount() {
         var API = this.props.navigation.state.params.API;
@@ -106,90 +107,39 @@ export default class MapScreen extends React.Component {
         });
         return result;
     }
+    onMarkerClick = (event) => {
+      // const markerID = event
+      console.warn(event)
+      // this.setState({nearScooter:null});
+      // this.setState({selectScooter:props.id});
+      // var markerLocation = props.position;
+      // var nearScooter = [];
+      // this.props.scooter.map(function(m,i){
+      //     var distance = this.GetDistance(markerLocation.lat,markerLocation.lng,m.location.lat,m.location.lng);
+      //     distance = distance.toFixed(2);
+      //     if (distance < 0.1) {
+      //         nearScooter.push(m);
+      //     }
+      // }.bind(this));
+      
+      // this.setState({nearScooter:nearScooter});
+
+    }
     render() {
         const component1 = () => <Text>篩選</Text>
         const component2 = () => <Text>列表</Text>
         const component3 = () => <Text>地圖</Text>
         const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter} = this.state;
-        const filter_option = {
-            modalVisible:this.state.modalVisible,
-            setModalVisible:this.setModalVisible
-        }
-        var items = scooter.map(function(m,i){
-            var stats_type = this.get_status_type(m.status);
-            var severe_lvl = this.get_severe_lvl(m.severe);
-            var card_header = <div>{severe_lvl}</div>;
-            // var local_task = localStorage.getItem('task');
-            // var task = [];
-            // if(local_task){
-            //     task = $.map(local_task.split(','), function(value){
-            //         return parseInt(value, 10);
-            //     });
-            // }
-            // if (task.indexOf(m.id) != -1) {
-            //     card_header = <div>{severe_lvl}<div className={styles.task_icon}><Icon name="thumbtack" /></div></div>
-            // }
-            
-            var show_power = "";
-            var power_type = "";
-            var power = m.power;
-            var ticket_id = "";
-            var conditions = [];
-            var scooter_status = "";
-            switch(true){
-                case power >= 50:
-                    show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
-                break;
-                case power >= 20 && power < 50:
-                    show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
-                break;
-                case power < 20:
-                    show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
-                break;
-            }
-            if(m.ticket){
-              if(m.ticket.scooter_conditions){
-                m.ticket.scooter_conditions.map(function(d,k){
-                  var description = this.getConditions(d);
-                    if(description == "其他"){
-                        // console.log(m.ticket.other_conditions);
-                        m.ticket.other_conditions.map(function(s,i){
-                            if(s.id == d){
-
-                                conditions.push(s.summary);
-                            }
-                        });
-                    }else{
-                        conditions.push(description);
-                    }
-                }.bind(this));
-                
-              }
-
-              if(m.ticket.id != undefined){
-                scooter_status = <Text>車況：【{conditions.join(" 、 ")}】</Text>;
-              }
-            }
-            var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
-            var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
-            var power_msg = show_power
-            return (
-                <Card
-                  title={m.plate}
-                  featuredTitle="xxx"
-                >
-                    <View style={{flex: 1, flexDirection: 'row',marginBottom: 10,}}>
-                        <View style={{width: '50%'}} ><Text>{stats_type}</Text></View>
-                        <View style={{width: '50%'}} ><Text>{power_msg}</Text></View>
-                    </View>
-                    <Text style={{marginBottom: 10}}>{scooter_status}</Text>
-                    <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>﹝{m.range_days}﹞天未租用</Text>
-                    
-                </Card>
-
-            )
+        
+        mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}]
+        var markers = [];
+        this.state.scooter.map(function(m,i){
+            var latlng = {latitude:m.location.lat,longitude:m.location.lng};
+            markers.push(<Marker coordinate={latlng}  title={m.plate} description={m.status} onPress={(event) => this.onMarkerClick(event)} />);
         }.bind(this))
+
+        
 
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
@@ -219,14 +169,20 @@ export default class MapScreen extends React.Component {
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
              <MapView
-             provider={PROVIDER_GOOGLE}
-                initialRegion={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-              />
+               provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+               style={styles.map}
+               customMapStyle={mapStyle}
+               mapType={Platform.OS == "android" ? "none" : "standard"}
+               region={{
+                 latitude: 22.6209962,
+                 longitude: 120.297948,
+                 latitudeDelta: 0.5,
+                 longitudeDelta: 0.5
+               }}
+             >
+             {markers}
+             
+             </MapView>
         </View>
          
         );
@@ -235,6 +191,16 @@ export default class MapScreen extends React.Component {
 
 
 const styles = StyleSheet.create({
+  container: {
+   ...StyleSheet.absoluteFill,
+   height: 400,
+   width: 400,
+   justifyContent: 'flex-end',
+   alignItems: 'center',
+ },
+ map: {
+   flex: 1,
+ },
   search_container: {
     backgroundColor:'#ff5722',
     paddingTop:-50,
