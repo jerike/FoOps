@@ -390,17 +390,6 @@ class Home extends React.Component {
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
             var card_header = <div>{severe_lvl}</div>;
-            // var local_task = localStorage.getItem('task');
-            // var task = [];
-            // if(local_task){
-            //     task = $.map(local_task.split(','), function(value){
-            //         return parseInt(value, 10);
-            //     });
-            // }
-            // if (task.indexOf(m.id) != -1) {
-            //     card_header = <div>{severe_lvl}<div className={styles.task_icon}><Icon name="thumbtack" /></div></div>
-            // }
-            
             var show_power = "";
             var power_type = "";
             var power = m.power;

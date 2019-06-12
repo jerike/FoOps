@@ -5,7 +5,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
 import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import Filter from './Filter';
-
+import Carousel from 'react-native-snap-carousel';
+import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
+import slideStyle, { colors } from '../styles/index.style';
+import SliderEntry from '../component/SliderEntry';
 
 const severe_title=["優先處理","次要處理","待處理","正常"];
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
@@ -15,6 +18,7 @@ export default class MapScreen extends React.Component {
       super()
       this.state = {
         selectedIndex: null,
+        nearScooter:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -107,23 +111,126 @@ export default class MapScreen extends React.Component {
         });
         return result;
     }
-    onMarkerClick = (event) => {
-      // const markerID = event
-      console.warn(event)
-      // this.setState({nearScooter:null});
-      // this.setState({selectScooter:props.id});
-      // var markerLocation = props.position;
-      // var nearScooter = [];
-      // this.props.scooter.map(function(m,i){
-      //     var distance = this.GetDistance(markerLocation.lat,markerLocation.lng,m.location.lat,m.location.lng);
-      //     distance = distance.toFixed(2);
-      //     if (distance < 0.1) {
-      //         nearScooter.push(m);
-      //     }
-      // }.bind(this));
-      
-      // this.setState({nearScooter:nearScooter});
+    GetDistance = ( lat1,  lng1,  lat2,  lng2)=>{
+      var radLat1 = lat1*Math.PI / 180.0;
+      var radLat2 = lat2*Math.PI / 180.0;
+      var a = radLat1 - radLat2;
+      var  b = lng1*Math.PI / 180.0 - lng2*Math.PI / 180.0;
+      var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2) +
+      Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
+      s = s *6378.137 ;// EARTH_RADIUS;
+      s = Math.round(s * 10000) / 10000;
+      return s;
+    }
+    get_status_type(type){
+        var result = "";
+        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
+        scootet_status.map(function(m,i){
+            if(m.type == type){
+                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
+            }
+        })
+        return result;
+    }
+    get_severe_lvl(severe,output){
+        var result = "";
+        var color=['#FF3333','#ff5722','#f5a623','#7ed321'];
 
+        if(output == "text"){
+            result = severe_title[severe-1];
+        }else{
+            result = <Text style={{color:color[severe-1]}}>{severe_title[severe-1]}</Text>;
+        }
+
+        return result;
+    }
+    getConditions(id){
+        var result = "";
+        this.state.condition.map(function(m, i){
+            if(parseInt(m.id) == parseInt(id)){
+              var description = m.description;
+              result = description;
+            }
+        });
+        return result;
+    }
+    onMarkerClick = (id,lat,lng) => {
+      // const markerID = event
+      console.warn(id);
+      this.setState({nearScooter:null});
+      this.setState({selectScooter:id});
+      var nearScooter = [];
+      this.state.scooter.map(function(m,i){
+          var distance = this.GetDistance(lat,lng,m.location.lat,m.location.lng);
+          distance = distance.toFixed(2);
+          
+
+
+          if (distance < 0.1) {
+              var stats_type = this.get_status_type(m.status);
+              var severe_lvl = this.get_severe_lvl(m.severe);
+              var card_header = <div>{severe_lvl}</div>;
+              var show_power = "";
+              var power_type = "";
+              var power = m.power;
+              var ticket_id = "";
+              var conditions = [];
+              var scooter_status = "";
+              var power = m.power;
+              switch(true){
+                  case power >= 50:
+                      show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
+                  break;
+                  case power >= 20 && power < 50:
+                      show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
+                  break;
+                  case power < 20:
+                      show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
+                  break;
+              }
+              if(m.ticket){
+                if(m.ticket.scooter_conditions){
+                  m.ticket.scooter_conditions.map(function(d,k){
+                    var description = this.getConditions(d);
+                      if(description == "其他"){
+                          // console.log(m.ticket.other_conditions);
+                          m.ticket.other_conditions.map(function(s,i){
+                              if(s.id == d){
+
+                                  conditions.push(s.summary);
+                              }
+                          });
+                      }else{
+                          conditions.push(description);
+                      }
+                  }.bind(this));
+                  
+                }
+
+                if(m.ticket.id != undefined){
+                  scooter_status = <Text>車況：【{conditions.join(" 、 ")}】</Text>;
+                }
+              }
+              var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
+              var power_msg = show_power;
+
+              nearScooter.push({
+                  title: m.plate,
+                  stats_type: stats_type,
+                  power_msg: power_msg,
+                  scooter_status: scooter_status,
+                  range_days: m.range_days,
+
+              });
+          }
+      }.bind(this));
+      console.log(nearScooter);
+      this.setState({nearScooter:nearScooter});
+
+    }
+
+    _renderDarkItem ({item, index}) {
+        return <SliderEntry data={item} even={true} />;
     }
     render() {
         const component1 = () => <Text>篩選</Text>
@@ -136,7 +243,7 @@ export default class MapScreen extends React.Component {
         var markers = [];
         this.state.scooter.map(function(m,i){
             var latlng = {latitude:m.location.lat,longitude:m.location.lng};
-            markers.push(<Marker coordinate={latlng}  title={m.plate} description={m.status} onPress={(event) => this.onMarkerClick(event)} />);
+            markers.push(<Marker coordinate={latlng}  title={m.plate} description={m.status} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
         }.bind(this))
 
         
@@ -168,6 +275,23 @@ export default class MapScreen extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
+            {this.state.nearScooter && (
+              <View style={{position:'absolute',bottom:0,zIndex:101,flexDirection: 'row',justifyContent: "flex-end", alignItems: "center"}}>
+                  <Carousel
+                    ref={(c) => { this._carousel = c; }}
+                    data={this.state.nearScooter}
+                    renderItem={this._renderDarkItem}
+                    sliderWidth={sliderWidth}
+                    itemWidth={itemWidth}
+                    loop={true}
+                    containerCustomStyle={slideStyle.slider}
+                    contentContainerCustomStyle={slideStyle.sliderContentContainer}
+                  />
+
+              </View>
+
+            )}
+
              <MapView
                provider={PROVIDER_GOOGLE} // remove if not using Google Maps
                style={styles.map}
@@ -248,6 +372,7 @@ const styles = StyleSheet.create({
     },
     btn_selectedButtonStyle: {
         backgroundColor: '#fff'
-    }
+    },
+   
 });
 
