@@ -25,6 +25,9 @@ class Home extends React.Component {
         all_work_area:[],
         sel_scooter:{},
         sel_condition:[],
+        scooter:[],
+        all:[],
+        open:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -32,6 +35,7 @@ class Home extends React.Component {
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
       this.onChangeSever=this.onChangeSever.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
+      this.get_days_change=this.get_days_change.bind(this);
     }
     componentWillMount() {
         var API = this.props.navigation.state.params.API;
@@ -45,16 +49,46 @@ class Home extends React.Component {
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
+        if (this.state.scooter.length == 0) {
+            this.fetch_scooters(API);
+        }else{
+            this.setState({scooter:this.state.all});
+        }
+    }
+    fetch_scooters(API){
+        var result = []
         fetch(API+'/scooter',{
-            method: 'GET',
-            credentials: 'include'
+          method: 'GET',
+          credentials: 'include'
         })
         .then((response) => {
-            return response.json();
+            if(response.status == 200){
+              return response.json();
+            }else{
+              this.props.navigation.navigate('Login');
+            }
         })
         .then((json) => {
-          this.setState({scooter:json.data});
-        }); 
+          if(json.data.length == 0){
+            this.props.navigation.navigate('Login');
+          }else{
+            this.set_scooter_data(json.data);
+            AsyncStorage.setItem('scooters',JSON.stringify(json.data));
+            
+          }
+        });
+    }
+    set_scooter_data(all_scooters){
+
+        this.setState({ 
+            all:all_scooters,
+            scooter:all_scooters,
+            save_scooter:all_scooters,
+            open:true
+        },()=>{
+            // this.after_reload_scooter();
+            this.setState({reload_now:false});
+        });
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -343,7 +377,7 @@ class Home extends React.Component {
             onChangeScooterStatus:this.onChangeScooterStatus,
             onChangeSever:this.onChangeSever,
             power_change:this.get_power_change,
-            days_change:this.days_change,
+            days_change:this.get_days_change,
             scooter:this.state.scooter,
             sel_task:this.state.sel_task,
             onChangeTask:this.onChangeTask,

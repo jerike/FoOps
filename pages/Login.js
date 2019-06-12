@@ -46,11 +46,11 @@ export default class Login extends React.Component {
           }
         });
 
-        // if(login){
-        //   this.props.navigation.navigate('Home');
-        // }else{
-        //   Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
-        // }
+        if(login){
+          this.props.navigation.navigate('Home');
+        }else{
+          Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
+        }
 
     });
   }

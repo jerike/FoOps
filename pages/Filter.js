@@ -19,13 +19,7 @@ export default class Filter extends React.Component {
       super()
       this.state = {
         selectedIndex: 2,
-        value:100,
-        wab1:false,
-        wab2:false,
-        wab3:false,
-        wab4:false,
-        wab5:false,
-        wab6:false,
+        value:100
       }
       this.updateIndex = this.updateIndex.bind(this)
     }
@@ -34,7 +28,6 @@ export default class Filter extends React.Component {
     }
     render() {
         const {filter_option} = this.props;
-        const buttons = ['Hello', 'World', 'Buttons','Hello', 'World', 'Buttons']
         const { selectedIndex } = this.state
         var total = filter_option.scooter.length;
         var work_area_btns = []
@@ -115,8 +108,8 @@ export default class Filter extends React.Component {
               presentationStyle="fullScreen"
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end" }}>
-                     <Icon name='close' size={20}  onPress={() => {
+                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
+                     <Icon name='close' size={30}  onPress={() => {
                         filter_option.setModalVisible(!filter_option.modalVisible);
                       }} />
                   </View>
@@ -164,7 +157,7 @@ export default class Filter extends React.Component {
                         selectedMinimum={0}
                         selectedMaximum={100}
                         style={{ flex: 1, height: 70, padding: 10, }}
-                        onChange={ (data)=>{ console.log(data);} }
+                        onChange={ (data)=>{ filter_option.days_change(data)} }
                       />
                    
                     </View>

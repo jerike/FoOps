@@ -191,7 +191,6 @@ export default class MapScreen extends React.Component {
             )
         }.bind(this))
 
-
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
