@@ -29,6 +29,7 @@ export default class MapScreen extends React.Component {
     }
     componentWillMount() {
         var scooter = this.props.navigation.state.params.scooter;
+        
         this.setState({search:'',modalVisible: false,scooter:scooter,condition:[] });
         this.get_scooter_status();
     }
@@ -41,7 +42,7 @@ export default class MapScreen extends React.Component {
     }
     updateIndex (selectedIndex) {
         if(selectedIndex == 0){
-            this.setModalVisible(true);
+            this.props.navigation.state.params.filter_option.setModalVisible(true);
         }else{
             if(selectedIndex == 1){
                 this.props.navigation.navigate("列表",{scooter:this.state.scooter});
@@ -54,9 +55,7 @@ export default class MapScreen extends React.Component {
     updateSearch = search => {
       this.setState({ search });
     }
-    setModalVisible(visible) {
-        this.setState({modalVisible: visible});
-    }
+    
     //取得車況
     get_scooter_status =()=>{
         fetch(global.API+'/scooter/status',{
@@ -236,7 +235,7 @@ export default class MapScreen extends React.Component {
         const component3 = () => <Text>地圖</Text>
         const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter} = this.state;
-        
+        var filter_option = this.props.navigation.state.params.filter_option;
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}]
         var markers = [];
         this.state.scooter.map(function(m,i){
@@ -297,7 +296,7 @@ export default class MapScreen extends React.Component {
               </View>
 
             )}
-
+            <Filter filter_option={filter_option}/>
              <MapView
                ref = {(ref)=>this.mapView=ref}
                provider={PROVIDER_GOOGLE} // remove if not using Google Maps

@@ -28,6 +28,7 @@ export default class Filter extends React.Component {
     }
     render() {
         const {filter_option} = this.props;
+        console.warn(filter_option.modalVisible);
         const { selectedIndex } = this.state
         var total = filter_option.scooter.length;
         var work_area_btns = []

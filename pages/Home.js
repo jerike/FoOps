@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl } from 'react-native';
-import { createDrawerNavigator, createAppContainer } from 'react-navigation';
+import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
 import MapScreen from './MapScreen';
 import Filter from './Filter';
 import '../global.js';
+import styles from '../styles/home.style';
 
 const severe_title=["優先處理","次要處理","待處理","正常"];
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
@@ -49,6 +50,12 @@ class Home extends React.Component {
             this.setState({ scooter:[]},()=>{this.get_scooter();});
         }
         this.get_scooter_status();
+    }
+    componentWillUpdate(nextProps,nextState){
+        if(nextState.scooter != this.state.scooter){
+            // console.warn(nextState.scooter);
+            NavigationActions.setParams({scooter:nextState.scooter});
+        }
     }
     //取得電動車資訊
     get_scooter(){
@@ -118,7 +125,29 @@ class Home extends React.Component {
             if(selectedIndex == 1){
                 this.props.navigation.navigate("列表");
             }else{
-                this.props.navigation.navigate("地圖",{scooter:this.state.scooter});
+                var filter_option = {
+                    power_min:this.state.power_min,
+                    power_max:this.state.power_max,
+                    day_min:this.state.day_min,
+                    day_max:this.state.day_max,
+                    sel_work_area:this.state.sel_work_area,
+                    sel_severe_data:this.state.sel_severe_data,
+                    sel_scooter_status:this.state.sel_scooter_status,
+                    work_area:this.state.work_area,
+                    severe_title:this.state.severe_title,
+                    scootet_status:this.state.scootet_status,
+                    onChangeWorkArea:this.onChangeWorkArea,
+                    onChangeScooterStatus:this.onChangeScooterStatus,
+                    onChangeSever:this.onChangeSever,
+                    power_change:this.get_power_change,
+                    days_change:this.get_days_change,
+                    scooter:this.state.scooter,
+                    sel_task:this.state.sel_task,
+                    onChangeTask:this.onChangeTask,
+                    modalVisible:this.state.modalVisible,
+                    setModalVisible:this.setModalVisible
+                }
+                this.props.navigation.navigate("地圖",{scooter:this.state.scooter,filter_option});
             }
             this.setState({selectedIndex});
         }
@@ -300,7 +329,6 @@ class Home extends React.Component {
         }
     }
     get_scooter_in_work_area(){
-        // console.log(this.state.sel_work_area);
         var area = this.state.sel_work_area;
         var result = [];
         if(area != null){
@@ -318,6 +346,7 @@ class Home extends React.Component {
                     }
                 }.bind(this));
                 this.setState({ scooter:result });
+
             });
         }
     }
@@ -520,62 +549,7 @@ class Home extends React.Component {
 }
 
 
-const styles = StyleSheet.create({
-  search_container: {
-    backgroundColor:'#ff5722',
-    paddingTop:-50,
-    
-    borderWidth:0,
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent'
-  },
-  search_input: {
-    width:'100%',
-    marginTop:-10,
-    backgroundColor:'#fff',
-    borderWidth: 0,
-    height:15,
-    borderBottomLeftRadius:20,
-    borderBottomRightRadius:20,
-    borderTopLeftRadius:20,
-    borderTopRightRadius:20
-  },
-  input:{
-    fontSize:12,
-    borderWidth: 0,
-  },
-  containerStyle:{
-    margin:0,
-    padding:0,
 
-  },
-    btn_containerStyle: {
-        height: 30,
-        width: '100%',
-        // borderTopRightRadius: 20,
-        borderWidth: 0,
-        backgroundColor: '#fff',
-        marginTop: 0,
-        borderRadius: 0,
-        paddingLeft:0,
-        marginLeft:0,
-        marginBottom:0,
-        borderBottomWidth:1,
-        borderBottomColor:'rgba(224, 224, 224,0.5)',
-        shadowColor: '#ccc',
-        shadowOffset: { width: 2, height: 4 },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-    },
-    btn_buttonStyle: {
-        backgroundColor: '#fff',
-
-        borderWidth: 0,
-    },
-    btn_selectedButtonStyle: {
-        backgroundColor: '#fff'
-    }
-});
 const TabNavigator = createDrawerNavigator({
   "篩選": { screen: Home },
   "列表": { screen: Home },
