@@ -4,12 +4,11 @@ import {createStackNavigator,createMaterialTopTabNavigator,createAppContainer,cr
 import Login from './pages/Login';
 import Home from './pages/Home';
 
-const API = "http://localhost:8000";
  
 const App = createStackNavigator(
   {
-    Login: {screen:Login,params: { API: API }},
-    Home: {screen:Home,params: { API: API }},
+    Login: {screen:Login},
+    Home: {screen:Home},
     
   },
   {

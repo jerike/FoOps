@@ -33,6 +33,7 @@ export default class Filter extends React.Component {
         var work_area_btns = []
         work_area.map(function(m,i){
             var btn = <Button
+              key={i}
               title={m.area}
               type="outline"
               style={styles.work_area_btn}
@@ -42,6 +43,7 @@ export default class Filter extends React.Component {
             />
             if (filter_option.sel_work_area == m.value) {
               btn = <Button
+                key={i}
                 title={m.area}
                 style={styles.work_area_btn}
                 icon={<Icon name="check-circle" size={15}  color="white" />}
@@ -56,6 +58,7 @@ export default class Filter extends React.Component {
         severe_title.map(function(m,i){
             var index = parseInt(i) + 1;
             var btn = <Button
+              key={i}
               title={m}
               type="outline"
               style={styles.work_area_btn}
@@ -65,6 +68,7 @@ export default class Filter extends React.Component {
             />
             if(filter_option.sel_severe_data === index) {
               btn = <Button
+                key={i}
                 title={m}
                 style={styles.work_area_btn}
                 icon={<Icon name="check-circle" size={15}  color="white" />}
@@ -78,6 +82,7 @@ export default class Filter extends React.Component {
         var scooter_status_btns = []
         scootet_status.map(function(m,i){
             var btn = <Button
+              key={i}
               title={m.title}
               type="outline"
               style={styles.work_area_btn}
@@ -87,6 +92,7 @@ export default class Filter extends React.Component {
             />
             if(filter_option.sel_scooter_status === m.type) {
               btn = <Button
+                key={i}
                 title={m.title}
                 style={styles.work_area_btn}
                 icon={<Icon name="check-circle" size={15}  color="white" />}

@@ -47,6 +47,8 @@ export default class SliderEntry extends Component {
             </Text>
         ) : false;
 
+        var status = scooter_status ? <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>{scooter_status}</Text> : ""
+
         return (
             <TouchableOpacity
               activeOpacity={1}
@@ -56,14 +58,18 @@ export default class SliderEntry extends Component {
                 <View style={styles.shadow} />
                 
                 <View style={[styles.textContainer, even ? styles.textContainerEven : {}]}>
-                     <Icon name="motorcycle" />
-                     { uppercaseTitle }
-                    <Text
-                      style={[styles.subtitle, even ? styles.subtitleEven : {}]}
-                      numberOfLines={2}
-                    >
+                    <View style={{flexDirection: 'row',justifyContent: 'center',alignItems: "center"}}>
+                        <Icon name="motorcycle" color="#fff" size={20} style={{marginRight:10}}/>
+                        { uppercaseTitle }
+                    </View>
+                     
+                     
+                    <Text  style={{fontSize:13,marginTop:10,marginBottom:10}} >
                         { stats_type }
                     </Text>
+                    <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>{power_msg}</Text>
+                    <Text>{status}</Text>
+                    <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>【{range_days}】天未租用</Text>
 
 
                     

@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
 import MapScreen from './MapScreen';
 import Filter from './Filter';
+import '../global.js';
 
 const severe_title=["優先處理","次要處理","待處理","正常"];
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
@@ -27,7 +28,8 @@ class Home extends React.Component {
         sel_condition:[],
         scooter:[],
         all:[],
-        open:false
+        open:false,
+        refreshing: false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -38,26 +40,30 @@ class Home extends React.Component {
       this.get_days_change=this.get_days_change.bind(this);
     }
     componentWillMount() {
-        var API = this.props.navigation.state.params.API;
-        this.setState({ API: API,search:'',modalVisible: false,scooter:[],condition:[] });
-        this.get_scooter(API);
-        this.get_scooter_status(API);
-        
+        var scooter = [];
+        this.setState({ search:'',modalVisible: false,condition:[]});
+        if(this.props.navigation.state.params != undefined){
+            scooter = this.props.navigation.state.params.scooter;
+            this.setState({ scooter:scooter});
+        }else{
+            this.setState({ scooter:[]},()=>{this.get_scooter();});
+        }
+        this.get_scooter_status();
     }
     //取得電動車資訊
-    get_scooter(API){
+    get_scooter(){
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
-        if (this.state.scooter.length == 0) {
-            this.fetch_scooters(API);
+        if (this.state.all.length == 0) {
+            this.fetch_scooters();
         }else{
             this.setState({scooter:this.state.all});
         }
     }
-    fetch_scooters(API){
+    fetch_scooters(){
         var result = []
-        fetch(API+'/scooter',{
+        fetch(global.API+'/scooter',{
           method: 'GET',
           credentials: 'include'
         })
@@ -72,10 +78,10 @@ class Home extends React.Component {
           if(json.data.length == 0){
             this.props.navigation.navigate('Login');
           }else{
-            this.set_scooter_data(json.data);
-            AsyncStorage.setItem('scooters',JSON.stringify(json.data));
-            
+            this.set_scooter_data(json.data);            
           }
+        }).then(() => {
+          this.setState({refreshing: false});
         });
     }
     set_scooter_data(all_scooters){
@@ -90,6 +96,15 @@ class Home extends React.Component {
             this.setState({reload_now:false});
         });
     }
+    after_reload_scooter(){
+        this.get_scooter_in_work_area();
+        this.get_scooter_by_severe();
+        this.get_scooter_by_status();
+        this.filter_scooter_by_power();
+        this.filter_scooter_by_rent_days();
+        // this.filter_scooter_by_task();
+        // this.filter_scooter_by_search();
+    }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -103,7 +118,7 @@ class Home extends React.Component {
             if(selectedIndex == 1){
                 this.props.navigation.navigate("列表");
             }else{
-                this.props.navigation.navigate("地圖");
+                this.props.navigation.navigate("地圖",{scooter:this.state.scooter});
             }
             this.setState({selectedIndex});
         }
@@ -115,8 +130,8 @@ class Home extends React.Component {
         this.setState({modalVisible: visible});
     }
     //取得車況
-    get_scooter_status =(API)=>{
-        fetch(API+'/scooter/status',{
+    get_scooter_status =()=>{
+        fetch(global.API+'/scooter/status',{
           method: 'GET'
         })
         .then((response) => {
@@ -276,20 +291,20 @@ class Home extends React.Component {
         // 帶入區域內經緯度資料
         if(this.state.sel_work_area == null){
             this.setState({sel_work_area:area}, () => {
-                this.get_scooter_in_work_area(this.state.API);
+                this.get_scooter_in_work_area();
             });
         }else{
             this.setState({sel_work_area:null}, () => {
-                this.get_scooter(this.state.API);
+                this.get_scooter();
             });
         }
     }
-    get_scooter_in_work_area(API){
+    get_scooter_in_work_area(){
         // console.log(this.state.sel_work_area);
         var area = this.state.sel_work_area;
         var result = [];
         if(area != null){
-            fetch(API+'/scooter/work_area/'+area,{
+            fetch(global.API+'/scooter/work_area/'+area,{
                   method: 'GET'
               })
             .then((response) => response.json())
@@ -315,7 +330,7 @@ class Home extends React.Component {
             });
         }else{
             this.setState({sel_severe_data:null}, () => {
-                this.get_scooter(this.state.API);
+                this.get_scooter();
             });
         }
     }
@@ -339,7 +354,7 @@ class Home extends React.Component {
             });
         }else{
             this.setState({sel_scooter_status:null}, () => {
-                this.get_scooter(this.state.API);
+                this.get_scooter();
             });
         }
     }
@@ -355,7 +370,16 @@ class Home extends React.Component {
             this.setState({ scooter:result });
         }
     }
-
+    _onRefresh = () => {
+        this.setState({refreshing: true});
+        fetch(global.API+'/tools/clear_cache_key/all_scooter',{
+            method: 'GET',
+            credentials: 'include'
+        }).then((response) => {
+          this.setState({all: []});
+          this.get_scooter();
+        });
+    }
     render() {
         const component1 = () => <Text>篩選</Text>
         const component2 = () => <Text>列表</Text>
@@ -389,7 +413,7 @@ class Home extends React.Component {
         var items = scooter.map(function(m,i){
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
-            var card_header = <div>{severe_lvl}</div>;
+            var card_header = <View style={{flexDirection: 'row',justifyContent:'space-between',marginBottom:10}}><Icon name="motorcycle"  size={20} style={{marginRight:10}}/><Text>{m.plate}</Text><Text>{severe_lvl}</Text></View>;
             var show_power = "";
             var power_type = "";
             var power = m.power;
@@ -433,17 +457,19 @@ class Home extends React.Component {
             var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
             var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
             var power_msg = show_power
+            var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
             return (
                 <Card
-                  title={m.plate}
-                  featuredTitle="xxx"
+                  containerStyle={{margin:0,marginBottom:1}}
+                  key={i}
                 >
-                    <View style={{flex: 1, flexDirection: 'row',marginBottom: 10,}}>
-                        <View style={{width: '50%'}} ><Text>{stats_type}</Text></View>
-                        <View style={{width: '50%'}} ><Text>{power_msg}</Text></View>
+                    <View>{card_header}</View>
+                    <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
+                        <Text>{stats_type}</Text>
+                        <Text>{power_msg}</Text>
                     </View>
-                    <Text style={{marginBottom: 10}}>{scooter_status}</Text>
-                    <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>﹝{m.range_days}﹞天未租用</Text>
+                    <View>{status_content}</View>
+                    <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>{m.range_days} 天未租用</Text>
                     
                 </Card>
 
@@ -452,7 +478,7 @@ class Home extends React.Component {
 
 
         return (
-        <View style={{flex: 1, backgroundColor: '#ccc'}}>
+        <View style={{flex: 1, backgroundColor: '#F5F5F5'}}>
             <Header
               
               centerComponent={<SearchBar
@@ -479,7 +505,12 @@ class Home extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-            <ScrollView style={{flexDirection:'column' }}>
+            <ScrollView style={{flexDirection:'column' }} refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }>
                  {items}
             </ScrollView>
         </View>
@@ -529,6 +560,12 @@ const styles = StyleSheet.create({
         paddingLeft:0,
         marginLeft:0,
         marginBottom:0,
+        borderBottomWidth:1,
+        borderBottomColor:'rgba(224, 224, 224,0.5)',
+        shadowColor: '#ccc',
+        shadowOffset: { width: 2, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
     },
     btn_buttonStyle: {
         backgroundColor: '#fff',
@@ -542,7 +579,7 @@ const styles = StyleSheet.create({
 const TabNavigator = createDrawerNavigator({
   "篩選": { screen: Home },
   "列表": { screen: Home },
-  "地圖": { screen: MapScreen },
+  "地圖": { screen: MapScreen},
 });
 
 export default createAppContainer(TabNavigator);

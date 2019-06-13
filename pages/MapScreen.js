@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
 import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Filter from './Filter';
 import Carousel from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import slideStyle, { colors } from '../styles/index.style';
 import SliderEntry from '../component/SliderEntry';
+import '../global.js';
 
 const severe_title=["優先處理","次要處理","待處理","正常"];
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
@@ -18,25 +20,17 @@ export default class MapScreen extends React.Component {
       super()
       this.state = {
         selectedIndex: null,
-        nearScooter:[]
+        nearScooter:null,
+        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.5,longitudeDelta: 0.5}
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
+      this.CloseCard=this.CloseCard.bind(this);
     }
     componentWillMount() {
-        var API = this.props.navigation.state.params.API;
-        this.setState({ API: API,search:'',modalVisible: false,scooter:[],condition:[] });
-        this.get_scooter_status(API);
-        fetch(API+'/scooter',{
-            method: 'GET',
-            credentials: 'include'
-          })
-          .then((response) => {
-                return response.json();
-          })
-          .then((json) => {
-              this.setState({scooter:json.data});
-          }); 
+        var scooter = this.props.navigation.state.params.scooter;
+        this.setState({search:'',modalVisible: false,scooter:scooter,condition:[] });
+        this.get_scooter_status();
     }
 
     pad(number){ return (number < 10 ? '0' : '') + number }
@@ -50,7 +44,7 @@ export default class MapScreen extends React.Component {
             this.setModalVisible(true);
         }else{
             if(selectedIndex == 1){
-                this.props.navigation.navigate("列表");
+                this.props.navigation.navigate("列表",{scooter:this.state.scooter});
             }else{
                 this.props.navigation.navigate("地圖");
             }
@@ -64,8 +58,8 @@ export default class MapScreen extends React.Component {
         this.setState({modalVisible: visible});
     }
     //取得車況
-    get_scooter_status =(API)=>{
-        fetch(API+'/scooter/status',{
+    get_scooter_status =()=>{
+        fetch(global.API+'/scooter/status',{
           method: 'GET'
         })
         .then((response) => {
@@ -155,17 +149,12 @@ export default class MapScreen extends React.Component {
         return result;
     }
     onMarkerClick = (id,lat,lng) => {
-      // const markerID = event
-      console.warn(id);
       this.setState({nearScooter:null});
       this.setState({selectScooter:id});
       var nearScooter = [];
       this.state.scooter.map(function(m,i){
           var distance = this.GetDistance(lat,lng,m.location.lat,m.location.lng);
-          distance = distance.toFixed(2);
-          
-
-
+          distance = distance.toFixed(2);          
           if (distance < 0.1) {
               var stats_type = this.get_status_type(m.status);
               var severe_lvl = this.get_severe_lvl(m.severe);
@@ -224,12 +213,21 @@ export default class MapScreen extends React.Component {
               });
           }
       }.bind(this));
-      console.log(nearScooter);
       this.setState({nearScooter:nearScooter});
-
+      let r = {
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: 0.5,
+          longitudeDelta: 0.5,
+      };
+      this.setState({setCenter:r});
+    }
+    CloseCard(){
+      this.setState({nearScooter:null});
     }
 
     _renderDarkItem ({item, index}) {
+
         return <SliderEntry data={item} even={true} />;
     }
     render() {
@@ -242,8 +240,8 @@ export default class MapScreen extends React.Component {
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}]
         var markers = [];
         this.state.scooter.map(function(m,i){
-            var latlng = {latitude:m.location.lat,longitude:m.location.lng};
-            markers.push(<Marker coordinate={latlng}  title={m.plate} description={m.status} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
+            var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng)};
+            markers.push(<Marker key={i} coordinate={latlng}  title={m.plate} description={m.status} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
         }.bind(this))
 
         
@@ -277,6 +275,14 @@ export default class MapScreen extends React.Component {
             />
             {this.state.nearScooter && (
               <View style={{position:'absolute',bottom:0,zIndex:101,flexDirection: 'row',justifyContent: "flex-end", alignItems: "center"}}>
+                  <View style={{position:'absolute',top:0,right:2}}>
+                    <Button
+                      style={styles.work_area_btn}
+                      buttonStyle={{backgroundColor:'#666'}}
+                      icon={<Icon name="times-circle" size={15}  color="white" />}
+                      onPress={()=>this.CloseCard()}
+                    />
+                  </View>
                   <Carousel
                     ref={(c) => { this._carousel = c; }}
                     data={this.state.nearScooter}
@@ -293,16 +299,12 @@ export default class MapScreen extends React.Component {
             )}
 
              <MapView
+               ref = {(ref)=>this.mapView=ref}
                provider={PROVIDER_GOOGLE} // remove if not using Google Maps
                style={styles.map}
                customMapStyle={mapStyle}
                mapType={Platform.OS == "android" ? "none" : "standard"}
-               region={{
-                 latitude: 22.6209962,
-                 longitude: 120.297948,
-                 latitudeDelta: 0.5,
-                 longitudeDelta: 0.5
-               }}
+               region={this.state.setCenter}
              >
              {markers}
              
@@ -353,26 +355,32 @@ const styles = StyleSheet.create({
     padding:0,
 
   },
-    btn_containerStyle: {
-        height: 30,
-        width: '100%',
-        // borderTopRightRadius: 20,
-        borderWidth: 0,
-        backgroundColor: '#fff',
-        marginTop: 0,
-        borderRadius: 0,
-        paddingLeft:0,
-        marginLeft:0,
-        marginBottom:0,
-    },
-    btn_buttonStyle: {
-        backgroundColor: '#fff',
+  btn_containerStyle: {
+      height: 30,
+      width: '100%',
+      // borderTopRightRadius: 20,
+      borderWidth: 0,
+      backgroundColor: '#fff',
+      marginTop: 0,
+      borderRadius: 0,
+      paddingLeft:0,
+      marginLeft:0,
+      marginBottom:0,
+      borderBottomWidth:1,
+      borderBottomColor:'rgba(224, 224, 224,0.5)',
+      shadowColor: '#ccc',
+      shadowOffset: { width: 2, height: 4 },
+      shadowOpacity: 0.5,
+      shadowRadius: 4,
+  },
+  btn_buttonStyle: {
+      backgroundColor: '#fff',
 
-        borderWidth: 0,
-    },
-    btn_selectedButtonStyle: {
-        backgroundColor: '#fff'
-    },
+      borderWidth: 0,
+  },
+  btn_selectedButtonStyle: {
+      backgroundColor: '#fff'
+  },
    
 });
 

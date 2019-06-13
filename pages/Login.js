@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
 import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,ProgressViewIOS } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import '../global.js';
 export default class Login extends React.Component {
 
   
   constructor(props) {
     super(props);
-    this.state = { email: null,password:null,API:null,progress:0 };
+    this.state = { email: null,password:null,progress:0 };
   }
   componentWillMount() {
-      var API = this.props.navigation.state.params.API;
-      this.setState({ API: API });
+
   }
   login(){
     this.props.navigation.navigate('Home');
@@ -19,7 +18,7 @@ export default class Login extends React.Component {
     var formData  = new FormData();
     formData.append("email",this.state.email);
     formData.append("password",this.state.password);
-    fetch(this.state.API+'/user/login',{
+    fetch(global.API+'/user/login',{
         method: 'POST',
         body: formData,
         credentials: 'include'
