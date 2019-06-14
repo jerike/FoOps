@@ -25,13 +25,22 @@ export default StyleSheet.create({
     fontSize:12,
     borderWidth: 0,
   },
+  cardContainerStyle:{
+    margin:3,
+    borderWidth:1,
+    borderColor:'#ccc',
+    shadowColor: '#333',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+  },
   containerStyle:{
     margin:0,
     padding:0,
 
   },
     btn_containerStyle: {
-        height: 30,
+        height: 40,
         width: '100%',
         // borderTopRightRadius: 20,
         borderWidth: 0,

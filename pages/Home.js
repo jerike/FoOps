@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button, Icon,Image,SearchBar,ButtonGroup } from 'react-native-elements'
-import MapScreen from './MapScreen';
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Filter from './Filter';
 import '../global.js';
 import styles from '../styles/home.style';
 
-const severe_title=["優先處理","次要處理","待處理","正常"];
-const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
+const severe_title = global.severe_title;
+const scootet_status = global.scootet_status;
 
-class Home extends React.Component {
+export default class Home extends React.Component {
     constructor () {
       super()
       this.state = {
@@ -31,6 +31,8 @@ class Home extends React.Component {
         all:[],
         open:false,
         refreshing: false,
+        screen:'Home',
+        search:''
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -39,6 +41,7 @@ class Home extends React.Component {
       this.onChangeSever=this.onChangeSever.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
       this.get_days_change=this.get_days_change.bind(this);
+      this.changeScreen=this.changeScreen.bind(this);
     }
     componentWillMount() {
         var scooter = [];
@@ -52,10 +55,16 @@ class Home extends React.Component {
         this.get_scooter_status();
     }
     componentWillUpdate(nextProps,nextState){
-        if(nextState.scooter != this.state.scooter){
-            // console.warn(nextState.scooter);
-            NavigationActions.setParams({scooter:nextState.scooter});
+        if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
+            const navigateAction = NavigationActions.navigate({
+              routeName: this.state.screen,
+              params: {scooter:nextState.scooter},
+              action: NavigationActions.navigate({ routeName: this.state.screen})
+            })
+            this.props.navigation.dispatch(navigateAction);
         }
+
+        
     }
     //取得電動車資訊
     get_scooter(){
@@ -110,7 +119,7 @@ class Home extends React.Component {
         this.filter_scooter_by_power();
         this.filter_scooter_by_rent_days();
         // this.filter_scooter_by_task();
-        // this.filter_scooter_by_search();
+        this.filter_scooter_by_search();
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -118,42 +127,56 @@ class Home extends React.Component {
       var create_date = this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
       return create_date;
     }
+    filter_scooter_by_search(){
+        if(this.state.search !=""){
+            var result = [];
+            
+            this.state.scooter.map(function(m, i){
+                if(m.plate.indexOf(this.state.search) != -1){
+                  result.push(m);
+                }
+                
+            }.bind(this));
+            this.setState({ scooter:result });
+        }else{
+            this.setState({scooter : this.state.save_scooter});
+        }
+    }
+    changeScreen(screen){
+        this.setState({screen:screen});
+    }
     updateIndex (selectedIndex) {
         if(selectedIndex == 0){
             this.setModalVisible(true);
         }else{
-            if(selectedIndex == 1){
-                this.props.navigation.navigate("列表");
-            }else{
-                var filter_option = {
-                    power_min:this.state.power_min,
-                    power_max:this.state.power_max,
-                    day_min:this.state.day_min,
-                    day_max:this.state.day_max,
-                    sel_work_area:this.state.sel_work_area,
-                    sel_severe_data:this.state.sel_severe_data,
-                    sel_scooter_status:this.state.sel_scooter_status,
-                    work_area:this.state.work_area,
-                    severe_title:this.state.severe_title,
-                    scootet_status:this.state.scootet_status,
-                    onChangeWorkArea:this.onChangeWorkArea,
-                    onChangeScooterStatus:this.onChangeScooterStatus,
-                    onChangeSever:this.onChangeSever,
-                    power_change:this.get_power_change,
-                    days_change:this.get_days_change,
-                    scooter:this.state.scooter,
-                    sel_task:this.state.sel_task,
-                    onChangeTask:this.onChangeTask,
-                    modalVisible:this.state.modalVisible,
-                    setModalVisible:this.setModalVisible
-                }
-                this.props.navigation.navigate("地圖",{scooter:this.state.scooter,filter_option});
+            this.setState({screen:'Map'});
+            var filter_option = {
+                setModalVisible:this.setModalVisible,
+                screen:this.state.screen,
+                changeScreen:this.changeScreen,
+                search:this.state.search,
+                updateSearch:this.updateSearch,
+                save_scooter:this.state.save_scooter
             }
+            this.props.navigation.navigate("Map",{scooter:this.state.scooter,filter_option});
+            
             this.setState({selectedIndex});
         }
     }
-    updateSearch = search => {
-      this.setState({ search });
+    updateSearch = search => {  
+        if(search != ""){
+            console.warn("home:"+search);
+            console.warn(this.state.screen);
+            const navigateAction = NavigationActions.navigate({
+              routeName: this.state.screen,
+              params: {search:search},
+              action: NavigationActions.navigate({ routeName: this.state.screen})
+            });
+            // 傳遞參數。問題是太多次
+            // this.props.navigation.dispatch(navigateAction);
+        }
+        this.setState({search:search},()=>this.filter_scooter_by_search());
+        this.setState({ search });
     }
     setModalVisible(visible) {
         this.setState({modalVisible: visible});
@@ -410,10 +433,9 @@ class Home extends React.Component {
         });
     }
     render() {
-        const component1 = () => <Text>篩選</Text>
-        const component2 = () => <Text>列表</Text>
-        const component3 = () => <Text>地圖</Text>
-        const buttons = [{ element: component1 }, { element: component2 }, { element: component3 }]
+        const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
+        const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
+        const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter} = this.state;
         var filter_option = {
             power_min:this.state.power_min,
@@ -488,10 +510,7 @@ class Home extends React.Component {
             var power_msg = show_power
             var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
             return (
-                <Card
-                  containerStyle={{margin:0,marginBottom:1}}
-                  key={i}
-                >
+                <Card containerStyle={styles.cardContainerStyle} key={i} >
                     <View>{card_header}</View>
                     <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
                         <Text>{stats_type}</Text>
@@ -499,9 +518,7 @@ class Home extends React.Component {
                     </View>
                     <View>{status_content}</View>
                     <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>{m.range_days} 天未租用</Text>
-                    
                 </Card>
-
             )
         }.bind(this))
 
@@ -540,7 +557,7 @@ class Home extends React.Component {
                 onRefresh={this._onRefresh}
               />
             }>
-                 {items}
+                {items}
             </ScrollView>
         </View>
          
@@ -548,12 +565,3 @@ class Home extends React.Component {
     }
 }
 
-
-
-const TabNavigator = createDrawerNavigator({
-  "篩選": { screen: Home },
-  "列表": { screen: Home },
-  "地圖": { screen: MapScreen},
-});
-
-export default createAppContainer(TabNavigator);

@@ -3,12 +3,13 @@ import {createStackNavigator,createMaterialTopTabNavigator,createAppContainer,cr
 
 import Login from './pages/Login';
 import Home from './pages/Home';
-
+import MapScreen from './pages/MapScreen';
  
-const App = createStackNavigator(
+const App = createDrawerNavigator(
   {
     Login: {screen:Login},
-    Home: {screen:Home},
+    Home: {screen:Home,path:'app/home'},
+    Map:{screen: MapScreen}
     
   },
   {

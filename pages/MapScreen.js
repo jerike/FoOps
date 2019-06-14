@@ -12,8 +12,8 @@ import slideStyle, { colors } from '../styles/index.style';
 import SliderEntry from '../component/SliderEntry';
 import '../global.js';
 
-const severe_title=["優先處理","次要處理","待處理","正常"];
-const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
+const severe_title = global.severe_title;
+const scootet_status = global.scootet_status;
 
 export default class MapScreen extends React.Component {
     constructor () {
@@ -21,19 +21,23 @@ export default class MapScreen extends React.Component {
       this.state = {
         selectedIndex: null,
         nearScooter:null,
-        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.5,longitudeDelta: 0.5}
+        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.5,longitudeDelta: 0.5},
+        search_scooter:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
       this.CloseCard=this.CloseCard.bind(this);
+      this.onClear=this.onClear.bind(this);
     }
     componentWillMount() {
         var scooter = this.props.navigation.state.params.scooter;
-        
-        this.setState({search:'',modalVisible: false,scooter:scooter,condition:[] });
+        var search = this.props.navigation.state.params.filter_option.search;
+        var save_scooter = this.props.navigation.state.params.filter_option.save_scooter;
+        this.setState({search:'',modalVisible: false,save_scooter:scooter,scooter:scooter,condition:[],search:search,save_scooter:save_scooter },()=>{
+            this.updateSearch(search);
+        });
         this.get_scooter_status();
     }
-
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -45,15 +49,22 @@ export default class MapScreen extends React.Component {
             this.props.navigation.state.params.filter_option.setModalVisible(true);
         }else{
             if(selectedIndex == 1){
-                this.props.navigation.navigate("列表",{scooter:this.state.scooter});
+                this.props.navigation.navigate("Home",{scooter:this.state.scooter});
+                this.props.navigation.state.params.filter_option.changeScreen('Home');
             }else{
-                this.props.navigation.navigate("地圖");
+                this.props.navigation.navigate("Map");
             }
             this.setState({selectedIndex});
         }
     }
     updateSearch = search => {
-      this.setState({ search });
+      console.warn(search);
+      this.props.navigation.state.params.filter_option.updateSearch(search);
+      this.setState({toSearch:true});
+      this.setState({search:search},()=>this.filter_scooter_by_search());
+    }
+    onClear(){
+      this.setState({toSearch:false});
     }
     
     //取得車況
@@ -214,8 +225,8 @@ export default class MapScreen extends React.Component {
       }.bind(this));
       this.setState({nearScooter:nearScooter});
       let r = {
-          latitude: lat,
-          longitude: lng,
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng),
           latitudeDelta: 0.5,
           longitudeDelta: 0.5,
       };
@@ -224,31 +235,71 @@ export default class MapScreen extends React.Component {
     CloseCard(){
       this.setState({nearScooter:null});
     }
-
+    filter_scooter_by_search(){
+        if(this.state.search !=""){
+            var result = [];
+            
+            this.state.scooter.map(function(m, i){
+              var plate = m.plate.toUpperCase();
+              if(plate.indexOf(this.state.search.toUpperCase()) != -1){
+                result.push(m);
+              }
+                
+            }.bind(this));
+            if(result.length > 0){
+              let r = {
+                  latitude: parseFloat(result[0].location.lat),
+                  longitude: parseFloat(result[0].location.lng),
+                  latitudeDelta: 0.5,
+                  longitudeDelta: 0.5,
+              };
+              this.setState({setCenter:r});
+            }
+            this.setState({ search_scooter:result });
+        }else{
+            this.setState({ toSearch:false });
+            this.setState({ search_scooter:[] });
+        }
+    }
     _renderDarkItem ({item, index}) {
 
         return <SliderEntry data={item} even={true} />;
     }
     render() {
-        const component1 = () => <Text>篩選</Text>
-        const component2 = () => <Text>列表</Text>
-        const component3 = () => <Text>地圖</Text>
+        const {search,selectedIndex,toSearch} = this.state;
+        var get_props_scooter = this.props.navigation.getParam('scooter');
+        var scooter = [];
+        if(toSearch){
+            if(this.state.search_scooter.length > 0){
+              scooter = this.state.search_scooter;
+            }
+        }else{
+          scooter = get_props_scooter;
+        }
+        // if(this.state.search_scooter.length > 0){
+        //   scooter = this.state.search_scooter;
+        // }else{
+        //   scooter = get_props_scooter;
+        // }
+        const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
+        const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        const {search,selectedIndex,scooter} = this.state;
-        var filter_option = this.props.navigation.state.params.filter_option;
+        
+        console.log("map:"+this.props.navigation.getParam('search'));
+        if(this.props.navigation.getParam('search') != undefined){
+            this.updateSearch(this.props.navigation.getParam('search'));
+        }
+        
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}]
         var markers = [];
-        this.state.scooter.map(function(m,i){
+        scooter.map(function(m,i){
             var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng)};
-            markers.push(<Marker key={i} coordinate={latlng}  title={m.plate} description={m.status} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
-        }.bind(this))
-
-        
+            markers.push(<Marker key={i} coordinate={latlng}  title={m.plate}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
+        }.bind(this));
 
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
-              
               centerComponent={<SearchBar
                                 placeholder="搜尋..."
                                 onChangeText={this.updateSearch}
@@ -257,6 +308,7 @@ export default class MapScreen extends React.Component {
                                 inputContainerStyle={styles.search_input}
                                 inputStyle={styles.input}
                                 lightTheme={true}
+                                onClear={this.onClear}
                               />}
               rightComponent={{ icon: 'menu', color: '#fff' }}
               containerStyle={{
@@ -296,10 +348,10 @@ export default class MapScreen extends React.Component {
               </View>
 
             )}
-            <Filter filter_option={filter_option}/>
+            
              <MapView
                ref = {(ref)=>this.mapView=ref}
-               provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+               provider={PROVIDER_GOOGLE}
                style={styles.map}
                customMapStyle={mapStyle}
                mapType={Platform.OS == "android" ? "none" : "standard"}
@@ -355,7 +407,7 @@ const styles = StyleSheet.create({
 
   },
   btn_containerStyle: {
-      height: 30,
+      height: 40,
       width: '100%',
       // borderTopRightRadius: 20,
       borderWidth: 0,
