@@ -1,21 +1,14 @@
 import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
-import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
-import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Filter from './Filter';
-import Carousel from 'react-native-snap-carousel';
-import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
-import slideStyle, { colors } from '../styles/index.style';
-import SliderEntry from '../component/SliderEntry';
 import '../global.js';
 
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 var t = 0;
-export default class MapScreen extends React.Component {
+export default class ScooterDetail extends React.Component {
     constructor () {
       super()
       this.state = {
@@ -402,71 +395,4 @@ export default class MapScreen extends React.Component {
 }
 
 
-const styles = StyleSheet.create({
-  container: {
-   ...StyleSheet.absoluteFill,
-   height: 400,
-   width: 400,
-   justifyContent: 'flex-end',
-   alignItems: 'center',
- },
- map: {
-   flex: 1,
- },
-  search_container: {
-    backgroundColor:'#ff5722',
-    paddingTop:-50,
-    
-    borderWidth:0,
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent'
-  },
-  search_input: {
-    width:'100%',
-    marginTop:-10,
-    backgroundColor:'#fff',
-    borderWidth: 0,
-    height:15,
-    borderBottomLeftRadius:20,
-    borderBottomRightRadius:20,
-    borderTopLeftRadius:20,
-    borderTopRightRadius:20
-  },
-  input:{
-    fontSize:12,
-    borderWidth: 0,
-  },
-  containerStyle:{
-    margin:0,
-    padding:0,
-
-  },
-  btn_containerStyle: {
-      height: 40,
-      width: '100%',
-      // borderTopRightRadius: 20,
-      borderWidth: 0,
-      backgroundColor: '#fff',
-      marginTop: 0,
-      borderRadius: 0,
-      paddingLeft:0,
-      marginLeft:0,
-      marginBottom:0,
-      borderBottomWidth:1,
-      borderBottomColor:'rgba(224, 224, 224,0.5)',
-      shadowColor: '#ccc',
-      shadowOffset: { width: 2, height: 4 },
-      shadowOpacity: 0.5,
-      shadowRadius: 4,
-  },
-  btn_buttonStyle: {
-      backgroundColor: '#fff',
-
-      borderWidth: 0,
-  },
-  btn_selectedButtonStyle: {
-      backgroundColor: '#fff'
-  },
-   
-});
 

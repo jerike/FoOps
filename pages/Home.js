@@ -58,7 +58,7 @@ export default class Home extends React.Component {
         if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
             const navigateAction = NavigationActions.navigate({
               routeName: this.state.screen,
-              params: {scooter:nextState.scooter},
+              params: {scooter:nextState.scooter,changed:true},
               action: NavigationActions.navigate({ routeName: this.state.screen})
             })
             this.props.navigation.dispatch(navigateAction);
@@ -146,6 +146,7 @@ export default class Home extends React.Component {
         this.setState({screen:screen});
     }
     updateIndex (selectedIndex) {
+
         if(selectedIndex == 0){
             this.setModalVisible(true);
         }else{
@@ -164,17 +165,13 @@ export default class Home extends React.Component {
         }
     }
     updateSearch = search => {  
-        if(search != ""){
-            console.warn("home:"+search);
-            console.warn(this.state.screen);
-            const navigateAction = NavigationActions.navigate({
-              routeName: this.state.screen,
-              params: {search:search},
-              action: NavigationActions.navigate({ routeName: this.state.screen})
-            });
-            // 傳遞參數。問題是太多次
-            // this.props.navigation.dispatch(navigateAction);
-        }
+        const navigateAction = NavigationActions.navigate({
+          routeName: this.state.screen,
+          params: {search:search},
+          action: NavigationActions.navigate({ routeName: this.state.screen})
+        });
+        this.props.navigation.dispatch(navigateAction);
+
         this.setState({search:search},()=>this.filter_scooter_by_search());
         this.setState({ search });
     }

@@ -198,13 +198,13 @@ const styles = StyleSheet.create({
   Wa_buttonStyleActive:{
     borderColor:'rgb(0, 221, 0)',
     backgroundColor:'rgb(0, 221, 0)',
-    color:'#fff'
+    color:'#ffffff'
   },
   ss_buttonStyle:{
     borderColor:'rgb(255, 204, 34)',
   },
   service_buttonStyle:{
-    borderColor:'#f00'
+    borderColor:'#ff0000'
   },
   slider_view:{
     flexDirection:'row', alignItems: 'center', justifyContent: 'center',paddingLeft:20,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     paddingRight:20,
     paddingBottom:10,
     paddingTop:10,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#eeeeee',
     borderBottomWidth: 1,
   },
   buttonStyle:{
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   titleStyleActive:{
     fontSize:11,
-    color:'#fff',
+    color:'#ffffff',
     paddingLeft:5
   },
   footer_view:{
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   view_titleStyle:{
     fontSize:15,
-    color:'#fff'
+    color:'#ffffff'
   },
 });
 
