@@ -55,6 +55,7 @@ export default class SliderEntry extends Component {
               style={styles.slideInnerContainer}
               onPress={() => { alert(`You've clicked '${title}'`); }}
               >
+                <View style={{position:'absolute',top:-20,zIndex:1,left:'49%',opacity:1,width: 10,height: 10,borderStyle: 'solid',borderTopWidth:0,borderRightWidth:10,borderBottomWidth:20,borderLeftWidth:10,borderTopColor: 'transparent', borderRightColor: 'transparent',borderBottomColor:'#000000',borderLeftColor: 'transparent'}}></View>
                 <View style={styles.shadow} />
                 
                 <View style={[styles.textContainer, even ? styles.textContainerEven : {}]}>

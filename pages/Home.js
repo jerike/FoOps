@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
@@ -42,8 +42,10 @@ export default class Home extends React.Component {
       this.get_power_change=this.get_power_change.bind(this);
       this.get_days_change=this.get_days_change.bind(this);
       this.changeScreen=this.changeScreen.bind(this);
+      this.showDetail=this.showDetail.bind(this);
     }
     componentWillMount() {
+        
         var scooter = [];
         this.setState({ search:'',modalVisible: false,condition:[]});
         if(this.props.navigation.state.params != undefined){
@@ -87,12 +89,12 @@ export default class Home extends React.Component {
             if(response.status == 200){
               return response.json();
             }else{
-              this.props.navigation.navigate('Login');
+              this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
             }
         })
         .then((json) => {
           if(json.data.length == 0){
-            this.props.navigation.navigate('Login');
+            this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
           }else{
             this.set_scooter_data(json.data);            
           }
@@ -108,7 +110,7 @@ export default class Home extends React.Component {
             save_scooter:all_scooters,
             open:true
         },()=>{
-            // this.after_reload_scooter();
+            this.after_reload_scooter();
             this.setState({reload_now:false});
         });
     }
@@ -188,6 +190,7 @@ export default class Home extends React.Component {
         })
         .then((json) => {
           if(json.code == 1){
+            global.condition = JSON.stringify(json.data);
             this.setState({ condition:json.data });
           }else{
             alert(json.reason);
@@ -429,11 +432,14 @@ export default class Home extends React.Component {
           this.get_scooter();
         });
     }
+    showDetail(sid){
+        this.props.navigation.navigate('ScooterDetail',{scooter:sid});
+    }
     render() {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        const {search,selectedIndex,scooter} = this.state;
+        const {search,selectedIndex,scooter,open} = this.state;
         var filter_option = {
             power_min:this.state.power_min,
             power_max:this.state.power_max,
@@ -507,15 +513,17 @@ export default class Home extends React.Component {
             var power_msg = show_power
             var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
             return (
-                <Card containerStyle={styles.cardContainerStyle} key={i} >
-                    <View>{card_header}</View>
-                    <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
-                        <Text>{stats_type}</Text>
-                        <Text>{power_msg}</Text>
-                    </View>
-                    <View>{status_content}</View>
-                    <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>{m.range_days} 天未租用</Text>
-                </Card>
+                <TouchableOpacity key={i} onPress={() =>this.showDetail(m.id)}> 
+                    <Card containerStyle={styles.cardContainerStyle} key={i} >
+                        <View>{card_header}</View>
+                        <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
+                            <Text>{stats_type}</Text>
+                            <Text>{power_msg}</Text>
+                        </View>
+                        <View>{status_content}</View>
+                        <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>{m.range_days} 天未租用</Text>
+                    </Card>
+                </TouchableOpacity>
             )
         }.bind(this))
 
@@ -548,13 +556,19 @@ export default class Home extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-            <ScrollView style={{flexDirection:'column' }} refreshControl={
+            <ScrollView  refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={this._onRefresh}
               />
             }>
-                {items}
+                {open ? items :
+                    (
+                        <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
+                            <ActivityIndicator size="large" color="#333333" />
+                        </View>
+                    )
+                }
             </ScrollView>
         </View>
          

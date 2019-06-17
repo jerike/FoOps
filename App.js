@@ -6,10 +6,19 @@ import Home from './pages/Home';
 import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 
+
+
+// const Detail = createStackNavigator(
+//   {
+//     ScooterDetail: {screen:ScooterDetail}
+    
+//   }
+// );
 const HomeStack=createDrawerNavigator(
   {
     Home: {screen:Home,path:'app/home'},
-    Map:{screen: MapScreen}
+    Map:{screen: MapScreen},
+    ScooterDetail:{screen: ScooterDetail}
   }
 );
 
@@ -33,6 +42,8 @@ const App = createStackNavigator(
     },
   }
 );
+
+
 
 export default createAppContainer(App);
 

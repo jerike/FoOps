@@ -242,6 +242,7 @@ export default class MapScreen extends React.Component {
                   power_msg: power_msg,
                   scooter_status: scooter_status,
                   range_days: m.range_days,
+                  location: m.location,
 
               });
           }
@@ -291,6 +292,20 @@ export default class MapScreen extends React.Component {
 
         return <SliderEntry data={item} even={true} />;
     }
+    _centerMapOnMarker (markerIndex) {
+        const mapRef = this.mapView;
+        const markerData = this.state.nearScooter[markerIndex];
+        console.warn(markerData);
+        if (!markerData || !mapRef) {
+            return;
+        }
+        mapRef.animateToRegion({
+            latitude: markerData.location.lat,
+            longitude: markerData.location.lng,
+            latitudeDelta: 0.001,
+            longitudeDelta: 0.001
+        });
+    }
     render() {
         
         const {search,selectedIndex,toSearch} = this.state;
@@ -330,7 +345,7 @@ export default class MapScreen extends React.Component {
               },100);
             }
             
-            markers.push(<Marker key={i} coordinate={latlng}  title={m.plate}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
+            markers.push(<MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
         }.bind(this));
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
@@ -378,6 +393,7 @@ export default class MapScreen extends React.Component {
                     loop={true}
                     containerCustomStyle={slideStyle.slider}
                     contentContainerCustomStyle={slideStyle.sliderContentContainer}
+                    onSnapToItem={(index, marker) => this._centerMapOnMarker(index)}
                   />
 
               </View>
