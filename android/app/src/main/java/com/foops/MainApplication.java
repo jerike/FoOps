@@ -3,6 +3,9 @@ package com.foops;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
+import com.airbnb.android.react.maps.MapsPackage;
+import org.reactnative.camera.RNCameraPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.psykar.cookiemanager.CookieManagerPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
@@ -27,6 +30,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImagePickerPackage(),
+            new MapsPackage(),
+            new RNCameraPackage(),
             new VectorIconsPackage(),
             new CookieManagerPackage(),
             new AsyncStoragePackage(),

@@ -138,6 +138,9 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-image-picker')
+    implementation project(':react-native-maps')
+    implementation project(':react-native-camera')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-cookies')
     implementation project(':@react-native-community_async-storage')

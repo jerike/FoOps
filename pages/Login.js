@@ -33,7 +33,7 @@ export default class Login extends React.Component {
     var formData  = new FormData();
     formData.append("email",this.state.email);
     formData.append("password",this.state.password);
-    fetch(global.API+'/user/login',{
+    fetch(global.API+'/operator/login',{
         method: 'POST',
         body: formData,
         credentials: 'include'
@@ -60,7 +60,7 @@ export default class Login extends React.Component {
         }.bind(this));
 
         if(login){
-          this.setState({timeout:true});
+          // this.setState({timeout:true});
           this.props.navigation.navigate('Home');
 
         }else{

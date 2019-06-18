@@ -463,7 +463,6 @@ export default class Home extends React.Component {
             setModalVisible:this.setModalVisible
         }
 
-
         var items = scooter.map(function(m,i){
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
