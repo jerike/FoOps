@@ -43,21 +43,16 @@ export default class MapScreen extends React.Component {
       this.getPosition();
     }
     getPosition(){
-      /** 獲取地理位置 */
       navigator.geolocation.getCurrentPosition(
         (position: any) => {
-          // console.warn('成功：' + JSON.stringify(position));
           const positionData: any = position.coords;
           this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         },
         (error: any) => {
           console.warn('失敗：' + JSON.stringify(error.message))
         }, {
-          // 提高精確度，但是獲取的速度會慢一點
           enableHighAccuracy: true,
-          // 設定獲取超時的時間20秒
           timeout: 20000,
-          // 示應用程式的快取時間，每次請求都是立即去獲取一個全新的物件內容
           maximumAge: 1000
         }
       );
@@ -295,7 +290,6 @@ export default class MapScreen extends React.Component {
     _centerMapOnMarker (markerIndex) {
         const mapRef = this.mapView;
         const markerData = this.state.nearScooter[markerIndex];
-        console.warn(markerData);
         if (!markerData || !mapRef) {
             return;
         }

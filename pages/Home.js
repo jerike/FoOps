@@ -32,7 +32,8 @@ export default class Home extends React.Component {
         open:false,
         refreshing: false,
         screen:'Home',
-        search:''
+        search:'',
+        show_loading:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -43,6 +44,8 @@ export default class Home extends React.Component {
       this.get_days_change=this.get_days_change.bind(this);
       this.changeScreen=this.changeScreen.bind(this);
       this.showDetail=this.showDetail.bind(this);
+      this.onClear=this.onClear.bind(this);
+      this.updateSearch=this.updateSearch.bind(this);
     }
     componentWillMount() {
         
@@ -73,6 +76,7 @@ export default class Home extends React.Component {
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
+        console.warn(this.state.all);
         if (this.state.all.length == 0) {
             this.fetch_scooters();
         }else{
@@ -130,6 +134,7 @@ export default class Home extends React.Component {
       return create_date;
     }
     filter_scooter_by_search(){
+
         if(this.state.search !=""){
             var result = [];
             
@@ -139,10 +144,12 @@ export default class Home extends React.Component {
                 }
                 
             }.bind(this));
+            console.warn(result);
             this.setState({ scooter:result });
         }else{
             this.setState({scooter : this.state.save_scooter});
         }
+        this.setState({show_loading:false});
     }
     changeScreen(screen){
         this.setState({screen:screen});
@@ -163,10 +170,17 @@ export default class Home extends React.Component {
             }
             this.props.navigation.navigate("Map",{scooter:this.state.scooter,filter_option});
             
-            this.setState({selectedIndex});
         }
     }
-    updateSearch = search => {  
+    onClear(){
+        this.setState({search:""});
+    }
+    updateSearch(search){  
+        this.setState({search:search,show_loading:true});
+        setTimeout(()=>{
+          this.filter_scooter_by_search();
+        },100);
+
         const navigateAction = NavigationActions.navigate({
           routeName: this.state.screen,
           params: {search:search},
@@ -174,8 +188,6 @@ export default class Home extends React.Component {
         });
         this.props.navigation.dispatch(navigateAction);
 
-        this.setState({search:search},()=>this.filter_scooter_by_search());
-        this.setState({ search });
     }
     setModalVisible(visible) {
         this.setState({modalVisible: visible});
@@ -526,19 +538,22 @@ export default class Home extends React.Component {
             )
         }.bind(this))
 
-
         return (
-        <View style={{flex: 1, backgroundColor: '#F5F5F5'}}>
+        <View style={{flex: 1,justifyContent: 'center',
+        alignItems: 'center', backgroundColor: '#F5F5F5'}}>
             <Header
               
               centerComponent={<SearchBar
                                 placeholder="搜尋..."
-                                onChangeText={this.updateSearch}
+                                onChangeText={text => this.updateSearch(text)}
+                                onClear={this.onClear}
                                 value={search}
+                                round
                                 containerStyle={styles.search_container}
                                 inputContainerStyle={styles.search_input}
                                 inputStyle={styles.input}
                                 lightTheme={true}
+                                autoCorrect={true}  
                               />}
               rightComponent={{ icon: 'menu', color: '#fff' }}
               containerStyle={{
@@ -555,7 +570,13 @@ export default class Home extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-            <ScrollView  refreshControl={
+            {this.state.show_loading &&(
+              <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                <Text style={{color:'#fff'}}>Loading...</Text>
+              </View>
+            )}
+            <ScrollView style={{width:'100%'}}  refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={this._onRefresh}
@@ -563,7 +584,7 @@ export default class Home extends React.Component {
             }>
                 {open ? items :
                     (
-                        <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
+                        <View style={{justifyContent: 'center',alignItems: 'center'}}>
                             <ActivityIndicator size="large" color="#333333" />
                         </View>
                     )

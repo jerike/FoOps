@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 
-
+console.disableYellowBox = true;
 
 // const Detail = createStackNavigator(
 //   {

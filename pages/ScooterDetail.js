@@ -67,7 +67,7 @@ export default class ScooterDetail extends React.Component {
     }
     newScooter(sid){
         this.setState({sid:sid});
-        fetch(global.API+'/scooter/'+sid+'/realtime',{
+        fetch(global.API+'/scooter/'+sid,{
           method: 'GET',
           credentials: 'include'
         })

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,CameraRoll } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBox } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -27,21 +27,9 @@ export default class Violation extends React.Component {
       return create_date;
     }
   
-    _handleButtonPress = () => {
-      CameraRoll.getPhotos({
-         first: 20,
-         assetType: 'Photos',
-       })
-       .then(r => {
-         this.setState({ photos: r.edges });
-       })
-       .catch((err) => {
-          //Error Loading Images
-       });
-     };
+   
     render() {
         const {violation_option} = this.props;
-        console.warn(this)
         return (
             <Modal
               animationType="slide"
@@ -55,21 +43,7 @@ export default class Violation extends React.Component {
                         violation_option.onClose('violation_modal');
                       }} />
                   </View>
-                  <Button title="Load Images" onPress={this._handleButtonPress} />
-                  <ScrollView>
-                     {this.state.photos.map((p, i) => {
-                     return (
-                       <Image
-                         key={i}
-                         style={{
-                           width: 300,
-                           height: 100,
-                         }}
-                         source={{ uri: p.node.image.uri }}
-                       />
-                     );
-                   })}
-                   </ScrollView>
+                  
                   
                     <Button
                       title="送出"

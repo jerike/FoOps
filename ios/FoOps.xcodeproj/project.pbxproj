@@ -48,6 +48,7 @@
 		5BBABB25C681420C8586452B /* libRNCookieManagerIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 966651651FBE4B25B3C643A2 /* libRNCookieManagerIOS.a */; };
 		5CD05E6163384B428AB09500 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2EF719FB11B94AB681AB2286 /* Octicons.ttf */; };
 		61918B3322B8E5DE00C5C126 /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61918B0C22B8E4DE00C5C126 /* libRCTCameraRoll.a */; };
+		61D35D0522B9D36C0021506C /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		67724290CC5F42EF9574CF2D /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 104F6E8FE2434F03B9EE2C7D /* Feather.ttf */; };
 		7136122060AE48E1B7F21AEE /* FontAwesome5_Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3FE7E3F254534ADBB860D978 /* FontAwesome5_Regular.ttf */; };
 		7D5EDD8085D0483F926B23B2 /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C7F2C838BDD48E7B0C54922 /* libRNGestureHandler.a */; };
@@ -473,6 +474,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61D35D0522B9D36C0021506C /* JavaScriptCore.framework in Frameworks */,
 				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -775,6 +777,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				61D058FC22B8F3B700B193C6 /* RNImagePicker.xcodeproj */,
 				61918B0122B8E4DE00C5C126 /* RCTCameraRoll.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -809,7 +812,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				61D058FC22B8F3B700B193C6 /* RNImagePicker.xcodeproj */,
 				13B07FAE1A68108700A75B9A /* FoOps */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* FoOpsTests */,
@@ -941,7 +943,11 @@
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = RLC5QETNPE;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
+					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = RLC5QETNPE;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1566,6 +1572,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = RLC5QETNPE;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1606,6 +1613,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = RLC5QETNPE;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
@@ -1644,6 +1652,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = RLC5QETNPE;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
@@ -1672,6 +1681,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RLC5QETNPE;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
