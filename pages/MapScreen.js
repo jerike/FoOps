@@ -22,7 +22,8 @@ export default class MapScreen extends React.Component {
         selectedIndex: null,
         nearScooter:null,
         setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.01,longitudeDelta: 0.01},
-        search_scooter:[]
+        search_scooter:[],
+        clickMarker:false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -177,8 +178,7 @@ export default class MapScreen extends React.Component {
         return result;
     }
     onMarkerClick = (id,lat,lng) => {
-      this.setState({nearScooter:null});
-      this.setState({selectScooter:id});
+      this.setState({nearScooter:null,selectScooter:id,clickMarker:true});
       var nearScooter = [];
       this.state.scooter.map(function(m,i){
           var distance = this.GetDistance(lat,lng,m.location.lat,m.location.lng);
@@ -302,7 +302,7 @@ export default class MapScreen extends React.Component {
     }
     render() {
         
-        const {search,selectedIndex,toSearch} = this.state;
+        const {search,selectedIndex,toSearch,clickMarker} = this.state;
         var get_props_scooter = this.props.navigation.getParam('scooter');
         var scooter_changed = this.props.navigation.getParam('changed');
         var scooter = [];
@@ -331,7 +331,7 @@ export default class MapScreen extends React.Component {
         scooter.map(function(m,i){
 
             var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
-            if(scooter_changed && t == 0 && i === 0){
+            if(!clickMarker && scooter_changed && t == 0 && i === 0){
               t++;
               setTimeout(()=>{
                 this.getFirstLatLng(latlng);

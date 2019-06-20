@@ -47,6 +47,7 @@
 		5ADC324DF46D416F81B3A018 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 707D67CD60C646F1B3126998 /* libRNVectorIcons.a */; };
 		5BBABB25C681420C8586452B /* libRNCookieManagerIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 966651651FBE4B25B3C643A2 /* libRNCookieManagerIOS.a */; };
 		5CD05E6163384B428AB09500 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2EF719FB11B94AB681AB2286 /* Octicons.ttf */; };
+		613B765022BB442A000E7826 /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61D0592C22B8F3B800B193C6 /* libRNImagePicker.a */; };
 		61918B3322B8E5DE00C5C126 /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61918B0C22B8E4DE00C5C126 /* libRCTCameraRoll.a */; };
 		61D35D0522B9D36C0021506C /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		67724290CC5F42EF9574CF2D /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 104F6E8FE2434F03B9EE2C7D /* Feather.ttf */; };
@@ -483,6 +484,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				613B765022BB442A000E7826 /* libRNImagePicker.a in Frameworks */,
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
 				61918B3322B8E5DE00C5C126 /* libRCTCameraRoll.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,

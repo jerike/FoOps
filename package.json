@@ -8,10 +8,12 @@
     "postinstall": "./node_modules/react-native-maps/enable-google-maps 'ios/FoOps/GoogleMaps/**'"
   },
   "dependencies": {
+    "@ptomasroos/react-native-multi-slider": "^1.0.0",
     "@react-native-community/async-storage": "^1.4.2",
     "global": "^4.3.2",
     "react": "16.8.3",
     "react-native": "^0.59.9",
+    "react-native-camera": "^2.10.2",
     "react-native-cli": "^2.0.1",
     "react-native-cookies": "^3.3.0",
     "react-native-elements": "^1.1.0",

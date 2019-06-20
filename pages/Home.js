@@ -16,15 +16,6 @@ export default class Home extends React.Component {
       super()
       this.state = {
         selectedIndex: 1,
-        sel_work_area:null,
-        power_min:0,
-        power_max:100,
-        day_min:0,
-        day_max:100,
-        sel_work_area:null,
-        sel_severe_data:null,
-        sel_scooter_status:null,
-        all_work_area:[],
         sel_scooter:{},
         sel_condition:[],
         scooter:[],
@@ -33,24 +24,21 @@ export default class Home extends React.Component {
         refreshing: false,
         screen:'Home',
         search:'',
-        show_loading:false
+        show_loading:false,
+        modalVisible:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
-      this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
-      this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
-      this.onChangeSever=this.onChangeSever.bind(this);
-      this.get_power_change=this.get_power_change.bind(this);
-      this.get_days_change=this.get_days_change.bind(this);
       this.changeScreen=this.changeScreen.bind(this);
       this.showDetail=this.showDetail.bind(this);
       this.onClear=this.onClear.bind(this);
       this.updateSearch=this.updateSearch.bind(this);
+      this.filter_scooter=this.filter_scooter.bind(this);
     }
     componentWillMount() {
         
         var scooter = [];
-        this.setState({ search:'',modalVisible: false,condition:[]});
+        this.setState({ search:'',condition:[]});
         if(this.props.navigation.state.params != undefined){
             scooter = this.props.navigation.state.params.scooter;
             this.setState({ scooter:scooter});
@@ -70,6 +58,10 @@ export default class Home extends React.Component {
         }
 
         
+    }
+    filter_scooter(scooter){
+        console.warn(scooter);
+        this.setState({scooter:scooter});
     }
     //取得電動車資訊
     get_scooter(){
@@ -119,12 +111,7 @@ export default class Home extends React.Component {
         });
     }
     after_reload_scooter(){
-        this.get_scooter_in_work_area();
-        this.get_scooter_by_severe();
-        this.get_scooter_by_status();
-        this.filter_scooter_by_power();
-        this.filter_scooter_by_rent_days();
-        // this.filter_scooter_by_task();
+        
         this.filter_scooter_by_search();
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
@@ -241,199 +228,9 @@ export default class Home extends React.Component {
         });
         return result;
     }
-    get_power_change(value){
-        this.setState({power_min:value.selectedMinimum,power_max:value.selectedMaximum});
-        setTimeout(()=>{
-          this.filter_scooter_by_power();
-        },10);
-    }
-    filter_scooter_by_power(){
-        var result = new Array();
-        this.state.scooter.map(function(m, i){
-            var pushed = true;
-            //判斷狀態
-            if(m.power >= this.state.power_min && m.power <= this.state.power_max){
-              pushed = true;
-            }else{
-              pushed = false;
-            }
-            if(pushed){
-              result.push(m);
-            }
-        }.bind(this));
-        this.setState({ scooter:result });
-    }
-    get_days_change(value){
-        this.setState({day_min:value.selectedMinimum,day_max:value.selectedMaximum});
-        setTimeout(()=>{
-          this.filter_scooter_by_rent_days();
-        },10);
-    }
-    filter_scooter_by_rent_days(){
-        var result = new Array();
-        this.state.scooter.map(function(m, i){
-            var pushed = true;
-            if(this.state.day_max == 100){
-                if(m.range_days >= this.state.day_min){
-                  pushed = true;
-                }else{
-                  pushed = false;
-                }
-            }else{
-                if(m.range_days >= this.state.day_min && m.range_days <= this.state.day_max){
-                    pushed = true;
-                }else{
-                  pushed = false;
-                }
-            }
-            if(pushed){
-              result.push(m);
-            }
-        }.bind(this));
-        this.setState({ scooter:result });
-    }
-    //檢查區域區外
-    checkzone =(option,zone,location)=>{
-        var result = true;
-        var check = zone.map(function(d,k){
-            var position = this.isptinpoly(location.lng,location.lat,d);
-            return position;
-        }.bind(this));
-
-        if(option == "out"){
-          if(check.indexOf(true) != -1){
-            result = false;
-          }else{
-            result = true;
-          }
-        }
-        else{
-          if(check.indexOf(true) != -1){
-            result = true;
-          }else{
-            result = false;
-          }
-        }
-
-        return result;
-    }
-    isptinpoly = (ALon, ALat, APoints) => {
-        var iSum = 0,
-          iCount;
-        var dLon1, dLon2, dLat1, dLat2, dLon;
-        if (APoints.length < 3) return false;
-        iCount = APoints.length;
-        for (var i = 0; i < iCount; i++) {
-          if (i == iCount - 1) {
-            dLon1 = APoints[i].lng;
-            dLat1 = APoints[i].lat;
-            dLon2 = APoints[0].lng;
-            dLat2 = APoints[0].lat;
-          } else {
-            dLon1 = APoints[i].lng;
-            dLat1 = APoints[i].lat;
-            dLon2 = APoints[i + 1].lng;
-            dLat2 = APoints[i + 1].lat;
-          }
-          //以下語句判斷A點是否在邊的兩端點的水平平行線之間，在則可能有交點，開始判斷交點是否在左射線上
-          if (((ALat >= dLat1) && (ALat < dLat2)) || ((ALat >= dLat2) && (ALat < dLat1))) {
-            if (Math.abs(dLat1 - dLat2) > 0) {
-              //得到A點向左射線與邊的交點的x坐標：
-              dLon = dLon1 - ((dLon1 - dLon2) * (dLat1 - ALat)) / (dLat1 - dLat2);
-              if (dLon < ALon)
-                iSum++;
-            }
-          }
-        }
-        if (iSum % 2 != 0)
-          return true;
-        return false;
-    }
-    // 選擇工作區域
-    onChangeWorkArea(area){
-
-        // 帶入區域內經緯度資料
-        if(this.state.sel_work_area == null){
-            this.setState({sel_work_area:area}, () => {
-                this.get_scooter_in_work_area();
-            });
-        }else{
-            this.setState({sel_work_area:null}, () => {
-                this.get_scooter();
-            });
-        }
-    }
-    get_scooter_in_work_area(){
-        var area = this.state.sel_work_area;
-        var result = [];
-        if(area != null){
-            fetch(global.API+'/scooter/work_area/'+area,{
-                  method: 'GET'
-              })
-            .then((response) => response.json())
-            .then((json) => {
-                var zone = [];
-                zone.push(json);
-                this.state.scooter.map(function(m, i){
-                    var istrue = this.checkzone('in',zone,m.location);
-                    if(istrue){
-                      result.push(m);
-                    }
-                }.bind(this));
-                this.setState({ scooter:result });
-
-            });
-        }
-    }
-
-    // 選擇車輛狀況
-    onChangeSever(e){
-        if(this.state.sel_severe_data == null){
-            this.setState({sel_severe_data:e}, () => {
-                this.get_scooter_by_severe();
-            });
-        }else{
-            this.setState({sel_severe_data:null}, () => {
-                this.get_scooter();
-            });
-        }
-    }
-    get_scooter_by_severe(){
-        var severe = this.state.sel_severe_data;
-        var result = [];
-        if(severe != ""){
-            this.state.scooter.map(function(m, i){
-                if(m.severe == severe){
-                  result.push(m);
-                }
-            }.bind(this));
-            this.setState({ scooter:result });
-        }
-    }
-    // 選擇服務狀態
-    onChangeScooterStatus(type){
-        if(this.state.sel_scooter_status == null){
-            this.setState({sel_scooter_status:type}, () => {
-                this.get_scooter_by_status();
-            });
-        }else{
-            this.setState({sel_scooter_status:null}, () => {
-                this.get_scooter();
-            });
-        }
-    }
-    get_scooter_by_status(){
-        var status = this.state.sel_scooter_status;
-        var result = [];
-        if(status != ""){
-            this.state.scooter.map(function(m, i){
-                if(m.status == status){
-                  result.push(m);
-                }
-            }.bind(this));
-            this.setState({ scooter:result });
-        }
-    }
+    
+    
+    
     _onRefresh = () => {
         this.setState({refreshing: true});
         fetch(global.API+'/tools/clear_cache_key/all_scooter',{
@@ -453,26 +250,11 @@ export default class Home extends React.Component {
         const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter,open} = this.state;
         var filter_option = {
-            power_min:this.state.power_min,
-            power_max:this.state.power_max,
-            day_min:this.state.day_min,
-            day_max:this.state.day_max,
-            sel_work_area:this.state.sel_work_area,
-            sel_severe_data:this.state.sel_severe_data,
-            sel_scooter_status:this.state.sel_scooter_status,
-            work_area:this.state.work_area,
-            severe_title:this.state.severe_title,
-            scootet_status:this.state.scootet_status,
-            onChangeWorkArea:this.onChangeWorkArea,
-            onChangeScooterStatus:this.onChangeScooterStatus,
-            onChangeSever:this.onChangeSever,
-            power_change:this.get_power_change,
-            days_change:this.get_days_change,
+            all:this.state.all,
             scooter:this.state.scooter,
-            sel_task:this.state.sel_task,
-            onChangeTask:this.onChangeTask,
             modalVisible:this.state.modalVisible,
-            setModalVisible:this.setModalVisible
+            setModalVisible:this.setModalVisible,
+            filter_scooter:this.filter_scooter
         }
 
         var items = scooter.map(function(m,i){
