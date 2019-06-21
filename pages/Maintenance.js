@@ -134,7 +134,7 @@ export default class Maintenance extends React.Component {
             }
             var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
 
-            return <View><CheckBox key={i}  onPress={()=>maintain_option.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
+            return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>maintain_option.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
         });
         return (
             <Modal

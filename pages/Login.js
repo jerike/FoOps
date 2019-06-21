@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,ProgressViewIOS,Animated,Easing,ActivityIndicator } from 'react-native';
+import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,ProgressViewIOS,Animated,Easing,ActivityIndicator,Vibration } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import '../global.js';
 export default class Login extends React.Component {
@@ -13,14 +13,15 @@ export default class Login extends React.Component {
     this.removeItemValue=this.removeItemValue.bind(this);
   }
   componentWillMount() {
-        this.setState({show_login:false,fadeInOpacity: new Animated.Value(0)});
+    this.setState({show_login:false});
+        // this.setState({show_login:false,fadeInOpacity: new Animated.Value(0)});
   }
   componentDidMount() {
-    Animated.timing(this.state.fadeInOpacity, {
-        toValue: 1, 
-        duration: 2500, 
-        easing: Easing.ease
-    }).start();
+    // Animated.timing(this.state.fadeInOpacity, {
+    //     toValue: 1, 
+    //     duration: 2500, 
+    //     easing: Easing.ease
+    // }).start();
     this.getStorage().done();
   }
   getStorage = async () => {
@@ -72,6 +73,7 @@ export default class Login extends React.Component {
         }.bind(this));
 
         if(login){
+          Vibration.vibrate(500);
           // this.setState({timeout:true});
           this.props.navigation.navigate('Home');
           this.setState({show_loading:false});

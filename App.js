@@ -14,11 +14,14 @@ import ScooterDetail from './pages/ScooterDetail';
     
 //   }
 // );
-const HomeStack=createDrawerNavigator(
+const HomeStack=createStackNavigator(
   {
     Home: {screen:Home,path:'app/home'},
     Map:{screen: MapScreen},
     ScooterDetail:{screen: ScooterDetail}
+  },
+  {
+    headerMode:'none',
   }
 );
 

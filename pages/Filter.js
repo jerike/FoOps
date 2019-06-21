@@ -68,11 +68,10 @@ export default class Filter extends React.Component {
     }
     get_power_change(value){
         this.show_loading();
-        this.setState({power_min:value[0],power_max:value[1]});
         this.setState({powerSliderValue:value});
-        setTimeout(()=>{
-          this.filter_scooter_by_power();
-        },10);
+        this.setState({power_min:value[0],power_max:value[1]},()=>{
+          this.after_reload_scooter();
+        });
     }
     filter_scooter_by_power(){
         var result = new Array();
@@ -88,15 +87,14 @@ export default class Filter extends React.Component {
               result.push(m);
             }
         }.bind(this));
-        this.filter_scooters(result);
+        this.setState({ scooter:result });
     }
     get_days_change(value){
         this.show_loading();
-        this.setState({day_min:value[0],day_max:value[1]});
         this.setState({daysSliderValue:value});
-        setTimeout(()=>{
-          this.filter_scooter_by_rent_days();
-        },10);
+        this.setState({day_min:value[0],day_max:value[1]},()=>{
+          this.after_reload_scooter();
+        });
     }
     filter_scooter_by_rent_days(){
         var result = new Array();
@@ -119,23 +117,20 @@ export default class Filter extends React.Component {
               result.push(m);
             }
         }.bind(this));
-        this.filter_scooters(result);
+        this.setState({ scooter:result });
     }
     // 選擇工作區域
     onChangeWorkArea(area){
         this.show_loading();
         // 帶入區域內經緯度資料
-        if(this.state.sel_work_area == null){
-            this.setState({sel_work_area:area}, () => {
-                this.get_scooter_in_work_area();
-            });
-        }else{
-            this.setState({sel_work_area:null}, () => {
-                this.get_scooter();
-            });
-        }
+        area = (this.state.sel_work_area == area) ? null : area;
+        this.setState({sel_work_area:area}, () => {
+            this.after_reload_scooter();
+        });
+
     }
     get_scooter_in_work_area(){
+
         var area = this.state.sel_work_area;
         var result = [];
         if(area != null){
@@ -152,8 +147,7 @@ export default class Filter extends React.Component {
                       result.push(m);
                     }
                 }.bind(this));
-                this.filter_scooters(result);
-                
+                this.setState({ scooter:result });
             });
         }
     }
@@ -217,51 +211,41 @@ export default class Filter extends React.Component {
     // 選擇車輛狀況
     onChangeSever(e){
         this.show_loading();
-        if(this.state.sel_severe_data == null){
-            this.setState({sel_severe_data:e}, () => {
-                this.get_scooter_by_severe();
-            });
-        }else{
-            this.setState({sel_severe_data:null}, () => {
-                this.get_scooter();
-            });
-        }
+        e = (this.state.sel_severe_data == e) ? null : e;
+        this.setState({sel_severe_data:e}, () => {
+            this.after_reload_scooter();
+        });
     }
     get_scooter_by_severe(){
         var severe = this.state.sel_severe_data;
         var result = [];
-        if(severe != ""){
+        if(severe != null){
             this.state.scooter.map(function(m, i){
                 if(m.severe == severe){
                   result.push(m);
                 }
             }.bind(this));
-            this.filter_scooters(result);
+            this.setState({ scooter:result });
         }
     }
     // 選擇服務狀態
     onChangeScooterStatus(type){
         this.show_loading();
-        if(this.state.sel_scooter_status == null){
-            this.setState({sel_scooter_status:type}, () => {
-                this.get_scooter_by_status();
-            });
-        }else{
-            this.setState({sel_scooter_status:null}, () => {
-                this.get_scooter();
-            });
-        }
+        type = (this.state.sel_scooter_status == type) ? null : type;
+        this.setState({sel_scooter_status:type}, () => {
+            this.after_reload_scooter();
+        });
     }
     get_scooter_by_status(){
         var status = this.state.sel_scooter_status;
         var result = [];
-        if(status != ""){
+        if(status != null){
             this.state.scooter.map(function(m, i){
                 if(m.status == status){
                   result.push(m);
                 }
             }.bind(this));
-            this.filter_scooters(result);
+            this.setState({ scooter:result });
         }
     }
     set_scooter_data(all_scooters){
@@ -273,22 +257,23 @@ export default class Filter extends React.Component {
             open:true
         },()=>{
             this.after_reload_scooter();
-            this.setState({reload_now:false});
         });
     }
     after_reload_scooter(){
-        this.get_scooter_in_work_area();
-        this.get_scooter_by_severe();
-        this.get_scooter_by_status();
-        this.filter_scooter_by_power();
-        this.filter_scooter_by_rent_days();
+      var promise1 = new Promise((resolve,reject)=>{
+        this.setState({scooter:this.props.filter_option.all});
+        resolve(0);
+      });
+      promise1.then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(1);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(2);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(3);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(4);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(5);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(6);}));
+        
 
     }
-    filter_scooters(result){
-      this.setState({ scooter:result });
-      this.props.filter_option.filter_scooter(result);
-      this.setState({show_loading:false});
-    }
+    
     get_scooter(){
       var all_scooters = this.props.filter_option.all;
       this.setState({scooter:all_scooters});
@@ -300,6 +285,7 @@ export default class Filter extends React.Component {
         const { selectedIndex } = this.state;
         const { show_loading } = this;
         var total = (filter_option.scooter == undefined) ? 0 : filter_option.scooter.length;
+        var all = filter_option.all.length;
         var work_area_btns = []
         work_area.map(function(m,i){
             var btn = <Button
@@ -342,7 +328,7 @@ export default class Filter extends React.Component {
                 title={m}
                 style={styles.work_area_btn}
                 icon={<Icon name="check-circle" size={15}  color="white" />}
-                buttonStyle={{borderColor:'rgb(255, 204, 34)',backgroundColor:'rgb(255, 204, 34)',color:'#fff'}}
+                buttonStyle={{borderColor:'rgb(255, 204, 34)',backgroundColor:'rgb(255, 204, 34)'}}
                 titleStyle={styles.titleStyleActive}
                 onPress={()=>this.onChangeSever(index)}
               />
@@ -407,40 +393,50 @@ export default class Filter extends React.Component {
                     </View>
                     <View style={styles.slider_view}>
                       <View style={{width:'20%'}}><Text>電量</Text></View>
-                      <View  style={{width:'70%'}}>
-                      <MultiSlider
-                        values={this.state.powerSliderValue}
-                        min={0}
-                        max={100}
-                        step={1}
-                        allowOverlap
-                        snapped
-                        onValuesChangeFinish={this.get_power_change}
-                        style={{width:'100%'}}
-                      />
+                      <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
+                        <View style={{marginRight:30}}><Text>{this.state.power_min}</Text></View>
+                        <View>
+                          <MultiSlider
+                            values={this.state.powerSliderValue}
+                            min={0}
+                            max={100}
+                            step={1}
+                            allowOverlap
+                            snapped
+                            onValuesChangeFinish={this.get_power_change}
+                            sliderLength={180}
+                            selectedStyle={{borderWidth:1,borderColor:'#00AA00'}}
+                          />
+                        </View>
+                        <View style={{marginLeft:30}}><Text>{this.state.power_max}</Text></View>
                       </View>
                      
                    
                     </View>
                     <View style={styles.slider_view}>
                       <View style={{width:'20%'}}><Text>天數</Text></View>
-                      <View  style={{width:'70%'}}>
-                      <MultiSlider
-                        values={this.state.daysSliderValue}
-                        min={0}
-                        max={100}
-                        step={1}
-                        allowOverlap
-                        snapped
-                        onValuesChangeFinish={this.get_days_change}
-                        style={{width:'100%'}}
-                      />
+                      <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
+                        <View style={{marginRight:30}}><Text>{this.state.day_min}</Text></View>
+                        <View>
+                          <MultiSlider
+                            values={this.state.daysSliderValue}
+                            min={0}
+                            max={100}
+                            step={1}
+                            allowOverlap
+                            snapped
+                            onValuesChangeFinish={this.get_days_change}
+                            sliderLength={180}
+                            selectedStyle={{borderWidth:1,borderColor:'#FF5511'}}
+                          />
+                        </View>
+                        <View style={{marginLeft:30}}><Text>{this.state.day_max}</Text></View>
                       </View>
-                   
+
                     </View>
                   </ScrollView>
                   <View style={styles.footer_view}>
-                    <Text style={{marginRight:20}}>篩選結果：{total}</Text>
+                    <Text style={{marginRight:20}}>篩選結果：{total} / {all}</Text>
                     <Button
                       title="顯示結果"
                       titleStyle={styles.view_titleStyle}
@@ -508,7 +504,8 @@ const styles = StyleSheet.create({
     paddingLeft:5
   },
   footer_view:{
-    flex:0.3,flexDirection:'row', alignItems: 'center', justifyContent: 'center',
+    width:'100%',
+    flex:0.3,flexDirection:'row', alignItems: 'center', justifyContent: 'space-around',
     borderTopWidth:1,
     borderTopColor:'rgba(224, 224, 224,0.5)',
     paddingTop:5,

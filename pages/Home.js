@@ -60,7 +60,6 @@ export default class Home extends React.Component {
         
     }
     filter_scooter(scooter){
-        console.warn(scooter);
         this.setState({scooter:scooter});
     }
     //取得電動車資訊
@@ -68,7 +67,6 @@ export default class Home extends React.Component {
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
-        console.warn(this.state.all);
         if (this.state.all.length == 0) {
             this.fetch_scooters();
         }else{
@@ -131,7 +129,6 @@ export default class Home extends React.Component {
                 }
                 
             }.bind(this));
-            console.warn(result);
             this.setState({ scooter:result });
         }else{
             this.setState({scooter : this.state.save_scooter});
@@ -256,7 +253,10 @@ export default class Home extends React.Component {
             setModalVisible:this.setModalVisible,
             filter_scooter:this.filter_scooter
         }
-
+        var show_loading = this.state.show_loading;
+        if(!open){
+            show_loading = true;
+        }
         var items = scooter.map(function(m,i){
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
@@ -352,24 +352,22 @@ export default class Home extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-            {this.state.show_loading &&(
+            {show_loading &&(
               <View style={styles.loading}>
                 <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
+
+
+
             <ScrollView style={{width:'100%'}}  refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={this._onRefresh}
               />
             }>
-                {open ? items :
-                    (
-                        <View style={{justifyContent: 'center',alignItems: 'center'}}>
-                            <ActivityIndicator size="large" color="#333333" />
-                        </View>
-                    )
+                {open ? items : []
                 }
             </ScrollView>
         </View>

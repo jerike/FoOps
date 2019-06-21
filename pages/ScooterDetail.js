@@ -313,7 +313,7 @@ export default class ScooterDetail extends React.Component {
             <Maintenance  maintain_option={maintain_option}/>
             <Violation  violation_option={violation_option}/>
 
-            <ListItem key={"li_0"} leftAvatar={<Icon name="motorcycle" />} title="車輛編號" subtitle={scooter.id} style={styles.listItem} />
+            <ListItem key={"li_0"} leftAvatar={<Icon name="motorcycle" />} title="車輛編號" subtitle={scooter.id+""} style={styles.listItem} />
             <ListItem key={"li_1"} leftAvatar={<Icon name="battery-full" />} title="電量" subtitle={scooter.power+"%"} style={styles.listItem} />
             <ListItem key={"li_2"} leftAvatar={<Icon name="history" />} title="未租用天數" subtitle={scooter.range_days+"天"} style={styles.listItem} />
             <ListItem key={"li_3"} leftAvatar={<Icon name="info" />} title="車輛狀態" subtitle={severe_lvl} style={styles.listItem} />
@@ -323,7 +323,7 @@ export default class ScooterDetail extends React.Component {
                 <FlatList  
                   style={{marginTop:20}}
                   data={conditions}
-                  renderItem={({item, index}) => <ListItem key={"fl_"+index} leftAvatar={<Icon name="wrench" />} title={item} subtitle="" style={styles.listItem} />}
+                  renderItem={({item, index}) => <ListItem key={"fl_"+index} leftAvatar={<Icon name="wrench" />} title={item}  style={styles.listItem} />}
                   ListHeaderComponent={this.ListHeaderComponent}
                   
                 />
