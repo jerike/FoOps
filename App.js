@@ -14,7 +14,7 @@ import ScooterDetail from './pages/ScooterDetail';
     
 //   }
 // );
-const HomeStack=createStackNavigator(
+const HomeStack=createDrawerNavigator(
   {
     Home: {screen:Home,path:'app/home'},
     Map:{screen: MapScreen},

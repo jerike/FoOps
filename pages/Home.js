@@ -355,7 +355,7 @@ export default class Home extends React.Component {
             {show_loading &&(
               <View style={styles.loading}>
                 <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                <Text style={{color:'#fff'}}>Loading...</Text>
+                <Text style={{color:'#fff'}}>讀取中，請稍候...</Text>
               </View>
             )}
 

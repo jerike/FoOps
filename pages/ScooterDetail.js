@@ -7,6 +7,8 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import Maintenance from './Maintenance'
 import Violation from './Violation'
+import Direction from './Direction'
+import Controller from './Controller'
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 const API = global.API;
@@ -21,6 +23,8 @@ export default class ScooterDetail extends React.Component {
         selectedIndex: 0,
         maintain_modal:false,
         violation_modal:false,
+        direction_modal:false,
+        controller_modal:false,
         sel_condition:[],
         top_other:"",
         medium_other:"",
@@ -244,6 +248,13 @@ export default class ScooterDetail extends React.Component {
     showViolation(){
       this.showModal('violation_modal');
     }
+    showDirection(){
+      this.showModal('direction_modal');
+    }
+    showController(){
+      this.showModal('controller_modal');
+    }
+    
     render() {
         
         const {search,selectedIndex,toSearch,scooter} = this.state;
@@ -298,6 +309,17 @@ export default class ScooterDetail extends React.Component {
           violation_modal:this.state.violation_modal,
           scooter:this.state.scooter,
         }
+        const direction_option={
+          onClose:this.onClose,
+          direction_modal:this.state.direction_modal,
+          scooter:this.state.scooter,
+        }
+        const controller_option={
+          onClose:this.onClose,
+          controller_modal:this.state.controller_modal,
+          scooter:this.state.scooter,
+        }
+        
 
         return (
         <View style={{flex: 1, backgroundColor: '#EFF1F4'}}>
@@ -312,7 +334,8 @@ export default class ScooterDetail extends React.Component {
             />
             <Maintenance  maintain_option={maintain_option}/>
             <Violation  violation_option={violation_option}/>
-
+            <Direction direction_option={direction_option} />
+            <Controller controller_option={controller_option} />
             <ListItem key={"li_0"} leftAvatar={<Icon name="motorcycle" />} title="車輛編號" subtitle={scooter.id+""} style={styles.listItem} />
             <ListItem key={"li_1"} leftAvatar={<Icon name="battery-full" />} title="電量" subtitle={scooter.power+"%"} style={styles.listItem} />
             <ListItem key={"li_2"} leftAvatar={<Icon name="history" />} title="未租用天數" subtitle={scooter.range_days+"天"} style={styles.listItem} />
@@ -330,9 +353,9 @@ export default class ScooterDetail extends React.Component {
             )}
             <View style={{flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
               <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} />
-              <Button  icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} />
+              <Button  icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
               <Button  icon={<Icon name="exclamation-circle" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
-              <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} />
+              <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
               <Button  icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
             </View>
         </View>
