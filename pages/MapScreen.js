@@ -50,6 +50,7 @@ export default class MapScreen extends React.Component {
       navigator.geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
+          console.warn(position.coords);
           this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         },
         (error: any) => {
@@ -297,8 +298,8 @@ export default class MapScreen extends React.Component {
             return;
         }
         mapRef.animateToRegion({
-            latitude: markerData.location.lat,
-            longitude: markerData.location.lng,
+            latitude: parseFloat(markerData.location.lat),
+            longitude: parseFloat(markerData.location.lng),
             latitudeDelta: 0.001,
             longitudeDelta: 0.001
         });
@@ -346,7 +347,6 @@ export default class MapScreen extends React.Component {
             
             markers.push(<MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
         }.bind(this));
-        console.warn(this.state.nearScooter);
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
@@ -405,7 +405,7 @@ export default class MapScreen extends React.Component {
                provider={PROVIDER_GOOGLE}
                style={styles.map}
                customMapStyle={mapStyle}
-               mapType={Platform.OS == "android" ? "none" : "standard"}
+               mapType="standard"
                region={this.state.setCenter}
              >
              {markers}
@@ -428,6 +428,8 @@ const styles = StyleSheet.create({
  },
  map: {
    flex: 1,
+   width: 400,
+   height: 400,
  },
   search_container: {
     backgroundColor:'#ff5722',

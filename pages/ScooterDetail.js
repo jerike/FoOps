@@ -183,7 +183,7 @@ export default class ScooterDetail extends React.Component {
         formData.append("zendesk", "");
 
         var sel_condition = this.state.sel_condition;
-        sel_condition.map(function(m,i){
+        sel_condition && sel_condition.map(function(m,i){
             formData.append("scooter_status[]", m);
         });
 
