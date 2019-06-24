@@ -19,7 +19,7 @@ export default class Controller extends React.Component {
               visible={controller_option.controller_modal}
               style={{height:200}}
               >
-              <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+              <View style={{backgroundColor: '#fff'}}>
                   <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
                      <Icon name='close' size={30}  onPress={() => {
                         controller_option.onClose('controller_modal');
@@ -45,7 +45,7 @@ export default class Controller extends React.Component {
                         <Text style={{color:'#000'}}>尋車(4G)</Text>
                     </View>
                   </TouchableOpacity>
-                </SafeAreaView>
+                </View>
             </Modal>
        
         );

@@ -30,11 +30,14 @@ export default class Filter extends React.Component {
         all_work_area:[],
         rangeSlide:false,
         powerSliderValue: [0, 100],
-        daysSliderValue:[0,100]
+        daysSliderValue:[0,100],
+        task:"",
+        sel_task:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.show_loading = this.show_loading.bind(this);
       this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
+      this.onChangeTask=this.onChangeTask.bind(this);
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
       this.onChangeSever=this.onChangeSever.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
@@ -48,7 +51,9 @@ export default class Filter extends React.Component {
     componentWillMount(){
       this.setState({scooter:this.props.filter_option.scooter});
     }
-
+    componentDidMount(){
+      // this.getStorage();
+    }
     updateIndex (selectedIndex) {
       this.setState({selectedIndex})
     }
@@ -65,6 +70,44 @@ export default class Filter extends React.Component {
           this.setState({rangeSlide:true});
         },1000)
       }
+    }
+    onChangeTask(index){
+      this.show_loading();
+        this.setState({sel_task:index}, () => {
+            this.after_reload_scooter();
+        });
+    }
+    // getStorage = async () => {
+    //     try {
+    //       const task = await AsyncStorage.getItem('@FoOps:task');
+    //       console.warn(task);
+    //       if (task !== null) {
+    //         this.setState({task:task});
+    //       }
+    //     } catch (error) {
+    //       console.warn(error);
+    //     }
+    // }
+
+    filter_scooter_by_task(){
+        if(this.state.sel_task){
+
+            var local_task = global.task;
+            var task = [];
+            if(local_task != null){
+                task = local_task.split(',').map(function(m,i){
+                    return parseInt(m, 10);
+                });
+            }
+            var scooter = [];
+
+            this.state.scooter.map(function(m,i){
+                if (task.indexOf(m.id) != -1) {
+                    scooter.push(m);
+                }
+            });
+            this.setState({scooter:scooter});
+        }
     }
     get_power_change(value){
         this.show_loading();
@@ -264,12 +307,13 @@ export default class Filter extends React.Component {
         this.setState({scooter:this.props.filter_option.all});
         resolve(0);
       });
-      promise1.then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(1);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(2);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(3);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(4);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(5);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(6);}));
+      promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_task();setTimeout(()=>{resolve(1);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(2);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(3);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(6);},50)}))
+              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
         
 
     }
@@ -361,7 +405,6 @@ export default class Filter extends React.Component {
             
         }.bind(this));
 
-
         return (
             <Modal
               animationType="slide"
@@ -382,6 +425,29 @@ export default class Filter extends React.Component {
                     </View>
                   )}
                   <ScrollView style={{flexDirection:'column', }}>
+                    <View style={{paddingBottom:10,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
+                        {this.state.sel_task ?(
+                          <Button
+                            title="我的任務清單"
+                            style={styles.work_area_btn}
+                            buttonStyle={styles.task_buttonStyleActive}
+                            titleStyle={styles.titleStyleActive}
+                            icon={<Icon name="check-circle" size={15}  color="white" />}
+                            onPress={()=>this.onChangeTask(false)}
+                          />
+                        ) : (
+                          <Button
+                            title="我的任務清單"
+                            type="outline"
+                            style={styles.work_area_btn}
+                            buttonStyle={styles.task_buttonStyle}
+                            titleStyle={styles.titleStyle}
+                            onPress={()=>this.onChangeTask(true)}
+                          />
+                        )}
+                        
+
+                    </View>
                     <View style={styles.row_view}>
                         {work_area_btns}
                     </View>
@@ -457,6 +523,16 @@ const styles = StyleSheet.create({
     marginTop:10,
     marginRight:10,
     
+  },
+  task_buttonStyle:{
+    borderColor:'#0000FF',
+
+  },
+  task_buttonStyleActive:{
+    borderColor:'#0000FF',
+    backgroundColor:'#0000FF',
+    color:'#ffffff'
+
   },
   Wa_buttonStyle:{
     borderColor:'rgb(0, 221, 0)',

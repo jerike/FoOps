@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
@@ -31,6 +31,8 @@ export default class ScooterDetail extends React.Component {
         low_other:"",
         operator:"",
         operator_id:"",
+        tasks:[],
+        task:""
       }
       this.newScooter=this.newScooter.bind(this);
       this.updateIndex = this.updateIndex.bind(this);
@@ -40,6 +42,7 @@ export default class ScooterDetail extends React.Component {
       this.onChangeOther=this.onChangeOther.bind(this);
       this.getStorage=this.getStorage.bind(this);
       this.updateCondition=this.updateCondition.bind(this);
+      this.onPressTask=this.onPressTask.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -58,6 +61,10 @@ export default class ScooterDetail extends React.Component {
           const operator_id = await AsyncStorage.getItem('@FoOps:user_id');
           if (operator_id !== null) {
             this.setState({operator_id:operator_id});
+          }
+          const task = await AsyncStorage.getItem('@FoOps:task');
+          if (task !== null) {
+            this.setState({task:task});
           }
         } catch (error) {
           console.warn(error);
@@ -191,7 +198,6 @@ export default class ScooterDetail extends React.Component {
         formData.append("medium_other", this.state.medium_other);
         formData.append("low_other", this.state.low_other);
 
-        console.warn(formData);
         fetch(API+'/ticket',{
             method: 'POST',
             mode: 'cors',
@@ -205,7 +211,7 @@ export default class ScooterDetail extends React.Component {
             this.newScooter(id);
 
           }else{
-            alert(data.reason);
+            Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
           }
         });
     }
@@ -252,9 +258,51 @@ export default class ScooterDetail extends React.Component {
       this.showModal('direction_modal');
     }
     showController(){
-      this.showModal('controller_modal');
+      Alert.alert('⚠️ 車輛控制項目',"尚未串接",[
+        {text: '啟動(4G)',onPress:()=>this.controller('start')},
+        {text: '熄火(4G)',onPress:()=>this.controller('stop')},
+        {text: '車廂(4G)',onPress:()=>this.controller('trunk')},
+        {text: '尋車(4G)',onPress:()=>this.controller('search')},
+        {text: '取消'}
+      ]);
+      // this.showModal('controller_modal');
     }
-    
+    controller(type){
+      Alert.alert('⚠️ Test',type,[{text: '還未測試車輛'}]);
+    }
+    setStorage = async () => {
+      try {
+        await AsyncStorage.setItem('@FoOps:task', this.state.task);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    onPressTask(id){
+      var tasks = global.task;
+      console.warn(tasks);
+      var task = [];
+      var show_msg = "";
+
+      if(tasks != undefined && tasks.split(',').length > 0){
+        console.warn(tasks.split(','));
+          task = tasks.split(',').map(function(m,i){
+              return parseInt(m, 10);
+          });
+      }
+      console.warn(task);
+      var index = task.indexOf(id);
+      if (index != -1) {
+          pushed = false;
+          task.splice(index, 1);
+          show_msg="已解除任務";
+      }else{
+          task.push(id);
+          show_msg="已增加任務";
+      }
+      global.task=task.join(',');
+      console.warn(global.task);
+      this.setState({task:task.join()},()=>{this.setStorage();Alert.alert('💪 Fighting',show_msg,[{text: '好的！'}])});           
+    }
     render() {
         
         const {search,selectedIndex,toSearch,scooter} = this.state;
@@ -263,6 +311,7 @@ export default class ScooterDetail extends React.Component {
         if(this.state.sid != get_props_sid){
           this.newScooter(get_props_sid);
         }
+
         var conditions = [];
         var other_conditions = [];
         var scooter_conditions = [];
@@ -319,17 +368,27 @@ export default class ScooterDetail extends React.Component {
           controller_modal:this.state.controller_modal,
           scooter:this.state.scooter,
         }
-        
+        var tasks = this.state.task.split(',');
+        var task = [];
+        if(tasks.length > 0){
+            task = tasks.map(function(m,i){
+                return parseInt(m, 10);
+            });
+        }
+        var sel_task = false;
+        if(task.indexOf(scooter.id) != -1){
+          sel_task = true;
+        }
 
         return (
         <View style={{flex: 1, backgroundColor: '#EFF1F4'}}>
             <Header
-              centerComponent={<Text color='#fff'>{scooter.plate}</Text>}
-              rightComponent={{ icon: 'menu', color: '#fff' }}
+              centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.goBack()}/></TouchableHighlight>}
               containerStyle={{
                 backgroundColor: '#ff5722',
                 justifyContent: 'space-around',
+                color:'#fff'
               }}
             />
             <Maintenance  maintain_option={maintain_option}/>
@@ -352,7 +411,15 @@ export default class ScooterDetail extends React.Component {
                 />
             )}
             <View style={{flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
-              <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} />
+              {sel_task ? (
+                <View>
+                <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
+                <Badge status="error" containerStyle={{position:'absolute',top:0,right:0}} />
+                </View>
+              ):(
+                <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
+              )}
+              
               <Button  icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
               <Button  icon={<Icon name="exclamation-circle" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
               <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>

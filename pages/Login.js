@@ -49,7 +49,6 @@ export default class Login extends React.Component {
         credentials: 'include'
     })
     .then((response) => {
-      console.warn(response);
       if(response.status == 200){
         return response.json();
       }else if(response.status == 403){
@@ -67,7 +66,7 @@ export default class Login extends React.Component {
           if(data.Name == "OPERATOR"){
               var account = json.data.email;
               // 儲存資料
-              this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token},()=>{this.setStorage()});
+              this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar},()=>{this.setStorage()});
               login = true;
           }
         }.bind(this));
@@ -90,9 +89,10 @@ export default class Login extends React.Component {
       await AsyncStorage.setItem('@FoOps:user_id', this.state.user_id);
       await AsyncStorage.setItem('@FoOps:user_email', this.state.user_email);
       await AsyncStorage.setItem('@FoOps:user_givenName', this.state.user_givenName);
+      await AsyncStorage.setItem('@FoOps:avatar', this.state.avatar);
       await AsyncStorage.setItem('@FoOps:token', this.state.token);
     } catch (error) {
-      console.log(error);
+      console.warn(error);
     }
   }
   close_msg(){

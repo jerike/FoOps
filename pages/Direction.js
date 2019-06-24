@@ -11,9 +11,24 @@ export default class Direction extends React.Component {
     constructor () {
         super()
         this.state = {
-            
+            positionData:null
         }
 
+    }
+    componentWillMount(){
+      navigator.geolocation.getCurrentPosition(
+        (position: any) => {
+          const positionData: any = position.coords;
+          this.setState({positionData:positionData});
+        },
+        (error: any) => {
+          console.warn('失敗：' + JSON.stringify(error.message))
+        }, {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 1000
+        }
+      );
     }
     componentDidMount() {
       
@@ -28,9 +43,13 @@ export default class Direction extends React.Component {
     
     render() {
         const {direction_option} = this.props;
-         var latlng = "";
+        var latlng = "";
         if(direction_option.scooter.location != undefined){
           latlng = direction_option.scooter.location.lat+","+ direction_option.scooter.location.lng;
+        }
+        var origin="";
+        if(this.state.positionData != null){
+          origin = this.state.positionData.latitude+","+this.state.positionData.longitude;
         }
         return (
             <Modal
@@ -46,7 +65,7 @@ export default class Direction extends React.Component {
                       }} />
                   </View>
                   <WebView
-                    source={{uri: 'https://www.google.com/maps/dir/?api=1&destination='+latlng+'&travelmode=two-wheeler'}}
+                    source={{uri: 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+latlng+'&travelmode=two-wheeler'}}
                   />
                 </SafeAreaView>
             </Modal>

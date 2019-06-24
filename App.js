@@ -1,27 +1,29 @@
 import React from 'react';
 import {createStackNavigator,createAppContainer,createDrawerNavigator,NavigationActions} from 'react-navigation';
-
+import {Platform } from 'react-native';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
+import Logout from './pages/Logout';
 
-console.disableYellowBox = true;
+// console.disableYellowBox = true;
+class Hidden extends React.Component {
+  render() {
+    return null;
+  }
+}
 
-// const Detail = createStackNavigator(
-//   {
-//     ScooterDetail: {screen:ScooterDetail}
-    
-//   }
-// );
 const HomeStack=createDrawerNavigator(
   {
-    Home: {screen:Home,path:'app/home'},
-    Map:{screen: MapScreen},
-    ScooterDetail:{screen: ScooterDetail}
-  },
-  {
-    headerMode:'none',
+    Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
+    Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
+    ScooterDetail:{screen: ScooterDetail,navigationOptions: {drawerLabel: <Hidden />}},
+    Logout:{screen: Logout}
+  },{
+    drawerPosition: 'right',
+    drawerLabel:'Menu',
+
   }
 );
 
@@ -42,7 +44,9 @@ const App = createStackNavigator(
       headerTitleStyle: {
         fontWeight: 'bold',
       },
+      gesturesEnabled: false 
     },
+    
   }
 );
 

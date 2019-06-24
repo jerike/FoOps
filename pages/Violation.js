@@ -97,8 +97,7 @@ export default class Violation extends React.Component {
         }
         if(msg.length > 0){
           Alert.alert('⚠️ Warning',msg.join('\n'),[{text: 'OK'}]);
-
-          this.setState({modal1:true,msg:msg});
+          this.setState({show_loading:false,modal1:true,msg:msg});
         }else{
             var scooter = this.props.violation_option.scooter;
             var formData  = new FormData();
@@ -278,7 +277,11 @@ export default class Violation extends React.Component {
                         style={{height: 80, borderColor: '#ccc', borderWidth: 1,}}
                       />
                     </View>
-                    <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}><Text>⚠️ 請選擇違規項目</Text></View>
+                    <View style={{justifyContent:'center',alignItems:'center'}}><Text>⚠️ 請選擇違規項目</Text></View>
+                    <View style={{justifyContent:'center',alignItems:'center',paddingLeft:20,paddingRight:20,marginTop:10}}>
+                        <Text style={{fontSize:13,marginBottom:5,color:'#900'}}>{this.state.select_type}</Text>
+                        <Text style={{fontSize:11,color:'#333'}}>{this.state.select_subtype}</Text>
+                    </View>
                     <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
                       <Picker
                         selectedValue={this.state.select_type}

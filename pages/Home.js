@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Filter from './Filter';
 import '../global.js';
@@ -25,7 +25,8 @@ export default class Home extends React.Component {
         screen:'Home',
         search:'',
         show_loading:false,
-        modalVisible:false
+        modalVisible:false,
+        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png"
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -34,6 +35,7 @@ export default class Home extends React.Component {
       this.onClear=this.onClear.bind(this);
       this.updateSearch=this.updateSearch.bind(this);
       this.filter_scooter=this.filter_scooter.bind(this);
+      this.getStorage=this.getStorage.bind(this);
     }
     componentWillMount() {
         
@@ -56,8 +58,25 @@ export default class Home extends React.Component {
             })
             this.props.navigation.dispatch(navigateAction);
         }
-
-        
+    }
+    componentDidMount(){
+        this.getStorage();
+        console.warn(global.task);
+    }
+    getStorage = async () => {
+        try {
+          const avatar = await AsyncStorage.getItem('@FoOps:avatar');
+          if (avatar !== null) {
+            this.setState({avatar:avatar});
+          }
+          const task = await AsyncStorage.getItem('@FoOps:task');
+          if (task !== null) {
+            global.task = task;
+            console.warn(global.task);
+          }
+        } catch (error) {
+          console.warn(error);
+        }
     }
     filter_scooter(scooter){
         this.setState({scooter:scooter});
@@ -319,12 +338,11 @@ export default class Home extends React.Component {
                 </TouchableOpacity>
             )
         }.bind(this))
-
         return (
         <View style={{flex: 1,justifyContent: 'center',
         alignItems: 'center', backgroundColor: '#F5F5F5'}}>
             <Header
-              
+              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
               centerComponent={<SearchBar
                                 placeholder="搜尋..."
                                 onChangeText={text => this.updateSearch(text)}
@@ -337,7 +355,7 @@ export default class Home extends React.Component {
                                 lightTheme={true}
                                 autoCorrect={true}  
                               />}
-              rightComponent={{ icon: 'menu', color: '#fff' }}
+              rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={{
                 backgroundColor: '#ff5722',
                 justifyContent: 'space-around',

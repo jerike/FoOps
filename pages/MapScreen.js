@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
 import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Filter from './Filter';
@@ -24,6 +24,7 @@ export default class MapScreen extends React.Component {
         setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.01,longitudeDelta: 0.01},
         search_scooter:[],
         clickMarker:false,
+        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png"
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -31,6 +32,7 @@ export default class MapScreen extends React.Component {
       this.onClear=this.onClear.bind(this);
       this.getFirstLatLng=this.getFirstLatLng.bind(this);
       this._renderDarkItem=this._renderDarkItem.bind(this);
+      this.getStorage=this.getStorage.bind(this);
     }
     componentWillMount() {
         var scooter = this.props.navigation.state.params.scooter;
@@ -43,14 +45,23 @@ export default class MapScreen extends React.Component {
     }
     componentDidMount() {
       this.getPosition();
+      this.getStorage();
     }
-
+    getStorage = async () => {
+        try {
+          const avatar = await AsyncStorage.getItem('@FoOps:avatar');
+          if (avatar !== null) {
+            this.setState({avatar:avatar});
+          }
+        } catch (error) {
+          console.warn(error);
+        }
+    }
 
     getPosition(){
       navigator.geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
-          console.warn(position.coords);
           this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         },
         (error: any) => {
@@ -350,6 +361,7 @@ export default class MapScreen extends React.Component {
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
+              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
               centerComponent={<SearchBar
                                 placeholder="搜尋..."
                                 onChangeText={this.updateSearch}
@@ -360,7 +372,7 @@ export default class MapScreen extends React.Component {
                                 lightTheme={true}
                                 onClear={this.onClear}
                               />}
-              rightComponent={{ icon: 'menu', color: '#fff' }}
+              rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={{
                 backgroundColor: '#ff5722',
                 justifyContent: 'space-around',
