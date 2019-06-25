@@ -263,12 +263,12 @@ export default class MapScreen extends React.Component {
           latitude: parseFloat(lat),
           longitude: parseFloat(lng),
           latitudeDelta: 0.001,
-            longitudeDelta: 0.001
+          longitudeDelta: 0.001
       };
       this.setState({setCenter:r});
     }
     CloseCard(){
-      this.setState({nearScooter:null});
+      this.setState({nearScooter:null,clickMarker:false});
     }
     getFirstLatLng(latlng){
       this.setState({setCenter:latlng});
@@ -440,8 +440,8 @@ const styles = StyleSheet.create({
  },
  map: {
    flex: 1,
-   width: 400,
-   height: 400,
+   width: '100%',
+   height: '100%',
  },
   search_container: {
     backgroundColor:'#ff5722',

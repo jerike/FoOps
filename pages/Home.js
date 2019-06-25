@@ -61,7 +61,6 @@ export default class Home extends React.Component {
     }
     componentDidMount(){
         this.getStorage();
-        console.warn(global.task);
     }
     getStorage = async () => {
         try {
@@ -72,7 +71,6 @@ export default class Home extends React.Component {
           const task = await AsyncStorage.getItem('@FoOps:task');
           if (task !== null) {
             global.task = task;
-            console.warn(global.task);
           }
         } catch (error) {
           console.warn(error);
@@ -86,6 +84,7 @@ export default class Home extends React.Component {
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
+
         if (this.state.all.length == 0) {
             this.fetch_scooters();
         }else{
@@ -116,7 +115,6 @@ export default class Home extends React.Component {
         });
     }
     set_scooter_data(all_scooters){
-
         this.setState({ 
             all:all_scooters,
             scooter:all_scooters,

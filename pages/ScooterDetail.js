@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert } from 'react-native';
+import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -9,6 +9,7 @@ import Maintenance from './Maintenance'
 import Violation from './Violation'
 import Direction from './Direction'
 import Controller from './Controller'
+import ActionSheet from 'react-native-action-sheet';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 const API = global.API;
@@ -32,7 +33,7 @@ export default class ScooterDetail extends React.Component {
         operator:"",
         operator_id:"",
         tasks:[],
-        task:""
+        task:"",
       }
       this.newScooter=this.newScooter.bind(this);
       this.updateIndex = this.updateIndex.bind(this);
@@ -92,12 +93,25 @@ export default class ScooterDetail extends React.Component {
         .then((json) => {
           if(json.code == 1){
             this.setState({scooter:json.data});
+            this.getScooterType(sid);
           }else{
              Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}]);           
           }
         });
     }
-
+    getScooterType(sid){
+      fetch(global.API+'/scooter/'+sid+'/status',{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => response.json())
+      .then((json)=>{
+          // console.log(json);
+          this.setState({
+              acc:json.data['acc']
+          });
+      });
+    }
     
     get_status_type(type){
         var result = "";
@@ -258,18 +272,66 @@ export default class ScooterDetail extends React.Component {
       this.showModal('direction_modal');
     }
     showController(){
-      Alert.alert('⚠️ 車輛控制項目',"尚未串接",[
-        {text: '啟動(4G)',onPress:()=>this.controller('start')},
-        {text: '熄火(4G)',onPress:()=>this.controller('stop')},
-        {text: '車廂(4G)',onPress:()=>this.controller('trunk')},
-        {text: '尋車(4G)',onPress:()=>this.controller('search')},
-        {text: '取消'}
-      ]);
+      var BUTTONS = [
+        '啟動(4G)',
+        '熄火(4G)',
+        '車廂(4G)',
+        '尋車(4G)',
+        '取消',
+      ];
+
+      var DESTRUCTIVE_INDEX = 3;
+      var CANCEL_INDEX = 4;
+      ActionSheet.showActionSheetWithOptions({
+        title:'車輛控制項',
+        message:'目前只提供 4G 網路操作，無法提供藍芽選項',
+        options: BUTTONS,
+        cancelButtonIndex: CANCEL_INDEX,
+        destructiveButtonIndex: DESTRUCTIVE_INDEX,
+        tintColor: '#ff5722'
+      },
+      (buttonIndex) => {
+        switch(buttonIndex){
+          case 0:
+            this.controller('unlock');
+          break;
+          case 1:
+            this.controller('lock');
+          break;
+          case 2:
+            this.controller('trunk');
+          break;
+          case 3:
+            this.controller('whistle');
+          break;
+        }
+      });
+      
       // this.showModal('controller_modal');
     }
     controller(type){
-      Alert.alert('⚠️ Test',type,[{text: '還未測試車輛'}]);
+      fetch(global.API+'/scooter/'+scooter.id+'/status?type='+type,{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+          if(response.status == 200){
+            return response.json();
+          }else{
+            this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+          }
+      })
+      .then((json) => {
+        if(json.data.length == 0){
+          this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+        }else{
+          this.set_scooter_data(json.data);            
+        }
+      }).then(() => {
+        this.setState({refreshing: false});
+      });
     }
+
     setStorage = async () => {
       try {
         await AsyncStorage.setItem('@FoOps:task', this.state.task);
@@ -279,17 +341,14 @@ export default class ScooterDetail extends React.Component {
     }
     onPressTask(id){
       var tasks = global.task;
-      console.warn(tasks);
       var task = [];
       var show_msg = "";
 
       if(tasks != undefined && tasks.split(',').length > 0){
-        console.warn(tasks.split(','));
           task = tasks.split(',').map(function(m,i){
               return parseInt(m, 10);
           });
       }
-      console.warn(task);
       var index = task.indexOf(id);
       if (index != -1) {
           pushed = false;
@@ -300,7 +359,7 @@ export default class ScooterDetail extends React.Component {
           show_msg="已增加任務";
       }
       global.task=task.join(',');
-      console.warn(global.task);
+
       this.setState({task:task.join()},()=>{this.setStorage();Alert.alert('💪 Fighting',show_msg,[{text: '好的！'}])});           
     }
     render() {
@@ -317,6 +376,8 @@ export default class ScooterDetail extends React.Component {
         var scooter_conditions = [];
         var severe_lvl = this.get_severe_lvl(scooter.severe);
         var stats_type = this.get_status_type(scooter.status);
+        var acc = (this.state.acc == undefined) ? false : this.state.acc;
+        var acc_status = (acc) ? <Text style={{color:'#f00'}}>啟動中</Text> : <Text style={{color:'#ccc'}}>熄火中</Text>;
         SCooter_ticket = scooter.ticket;
         if(SCooter_ticket != undefined){
           other_conditions = SCooter_ticket.other_conditions;
@@ -399,7 +460,8 @@ export default class ScooterDetail extends React.Component {
             <ListItem key={"li_1"} leftAvatar={<Icon name="battery-full" />} title="電量" subtitle={scooter.power+"%"} style={styles.listItem} />
             <ListItem key={"li_2"} leftAvatar={<Icon name="history" />} title="未租用天數" subtitle={scooter.range_days+"天"} style={styles.listItem} />
             <ListItem key={"li_3"} leftAvatar={<Icon name="info" />} title="車輛狀態" subtitle={severe_lvl} style={styles.listItem} />
-            <ListItem key={"li_4"} leftAvatar={<Icon name="unlock-alt" />} title="服務狀態" subtitle={stats_type} style={styles.listItem} />
+            <ListItem key={"li_4"} leftAvatar={<Icon name="exclamation" />} title="服務狀態" subtitle={stats_type} style={styles.listItem} />
+            <ListItem key={"li_5"} leftAvatar={<Icon name="unlock-alt" />} title="是否啟動" subtitle={acc_status} style={styles.listItem} />
             
             {conditions &&(
                 <FlatList  
@@ -421,7 +483,7 @@ export default class ScooterDetail extends React.Component {
               )}
               
               <Button  icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
-              <Button  icon={<Icon name="exclamation-circle" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
+              <Button  icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
               <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
               <Button  icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
             </View>
