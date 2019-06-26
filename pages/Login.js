@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,ProgressViewIOS,Animated,Easing,ActivityIndicator,Vibration } from 'react-native';
+import { CheckBox } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import '../global.js';
 export default class Login extends React.Component {
@@ -13,15 +14,15 @@ export default class Login extends React.Component {
     this.removeItemValue=this.removeItemValue.bind(this);
   }
   componentWillMount() {
-    this.setState({show_login:false});
-        // this.setState({show_login:false,fadeInOpacity: new Animated.Value(0)});
+    // this.setState({show_login:false});
+        this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false});
   }
   componentDidMount() {
-    // Animated.timing(this.state.fadeInOpacity, {
-    //     toValue: 1, 
-    //     duration: 2500, 
-    //     easing: Easing.ease
-    // }).start();
+    Animated.timing(this.state.fadeInOpacity, {
+        toValue: 1, 
+        duration: 500, 
+        easing: Easing.ease
+    }).start();
     this.getStorage().done();
   }
   getStorage = async () => {
@@ -30,8 +31,19 @@ export default class Login extends React.Component {
         if (value !== null) {
           this.props.navigation.navigate('Home');
         }else{
+          console.warn('show_login');
           this.setState({show_login:true});
         }
+        const email = await AsyncStorage.getItem('@FoOps:email');
+        if (email !== null) {
+          this.setState({email:email,save_login:true});
+        }
+        const pwd = await AsyncStorage.getItem('@FoOps:pwd');
+        if (pwd !== null) {
+          this.setState({password:pwd});
+        }
+
+
       } catch (error) {
         console.warn(error);
       }
@@ -91,6 +103,13 @@ export default class Login extends React.Component {
       await AsyncStorage.setItem('@FoOps:user_givenName', this.state.user_givenName);
       await AsyncStorage.setItem('@FoOps:avatar', this.state.avatar);
       await AsyncStorage.setItem('@FoOps:token', this.state.token);
+      if(this.state.save_login){
+        await AsyncStorage.setItem('@FoOps:email', this.state.email);
+        await AsyncStorage.setItem('@FoOps:pwd', this.state.password);
+      }else{
+        await AsyncStorage.removeItem('@FoOps:email');
+        await AsyncStorage.removeItem('@FoOps:pwd');
+      }
     } catch (error) {
       console.warn(error);
     }
@@ -115,6 +134,9 @@ export default class Login extends React.Component {
           this.setState({timeout:false});
           Alert.alert('⚠️ Warning',this.props.navigation.state.params.msg,[{text: 'OK',onPress: () => this.close_msg()}]);
       } 
+      if(!this.state.show_login && this.props.navigation.state.params.logout){
+        this.setState({show_login:true});
+      }
     }
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' ,backgroundColor:'#2f3345' }}>
@@ -126,9 +148,17 @@ export default class Login extends React.Component {
           </View>
         )}
         {this.state.show_login &&(
-           <Animated.View style={[styles.demo, {
-                    opacity: this.state.fadeInOpacity
-                }]}>
+           <Animated.View style={{width:'100%',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  opacity: this.state.fadeInOpacity, 
+                                  transform: [{
+                                    translateY: this.state.fadeInOpacity.interpolate({
+                                      inputRange: [0, 1],
+                                      outputRange: [150, 0]
+                                    }),
+                                  }],}} >
+           
                 <TextInput
                   style={styles.input}
                   onChangeText={(text) => this.setState({email:text})}
@@ -143,6 +173,8 @@ export default class Login extends React.Component {
                   secureTextEntry={true}
                   placeholder='密碼'
                 />
+                <CheckBox title='紀錄登入資訊' checked={this.state.save_login} onPress={()=>this.setState({save_login:true})} containerStyle={{marginTop:10,marginBottom:10,backgroundColor:'transparent',borderWidth:0,}} textStyle={{color:'#fff'}}  />
+                
                 <TouchableOpacity style={styles.login_btn} onPress={this.login.bind(this)} >
                    <Text style={{color:'#fff'}}> 登入 </Text>
                 </TouchableOpacity>
@@ -167,11 +199,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius:5,
     borderTopRightRadius:5
   },
-  demo: {
-        width:'100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
   input: {
     width:'60%',
     backgroundColor:'#fff',
@@ -195,4 +222,5 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius:5,
 
   }
+
 });

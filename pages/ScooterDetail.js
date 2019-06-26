@@ -276,7 +276,7 @@ export default class ScooterDetail extends React.Component {
         '啟動(4G)',
         '熄火(4G)',
         '車廂(4G)',
-        '尋車(4G)',
+        '呼叫(4G)',
         '取消',
       ];
 
