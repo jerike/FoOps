@@ -38,7 +38,7 @@ export default class Home extends React.Component {
       this.getStorage=this.getStorage.bind(this);
     }
     componentWillMount() {
-        
+        global.page = 'home';
         var scooter = [];
         this.setState({ search:'',condition:[]});
         if(this.props.navigation.state.params != undefined){
@@ -158,6 +158,7 @@ export default class Home extends React.Component {
     updateIndex (selectedIndex) {
 
         if(selectedIndex == 0){
+            global.page = "home";
             this.setModalVisible(true);
         }else{
             this.setState({screen:'Map'});
@@ -191,6 +192,9 @@ export default class Home extends React.Component {
 
     }
     setModalVisible(visible) {
+        if(global.page=="map"){
+            this.updateIndex (1);
+        }
         this.setState({modalVisible: visible});
     }
     //取得車況
@@ -259,6 +263,7 @@ export default class Home extends React.Component {
         this.props.navigation.navigate('ScooterDetail',{scooter:sid});
     }
     render() {
+        
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]

@@ -440,7 +440,6 @@ export default class ScooterDetail extends React.Component {
         if(task.indexOf(scooter.id) != -1){
           sel_task = true;
         }
-
         return (
         <View style={{flex: 1, backgroundColor: '#EFF1F4'}}>
             <Header

@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,TouchableOpacity } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
-import MapView, { Marker,PROVIDER_GOOGLE } from 'react-native-maps';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import MapView, { Marker,PROVIDER_GOOGLE,Polygon,Polyline } from 'react-native-maps';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
 import Carousel from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import slideStyle, { colors } from '../styles/index.style';
 import SliderEntry from '../component/SliderEntry';
 import '../global.js';
-
+const marker1 = require("../img/marker-normal.png");
+const marker2 = require("../img/marker-green.png");
+const marker3 = require("../img/marker-gray.png");
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 var t = 0;
@@ -21,10 +23,13 @@ export default class MapScreen extends React.Component {
       this.state = {
         selectedIndex: null,
         nearScooter:null,
-        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta: 0.01,longitudeDelta: 0.01},
+        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta:0.005,longitudeDelta: 0.005},
         search_scooter:[],
         clickMarker:false,
-        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png"
+        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png",
+        selectMarker:null,
+        work_area:'',
+        all_work_area:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -33,6 +38,8 @@ export default class MapScreen extends React.Component {
       this.getFirstLatLng=this.getFirstLatLng.bind(this);
       this._renderDarkItem=this._renderDarkItem.bind(this);
       this.getStorage=this.getStorage.bind(this);
+      this.reload_all_scooter=this.reload_all_scooter.bind(this);
+      this.fetch_scooters=this.fetch_scooters.bind(this);
     }
     componentWillMount() {
         var scooter = this.props.navigation.state.params.scooter;
@@ -42,9 +49,11 @@ export default class MapScreen extends React.Component {
             if(search != ""){this.updateSearch(search);}
         });
         this.get_scooter_status();
+        this.get_geofence();
+        this.get_work_area();
     }
     componentDidMount() {
-      this.getPosition();
+      // this.getPosition();
       this.getStorage();
     }
     getStorage = async () => {
@@ -57,7 +66,36 @@ export default class MapScreen extends React.Component {
           console.warn(error);
         }
     }
-
+    get_work_area = () =>{
+      //取得工作區域
+      fetch(global.API+'/scooter/get_all_work_zone',{
+          method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+          return response.json();
+      })
+      .then((json) => {
+          if(json.code == 1){
+            this.setState({ all_work_area:json.data });
+          }else{
+            alert(json.reason);
+          }
+      });
+    }
+    get_geofence =()=>{
+      //取得電子柵欄
+      fetch(global.API+'/tools/get_geofence',{
+         method: 'GET',
+         credentials: 'include'
+      })
+      .then((response) => response.json())
+      .then((json)=> {
+        this.setState({ geofence:json.data });
+        this.setState({ updated_time:json.updated }); 
+        this.setState({set_polygon:true});
+      });
+    }
     getPosition(){
       navigator.geolocation.getCurrentPosition(
         (position: any) => {
@@ -81,7 +119,9 @@ export default class MapScreen extends React.Component {
     }
     updateIndex (selectedIndex) {
         if(selectedIndex == 0){
-            this.props.navigation.state.params.filter_option.setModalVisible(true);
+          global.page = "map"; 
+          this.props.navigation.state.params.filter_option.setModalVisible(true);
+          this.CloseCard();
         }else{
             if(selectedIndex == 1){
                 this.props.navigation.navigate("Home",{scooter:this.state.scooter});
@@ -100,7 +140,36 @@ export default class MapScreen extends React.Component {
     onClear(){
       this.setState({toSearch:false});
     }
-    
+    reload_all_scooter(){
+        fetch(global.API+'/tools/clear_cache_key/all_scooter',{
+            method: 'GET',
+            credentials: 'include'
+        }).then((response) => {
+          this.fetch_scooters();
+        });
+    }
+    fetch_scooters(){
+        var result = []
+        fetch(global.API+'/scooter',{
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then((response) => {
+            if(response.status == 200){
+              return response.json();
+            }else{
+              this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+            }
+        })
+        .then((json) => {
+          if(json.data.length == 0){
+            this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+          }else{
+            console.warn(json.data);
+            this.setState({scooter:json.data});            
+          }
+        });
+    }
     //取得車況
     get_scooter_status =()=>{
         fetch(global.API+'/scooter/status',{
@@ -195,6 +264,8 @@ export default class MapScreen extends React.Component {
     onMarkerClick = (id,lat,lng) => {
       this.setState({nearScooter:null,selectScooter:id,clickMarker:true});
       var nearScooter = [];
+      var LatLng = {};
+      var index = 0;
       this.state.scooter.map(function(m,i){
           var distance = this.GetDistance(lat,lng,m.location.lat,m.location.lng);
           distance = distance.toFixed(2);          
@@ -245,7 +316,15 @@ export default class MapScreen extends React.Component {
               }
               var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
               var power_msg = show_power;
-
+              if(index == 0){
+                this.setState({selectMarker:m.id});
+                LatLng = {
+                    latitude: parseFloat(m.location.lat),
+                    longitude: parseFloat(m.location.lng),
+                    latitudeDelta: 0.001,
+                    longitudeDelta: 0.001
+                }
+              }
               nearScooter.push({
                   id: m.id,
                   title: m.plate,
@@ -256,16 +335,12 @@ export default class MapScreen extends React.Component {
                   location: m.location,
 
               });
+              index++;
           }
       }.bind(this));
       this.setState({nearScooter:nearScooter});
-      let r = {
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng),
-          latitudeDelta: 0.001,
-          longitudeDelta: 0.001
-      };
-      this.setState({setCenter:r});
+      this.setState({setCenter:LatLng});
+      
     }
     CloseCard(){
       this.setState({nearScooter:null,clickMarker:false});
@@ -300,6 +375,7 @@ export default class MapScreen extends React.Component {
         }
     }
     _renderDarkItem ({item, index}) {
+        global.page = 'map';
         return <SliderEntry data={item} even={true} navigation={this.props.navigation} sid={item.id}/>;
     }
     _centerMapOnMarker (markerIndex) {
@@ -308,19 +384,22 @@ export default class MapScreen extends React.Component {
         if (!markerData || !mapRef) {
             return;
         }
-        mapRef.animateToRegion({
+        this.setState({selectMarker:markerData.id});
+        let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
             latitudeDelta: 0.001,
             longitudeDelta: 0.001
-        });
+        };
+        this.setState({setCenter:r});
+        // mapRef.animateToRegion(r);
     }
     render() {
-        
-        const {search,selectedIndex,toSearch,clickMarker} = this.state;
+        const {search,selectedIndex,toSearch,clickMarker,geofence} = this.state;
         var get_props_scooter = this.props.navigation.getParam('scooter');
         var scooter_changed = this.props.navigation.getParam('changed');
         var scooter = [];
+        var set_polygon = this.state.set_polygon;
         if(toSearch){
             if(this.state.search_scooter.length > 0){
               scooter = this.state.search_scooter;
@@ -329,11 +408,6 @@ export default class MapScreen extends React.Component {
           scooter = get_props_scooter;
         }
 
-        // if(this.state.search_scooter.length > 0){
-        //   scooter = this.state.search_scooter;
-        // }else{
-        //   scooter = get_props_scooter;
-        // }
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
@@ -342,7 +416,8 @@ export default class MapScreen extends React.Component {
             this.updateSearch(this.props.navigation.getParam('search'));
         }
         
-        mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}]
+        mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
+
         var markers = [];
         scooter.map(function(m,i){
 
@@ -355,9 +430,62 @@ export default class MapScreen extends React.Component {
                 t = 0;
               },100);
             }
-            
-            markers.push(<MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />);
+            var selected = (this.state.selectMarker==m.id) ? styles.markerSelect : styles.marker
+            var marker;
+            switch(m.status){
+              case "MAINTENANCE":
+                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker3} style={selected} /></MapView.Marker>
+              break;
+              case "RIDING":
+                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker2} style={selected} /></MapView.Marker>
+              break;
+              default:
+                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker1} style={selected} /></MapView.Marker>
+              break;
+            }
+            markers.push(marker);
+
         }.bind(this));
+        var setPolyPath=[];
+        if(set_polygon){
+            var worldCoords = [
+              {latitude:-85.1054596961173,longitude: -180},
+              {latitude:85.1054596961173,longitude: -180},
+              {latitude:85.1054596961173,longitude: 180},
+              {latitude:-85.1054596961173,longitude: 180},
+              {latitude:-85.1054596961173,longitude: 0}
+            ]; 
+            var fence = [];
+            if(geofence != undefined){
+              geofence.map(function(value,index){
+                  fence[index] = [];
+                  value.zone.map(function(v,i){
+                    fence[index].push({latitude:parseFloat(v[1]),longitude: parseFloat(v[0])});
+                  });
+                  setPolyPath.push(fence[index]);
+              });
+            }
+            var work_area_color1 = ['rgba(255,255,119,0.6)','rgba(204,238,255,0.6)','rgba(255,204,204,0.6)','rgba(204,204,255,0.6)','rgba(119,255,204,0.6)','rgba(238,119,0,0.6)'];
+            var work_area_color2 = ['rgba(255,255,119,0.2)','rgba(204,238,255,0.2)','rgba(255,204,204,0.2)','rgba(204,204,255,0.2)','rgba(119,255,204,0.2)','rgba(238,119,0,0.2)'];
+            var work_areas = this.state.all_work_area.map(function(value,index){
+              // console.log(index);
+                var set_work_area = []
+                value.map(function(m,i){
+                    set_work_area.push({latitude:parseFloat(m.lat),longitude:parseFloat(m.lng)});
+                });
+                return <MapView.Polygon
+                  key={index}
+                  coordinates = {set_work_area}
+                  strokeColor = {work_area_color1[index]}
+                  fillColor={work_area_color2[index]}
+                  strokeWidth={3}
+                />
+            });
+            
+            
+            
+        }
+        // console.warn(setPolyPath);
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
@@ -420,9 +548,25 @@ export default class MapScreen extends React.Component {
                mapType="standard"
                region={this.state.setCenter}
              >
-             {markers}
              
+              <MapView.Polygon
+                coordinates={[{ latitude: -89, longitude: -179.99999999 },{ latitude: 0, longitude: -179.99999999 },{ latitude: 89, longitude: -179.99999999 },{ latitude: 89, longitude: 0 },{ latitude: 89, longitude: 179.99999999 },{ latitude: 0, longitude: 179.99999999 },{ latitude: -89, longitude: 179.99999999 },{ latitude: -89, longitude: 0 },{ latitude: -89, longitude: -179.99999999 }]}
+                strokeColor={'#ff0000'}
+                fillColor={'rgba(0,0,0,0.5)'}
+                strokeWidth={2}
+                holes={setPolyPath}
+              />
+             
+              {work_areas}
+              {markers}
+              
              </MapView>
+             <View style={styles.circle} >
+               <TouchableOpacity onPress={()=>this.reload_all_scooter()}>
+                 <Icon name="redo" size={20} color={'#ffffff'}/>
+                  
+               </TouchableOpacity>
+             </View>
         </View>
          
         );
@@ -432,17 +576,23 @@ export default class MapScreen extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-   ...StyleSheet.absoluteFill,
-   height: 400,
-   width: 400,
-   justifyContent: 'flex-end',
-   alignItems: 'center',
- },
- map: {
-   flex: 1,
-   width: '100%',
-   height: '100%',
- },
+    ...StyleSheet.absoluteFill,
+    height: 400,
+    width: 400,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  map: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  marker:{
+    width:30,height:40
+  },
+  markerSelect:{
+    width:40,height:53
+  },
   search_container: {
     backgroundColor:'#ff5722',
     paddingTop:-50,
@@ -497,6 +647,25 @@ const styles = StyleSheet.create({
   btn_selectedButtonStyle: {
       backgroundColor: '#fff'
   },
-   
+  circle:{
+    position:'absolute',
+    bottom:25,
+    left:15,
+    zIndex:10009,
+    marginRight:10,
+    alignItems:'center',
+    justifyContent:'center',
+    width: 50,
+    height:50,
+    backgroundColor:'#f76260',
+    borderColor:'green',
+    borderStyle:'solid',
+    borderRadius:25,
+    paddingBottom:2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,  
+  }
 });
 

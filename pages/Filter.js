@@ -404,7 +404,7 @@ export default class Filter extends React.Component {
             scooter_status_btns.push(btn);
             
         }.bind(this));
-
+        
         return (
             <Modal
               animationType="slide"
