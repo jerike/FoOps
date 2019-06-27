@@ -165,7 +165,7 @@ export default class MapScreen extends React.Component {
           if(json.data.length == 0){
             this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
           }else{
-            console.warn(json.data);
+            
             this.setState({scooter:json.data});            
           }
         });
@@ -376,7 +376,7 @@ export default class MapScreen extends React.Component {
     }
     _renderDarkItem ({item, index}) {
         global.page = 'map';
-        return <SliderEntry data={item} even={true} navigation={this.props.navigation} sid={item.id}/>;
+        return <SliderEntry data={item} even={true} CloseCard={this.CloseCard} navigation={this.props.navigation} sid={item.id}/>;
     }
     _centerMapOnMarker (markerIndex) {
         const mapRef = this.mapView;
@@ -407,7 +407,7 @@ export default class MapScreen extends React.Component {
         }else{
           scooter = get_props_scooter;
         }
-
+        console.warn(scooter);
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]

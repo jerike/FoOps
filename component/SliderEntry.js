@@ -36,7 +36,7 @@ export default class SliderEntry extends Component {
     }
 
     render () {
-        const { data: { title, stats_type,power_msg,scooter_status,range_days }, even ,sid} = this.props;
+        const { data: { title, stats_type,power_msg,scooter_status,range_days }, even ,sid,CloseCard} = this.props;
 
         const uppercaseTitle = title ? (
             <Text
@@ -53,7 +53,7 @@ export default class SliderEntry extends Component {
             <TouchableOpacity
               activeOpacity={1}
               style={styles.slideInnerContainer}
-              onPress={() => { this.props.navigation.navigate('ScooterDetail',{scooter:sid}); }}
+              onPress={() => {CloseCard(); this.props.navigation.navigate('ScooterDetail',{scooter:sid}); }}
               >
                 <View style={{position:'absolute',top:-20,zIndex:1,left:'49%',opacity:1,width: 10,height: 10,borderStyle: 'solid',borderTopWidth:0,borderRightWidth:10,borderBottomWidth:20,borderLeftWidth:10,borderTopColor: 'transparent', borderRightColor: 'transparent',borderBottomColor:'#000000',borderLeftColor: 'transparent'}}></View>
                 <View style={styles.shadow} />
