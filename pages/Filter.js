@@ -404,7 +404,7 @@ export default class Filter extends React.Component {
             scooter_status_btns.push(btn);
             
         }.bind(this));
-        
+
         return (
             <Modal
               animationType="slide"
@@ -418,12 +418,7 @@ export default class Filter extends React.Component {
                         filter_option.setModalVisible(!filter_option.modalVisible);
                       }} />
                   </View>
-                  {this.state.show_loading &&(
-                    <View style={styles.loading}>
-                      <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                      <Text style={{color:'#fff'}}>Loading...</Text>
-                    </View>
-                  )}
+                  
                   <ScrollView style={{flexDirection:'column', }}>
                     <View style={{paddingBottom:10,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
                         {this.state.sel_task ?(
@@ -502,7 +497,17 @@ export default class Filter extends React.Component {
                     </View>
                   </ScrollView>
                   <View style={styles.footer_view}>
-                    <Text style={{marginRight:20}}>篩選結果：{total} / {all}</Text>
+                    {this.state.show_loading ? 
+                      (
+                        <View>
+                          <Text>篩選結果：</Text>
+                          <ActivityIndicator color="#ccc"  />
+                        </View>
+                      ):(
+                        <Text style={{marginRight:20}}>篩選結果：{total} / {all}</Text>
+                      )
+                    }
+                    
                     <Button
                       title="顯示結果"
                       titleStyle={styles.view_titleStyle}
@@ -541,7 +546,6 @@ const styles = StyleSheet.create({
   Wa_buttonStyleActive:{
     borderColor:'rgb(0, 221, 0)',
     backgroundColor:'rgb(0, 221, 0)',
-    color:'#ffffff'
   },
   ss_buttonStyle:{
     borderColor:'rgb(255, 204, 34)',

@@ -47,23 +47,8 @@ export default class Violation extends React.Component {
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.send_violation=this.send_violation.bind(this);
     }
-    componentDidMount() {
-      this.getStorage().done();
-    }
-    getStorage = async () => {
-        try {
-          const operator = await AsyncStorage.getItem('@FoOps:user_givenName');
-          if (operator !== null) {
-            this.setState({operator:operator});
-          }
-          const operator_id = await AsyncStorage.getItem('@FoOps:user_id');
-          if (operator_id !== null) {
-            this.setState({operator_id:operator_id});
-          }
-        } catch (error) {
-          console.warn(error);
-        }
-    }
+
+    
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -110,7 +95,7 @@ export default class Violation extends React.Component {
             formData.append("photo2", this.state.avatarSource2);
             formData.append("photo3", this.state.avatarSource3);
             formData.append("photo4", this.state.avatarSource4);
-            formData.append("operator", this.state.operator);
+            formData.append("operator", global.user_givenName);
             fetch(global.API+'/scooter/violation',{
               method: 'POST',
               mode: 'cors',

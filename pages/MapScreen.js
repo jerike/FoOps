@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,TouchableOpacity } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,TouchableOpacity,ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
@@ -29,7 +29,8 @@ export default class MapScreen extends React.Component {
         avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png",
         selectMarker:null,
         work_area:'',
-        all_work_area:[]
+        all_work_area:[],
+        load_data:false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -141,6 +142,7 @@ export default class MapScreen extends React.Component {
       this.setState({toSearch:false});
     }
     reload_all_scooter(){
+        this.setState({load_data:true});
         fetch(global.API+'/tools/clear_cache_key/all_scooter',{
             method: 'GET',
             credentials: 'include'
@@ -165,8 +167,8 @@ export default class MapScreen extends React.Component {
           if(json.data.length == 0){
             this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
           }else{
-            
-            this.setState({scooter:json.data});            
+            this.setState({scooter:json.data});   
+            this.setState({load_data:false});         
           }
         });
     }
@@ -343,7 +345,7 @@ export default class MapScreen extends React.Component {
       
     }
     CloseCard(){
-      this.setState({nearScooter:null,clickMarker:false});
+      this.setState({nearScooter:null,clickMarker:false,selectMarker:null});
     }
     getFirstLatLng(latlng){
       this.setState({setCenter:latlng});
@@ -388,8 +390,8 @@ export default class MapScreen extends React.Component {
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.001
+            latitudeDelta: 0.0005,
+            longitudeDelta: 0.0005
         };
         this.setState({setCenter:r});
         // mapRef.animateToRegion(r);
@@ -407,7 +409,7 @@ export default class MapScreen extends React.Component {
         }else{
           scooter = get_props_scooter;
         }
-        console.warn(scooter);
+
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
@@ -430,17 +432,20 @@ export default class MapScreen extends React.Component {
                 t = 0;
               },100);
             }
-            var selected = (this.state.selectMarker==m.id) ? styles.markerSelect : styles.marker
+
             var marker;
             switch(m.status){
               case "MAINTENANCE":
-                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker3} style={selected} /></MapView.Marker>
+                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#9B9B9B';
+                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               case "RIDING":
-                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker2} style={selected} /></MapView.Marker>
+                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#528F0D';
+                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               default:
-                marker = <MapView.Marker key={i} coordinate={latlng}   onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} ><Image source={marker1} style={selected} /></MapView.Marker>
+                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#FF5622';
+                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
             }
             markers.push(marker);
@@ -563,7 +568,11 @@ export default class MapScreen extends React.Component {
              </MapView>
              <View style={styles.circle} >
                <TouchableOpacity onPress={()=>this.reload_all_scooter()}>
-                 <Icon name="redo" size={20} color={'#ffffff'}/>
+                { this.state.load_data ?(
+                  <ActivityIndicator  color="#ffffff"  />
+                  ):
+                  (<Icon name="redo" size={20} color={'#ffffff'}/>)
+                }
                   
                </TouchableOpacity>
              </View>

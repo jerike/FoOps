@@ -35,6 +35,8 @@ target 'FoOps' do
 
  # pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
 
+  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|

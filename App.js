@@ -8,11 +8,7 @@ import ScooterDetail from './pages/ScooterDetail';
 import Logout from './pages/Logout';
 import { Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
-if (!__DEV__) {
-  console.log = () => {};
-  console.warn = () => {};
-  console.error = () => {};
-}
+
 console.disableYellowBox = true;
 const { width, height } = Dimensions.get('screen');
 class Hidden extends React.Component {

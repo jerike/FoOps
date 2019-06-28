@@ -18,17 +18,24 @@ export default class Login extends React.Component {
         this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false});
   }
   componentDidMount() {
-    Animated.timing(this.state.fadeInOpacity, {
-        toValue: 1, 
-        duration: 500, 
-        easing: Easing.ease
-    }).start();
+    if(this.state.show_login){
+      Animated.timing(this.state.fadeInOpacity, {
+          toValue: 1, 
+          duration: 500, 
+          easing: Easing.ease
+      }).start();
+    }
     this.getStorage().done();
   }
   getStorage = async () => {
       try {
         const value = await AsyncStorage.getItem('@FoOps:token');
         if (value !== null) {
+          global.user_id =  await AsyncStorage.getItem('@FoOps:user_id');
+          global.user_email =  await AsyncStorage.getItem('@FoOps:user_email');
+          global.user_givenName =  await AsyncStorage.getItem('@FoOps:user_givenName');
+          global.avatar =  await AsyncStorage.getItem('@FoOps:avatar');
+          global.token =  await AsyncStorage.getItem('@FoOps:token');
           this.props.navigation.navigate('Home');
         }else{
           console.warn('show_login');
@@ -98,6 +105,11 @@ export default class Login extends React.Component {
   }
   setStorage = async () => {
     try {
+      global.user_id =  this.state.user_id;
+      global.user_email =  this.state.user_email;
+      global.user_givenName =  this.state.user_givenName;
+      global.avatar =  this.state.avatar;
+      global.token =  this.state.token;
       await AsyncStorage.setItem('@FoOps:user_id', this.state.user_id);
       await AsyncStorage.setItem('@FoOps:user_email', this.state.user_email);
       await AsyncStorage.setItem('@FoOps:user_givenName', this.state.user_givenName);

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS } from 'react-native';
-import { createDrawerNavigator, createAppContainer } from 'react-navigation';
+import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -55,16 +55,9 @@ export default class ScooterDetail extends React.Component {
     }
     getStorage = async () => {
         try {
-          const operator = await AsyncStorage.getItem('@FoOps:user_givenName');
-          if (operator !== null) {
-            this.setState({operator:operator});
-          }
-          const operator_id = await AsyncStorage.getItem('@FoOps:user_id');
-          if (operator_id !== null) {
-            this.setState({operator_id:operator_id});
-          }
           const task = await AsyncStorage.getItem('@FoOps:task');
           if (task !== null) {
+            global.task = task;
             this.setState({task:task});
           }
         } catch (error) {
@@ -199,8 +192,8 @@ export default class ScooterDetail extends React.Component {
         var formData  = new FormData();
         formData.append("scooter_id", id);
         formData.append("ticket_status_id", 0);
-        formData.append("operator", this.state.operator);
-        formData.append("operator_id", this.state.operator_id);
+        formData.append("operator", global.user_givenName);
+        formData.append("operator_id", global.user_id);
         formData.append("zendesk", "");
 
         var sel_condition = this.state.sel_condition;
@@ -301,18 +294,23 @@ export default class ScooterDetail extends React.Component {
           case 2:
             this.controller('trunk');
           break;
-          case 3:
-            this.controller('whistle');
-          break;
+          // case 3:
+          //   this.controller('whistle');
+          // break;
         }
       });
       
       // this.showModal('controller_modal');
     }
     controller(type){
-      fetch(global.API+'/scooter/'+scooter.id+'/status?type='+type,{
-        method: 'GET',
-        credentials: 'include'
+      var formData  = new FormData();    
+      formData.append("value", type);  
+      formData.append("operator", global.user_givenName);
+
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/type',{
+        method: 'PUT',
+        credentials: 'include',
+        body: formData
       })
       .then((response) => {
           if(response.status == 200){
@@ -322,13 +320,11 @@ export default class ScooterDetail extends React.Component {
           }
       })
       .then((json) => {
-        if(json.data.length == 0){
-          this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+        if(json.code == 1){
+          console.warn(json.data); 
         }else{
-          this.set_scooter_data(json.data);            
+          this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});        
         }
-      }).then(() => {
-        this.setState({refreshing: false});
       });
     }
 
@@ -363,7 +359,6 @@ export default class ScooterDetail extends React.Component {
       this.setState({task:task.join()},()=>{this.setStorage();Alert.alert('💪 Fighting',show_msg,[{text: '好的！'}])});           
     }
     render() {
-        
         const {search,selectedIndex,toSearch,scooter} = this.state;
 
         var get_props_sid = this.props.navigation.getParam('scooter');
@@ -444,11 +439,10 @@ export default class ScooterDetail extends React.Component {
         <View style={{flex: 1, backgroundColor: '#EFF1F4'}}>
             <Header
               centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
-              leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.goBack()}/></TouchableHighlight>}
+              leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.dispatch(NavigationActions.back())}/></TouchableHighlight>}
               containerStyle={{
                 backgroundColor: '#ff5722',
-                justifyContent: 'space-around',
-                color:'#fff'
+                justifyContent: 'space-around'
               }}
             />
             <Maintenance  maintain_option={maintain_option}/>

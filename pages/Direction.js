@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Text, View,SafeAreaView,StyleSheet,Modal,Platform,WebView } from 'react-native';
+import { Text, View,SafeAreaView,StyleSheet,Modal,Platform } from 'react-native';
 import {Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import '../global.js';
-
+import { WebView } from 'react-native-webview';
 
 var t = 0;
 
