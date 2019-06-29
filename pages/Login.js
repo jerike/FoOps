@@ -11,21 +11,21 @@ export default class Login extends React.Component {
     this.state = { email: null,password:null,progress:0,timeout:true,show_loading:false };
     this.close_msg = this.close_msg.bind(this);
     this.login=this.login.bind(this);
-    this.removeItemValue=this.removeItemValue.bind(this);
+    this.ShowLogin=this.ShowLogin.bind(this);
   }
   componentWillMount() {
     // this.setState({show_login:false});
         this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false});
   }
   componentDidMount() {
-    if(this.state.show_login){
-      Animated.timing(this.state.fadeInOpacity, {
+    this.getStorage().done();
+  }
+  ShowLogin(){
+    Animated.timing(this.state.fadeInOpacity, {
           toValue: 1, 
           duration: 500, 
           easing: Easing.ease
       }).start();
-    }
-    this.getStorage().done();
   }
   getStorage = async () => {
       try {
@@ -39,7 +39,7 @@ export default class Login extends React.Component {
           this.props.navigation.navigate('Home');
         }else{
           console.warn('show_login');
-          this.setState({show_login:true});
+          this.setState({show_login:true},()=>this.ShowLogin());
         }
         const email = await AsyncStorage.getItem('@FoOps:email');
         if (email !== null) {
@@ -129,27 +129,9 @@ export default class Login extends React.Component {
   close_msg(){
     this.setState({timeout:false});
   }
-  async removeItemValue(key) {
-    try {
-      await AsyncStorage.removeItem(key);
-      this.setState({show_login:true});
-    }
-    catch(exception) {
-      this.setState({show_login:true});
-    }
-  }
+
   
   render() {
-    if(this.props.navigation.state.params != undefined){
-      if(this.state.timeout && this.props.navigation.state.params.msg !=undefined){
-          this.removeItemValue('@FoOps:token');
-          this.setState({timeout:false});
-          Alert.alert('⚠️ Warning',this.props.navigation.state.params.msg,[{text: 'OK',onPress: () => this.close_msg()}]);
-      } 
-      if(!this.state.show_login && this.props.navigation.state.params.logout){
-        this.setState({show_login:true});
-      }
-    }
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' ,backgroundColor:'#2f3345' }}>
         <Image source={require('../img/gokube-logo.png')} style={{marginBottom:30}} />

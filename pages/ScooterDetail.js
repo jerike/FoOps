@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
@@ -34,6 +34,7 @@ export default class ScooterDetail extends React.Component {
         operator_id:"",
         tasks:[],
         task:"",
+        remark:null
       }
       this.newScooter=this.newScooter.bind(this);
       this.updateIndex = this.updateIndex.bind(this);
@@ -44,6 +45,7 @@ export default class ScooterDetail extends React.Component {
       this.getStorage=this.getStorage.bind(this);
       this.updateCondition=this.updateCondition.bind(this);
       this.onPressTask=this.onPressTask.bind(this);
+      this.removeRemark=this.removeRemark.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -80,13 +82,14 @@ export default class ScooterDetail extends React.Component {
             if(response.status == 200){
               return response.json();
             }else{
-              this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+              this.props.navigation.navigate('TimeOut');
             }
         })
         .then((json) => {
           if(json.code == 1){
             this.setState({scooter:json.data});
             this.getScooterType(sid);
+            this.getRemark(sid);
           }else{
              Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}]);           
           }
@@ -105,7 +108,27 @@ export default class ScooterDetail extends React.Component {
           });
       });
     }
-    
+    getRemark(sid){
+      fetch(global.API+'/scooter/'+sid+'/remark',{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => response.json())
+      .then((json)=>{
+          if(json.code == 1){
+            // console.warn(json.data);
+            if(json.data != null){
+              this.setState({remark:json.data.remark});
+            }else{
+              this.setState({remark:null});
+            }
+          }else{
+            Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);           
+          }
+          
+      });
+      
+    }
     get_status_type(type){
         var result = "";
         var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
@@ -269,7 +292,7 @@ export default class ScooterDetail extends React.Component {
         '啟動(4G)',
         '熄火(4G)',
         '車廂(4G)',
-        '呼叫(4G)',
+        '響鈴(4G)',
         '取消',
       ];
 
@@ -294,15 +317,16 @@ export default class ScooterDetail extends React.Component {
           case 2:
             this.controller('trunk');
           break;
-          // case 3:
-          //   this.controller('whistle');
-          // break;
+          case 3:
+            this.controller('whistle');
+          break;
         }
       });
       
       // this.showModal('controller_modal');
     }
     controller(type){
+      this.setState({show_loading:true});
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
@@ -316,14 +340,35 @@ export default class ScooterDetail extends React.Component {
           if(response.status == 200){
             return response.json();
           }else{
-            this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+            this.props.navigation.navigate('TimeOut');
           }
       })
       .then((json) => {
         if(json.code == 1){
-          console.warn(json.data); 
+          var msg = "";
+          switch(type){
+            case "unlock":
+              msg = "車輛已啟動";
+            break;
+            case "lock":
+              msg = "車輛已熄火";
+            break;
+            case "trunk":
+              msg = "車廂已開啟";
+            break;
+            case "whistle":
+              msg = "喇叭已響起";
+            break;
+          }
+          setTimeout(
+            ()=>{
+              this.setState({show_loading:true});
+              this.newScooter(this.state.scooter.id);
+              Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}])
+            }
+          ,3000);
         }else{
-          this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});        
+          this.props.navigation.navigate('TimeOut');        
         }
       });
     }
@@ -357,6 +402,64 @@ export default class ScooterDetail extends React.Component {
       global.task=task.join(',');
 
       this.setState({task:task.join()},()=>{this.setStorage();Alert.alert('💪 Fighting',show_msg,[{text: '好的！'}])});           
+    }
+    addRemark(){
+      var formData  = new FormData();    
+      formData.append("remark", this.state.txt_remark);  
+      formData.append("operator", global.user_givenName);
+
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/remark',{
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      })
+      .then((response) => {
+          if(response.status == 200){
+            return response.json();
+          }else{
+            this.props.navigation.navigate('TimeOut');
+          }
+      })
+      .then((json) => {
+        if(json.code == 1){
+          this.getRemark(this.state.scooter.id);
+          // console.warn(json.data); 
+        }else{
+          this.props.navigation.navigate('TimeOut');        
+        }
+      });
+    }
+    removeAlert(){
+      Alert.alert(
+        '⚠️ Warning',
+        '確定要清除備註？',
+        [
+          {text: '確定!', onPress: () => this.removeRemark()},
+          {text: '不要!'},
+        ],
+        {cancelable: false},
+      );
+    }
+    removeRemark(){
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/remark',{
+        method: 'PUT',
+        credentials: 'include'
+      })
+      .then((response) => {
+          if(response.status == 200){
+            return response.json();
+          }else{
+            this.props.navigation.navigate('TimeOut');
+          }
+      })
+      .then((json) => {
+        if(json.code == 1){
+          this.getRemark(this.state.scooter.id);
+          // console.warn(json.data); 
+        }else{
+          this.props.navigation.navigate('TimeOut');        
+        }
+      });
     }
     render() {
         const {search,selectedIndex,toSearch,scooter} = this.state;
@@ -436,7 +539,7 @@ export default class ScooterDetail extends React.Component {
           sel_task = true;
         }
         return (
-        <View style={{flex: 1, backgroundColor: '#EFF1F4'}}>
+        <View style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
             <Header
               centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.dispatch(NavigationActions.back())}/></TouchableHighlight>}
@@ -445,17 +548,37 @@ export default class ScooterDetail extends React.Component {
                 justifyContent: 'space-around'
               }}
             />
+            {this.state.show_loading &&(
+              <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                <Text style={{color:'#fff'}}>Loading...</Text>
+              </View>
+            )}
             <Maintenance  maintain_option={maintain_option}/>
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
-            <ListItem key={"li_0"} leftAvatar={<Icon name="motorcycle" />} title="車輛編號" subtitle={scooter.id+""} style={styles.listItem} />
-            <ListItem key={"li_1"} leftAvatar={<Icon name="battery-full" />} title="電量" subtitle={scooter.power+"%"} style={styles.listItem} />
-            <ListItem key={"li_2"} leftAvatar={<Icon name="history" />} title="未租用天數" subtitle={scooter.range_days+"天"} style={styles.listItem} />
-            <ListItem key={"li_3"} leftAvatar={<Icon name="info" />} title="車輛狀態" subtitle={severe_lvl} style={styles.listItem} />
-            <ListItem key={"li_4"} leftAvatar={<Icon name="exclamation" />} title="服務狀態" subtitle={stats_type} style={styles.listItem} />
-            <ListItem key={"li_5"} leftAvatar={<Icon name="unlock-alt" />} title="是否啟動" subtitle={acc_status} style={styles.listItem} />
-            
+            <ListItem key={"li_0"} leftAvatar={<Icon name="motorcycle" size={19} style={{width:24}} />} title="車輛編號" subtitle={scooter.id+""} style={styles.listItem} />
+            <ListItem key={"li_1"} leftAvatar={<Icon name="battery-full" size={19} style={{width:24}}/>} title="電量" subtitle={scooter.power+"%"} style={styles.listItem} />
+            <ListItem key={"li_2"} leftAvatar={<Icon name="history" size={24} style={{width:24}}/>} title="未租用天數" subtitle={scooter.range_days+"天"} style={styles.listItem} />
+            <ListItem key={"li_3"} leftAvatar={<Icon name="info" size={24} style={{width:24}}  />} title="車輛狀態" subtitle={severe_lvl} style={styles.listItem} />
+            <ListItem key={"li_4"} leftAvatar={<Icon name="exclamation" size={24} style={{width:24}}/>} title="服務狀態" subtitle={stats_type} style={styles.listItem} />
+            <ListItem key={"li_5"} leftAvatar={<Icon name="unlock-alt" size={24} style={{width:24}} />} title="是否啟動" subtitle={acc_status} style={styles.listItem} />
+            {this.state.remark == null ?(
+              <View>
+                <Input placeholder='備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0,height:50}} inputStyle={{marginLeft:10,height:50}} leftIcon={
+                <Icon name='user-edit' color='black'  size={24} style={{width:24}} /> } onChangeText={(text)=>this.setState({txt_remark:text})} />
+                <Button title="新增備註" onPress={()=>this.addRemark()}/>
+              </View>
+            ):(
+              <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',height:50}}>
+                <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                  <Icon name='user-edit' color='black'  size={24} style={{width:24,marginLeft:12,marginRight:20}} />
+                  <Text>{this.state.remark}</Text>
+                </View>
+                <Button title="清除備註" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
+              </View>
+            )}
             {conditions &&(
                 <FlatList  
                   style={{marginTop:20}}
@@ -502,7 +625,19 @@ const styles = StyleSheet.create({
   },
   listItem:{
     borderBottomWidth:1,borderBottomColor:'#EFF1F4'
-  }
+  },
+  loading:{
+    position:'absolute',
+    zIndex:101,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:'rgba(1,1,1,0.8)',
+    padding:20,
+    borderBottomLeftRadius:5,
+    borderBottomRightRadius:5,
+    borderTopLeftRadius:5,
+    borderTopRightRadius:5
+  },
 });
 
 

@@ -6,10 +6,11 @@ import Home from './pages/Home';
 import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 import Logout from './pages/Logout';
+import TimeOut from './pages/timeout';
 import { Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-console.disableYellowBox = true;
+// console.disableYellowBox = true;
 const { width, height } = Dimensions.get('screen');
 class Hidden extends React.Component {
   render() {
@@ -55,7 +56,9 @@ const HomeStack=createDrawerNavigator(
     Home: {screen:Home,path:'app/home',key:'show-home',navigationOptions: {drawerLabel: <Hidden />}},
     Map:{screen: MapScreen,key:'show-map',navigationOptions: {drawerLabel: <Hidden />}},
     ScooterDetail:{screen: ScooterDetail,navigationOptions: {drawerLabel: <Hidden />}},
+    TimeOut:{screen: TimeOut,navigationOptions: {drawerLabel: <Hidden />}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}
+
   },{
     drawerPosition: 'right',
     drawerLabel:'Menu',

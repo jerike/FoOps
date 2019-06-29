@@ -160,12 +160,12 @@ export default class MapScreen extends React.Component {
             if(response.status == 200){
               return response.json();
             }else{
-              this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+              this.props.navigation.navigate('TimeOut');
             }
         })
         .then((json) => {
           if(json.data.length == 0){
-            this.props.navigation.navigate('Login',{msg:"登入逾時，請重新登入"});
+            this.props.navigation.navigate('TimeOut');
           }else{
             this.setState({scooter:json.data});   
             this.setState({load_data:false});         
