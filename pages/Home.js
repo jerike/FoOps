@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Filter from './Filter';
 import '../global.js';
 import styles from '../styles/home.style';
-
+import shallowCompare from 'react-addons-shallow-compare';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 
@@ -26,6 +26,7 @@ export default class Home extends React.Component {
         search:'',
         show_loading:false,
         modalVisible:false,
+        jump2map:false,
         avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png"
       }
       this.updateIndex = this.updateIndex.bind(this);
@@ -49,6 +50,12 @@ export default class Home extends React.Component {
         }
         this.get_scooter_status();
     }
+    shouldComponentUpdate(nextProps, nextState){
+        console.warn(nextProps);
+        console.warn(nextState);
+        console.warn(this.state);
+        return shallowCompare(this, nextProps, nextState);
+    }   
     componentWillUpdate(nextProps,nextState){
         if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
             const navigateAction = NavigationActions.navigate({
@@ -58,9 +65,20 @@ export default class Home extends React.Component {
             })
             this.props.navigation.dispatch(navigateAction);
         }
+        
+        if(nextProps.navigation.state.params != undefined){
+            if(nextProps.navigation.state.params.jump2map !=undefined){
+                jump2map = nextProps.navigation.state.params.jump2map;
+                if(jump2map){
+                    this.updateIndex(1);
+                }
+            }
+        }
     }
     componentDidMount(){
         this.getStorage();
+
+
     }
     getStorage = async () => {
         try {
