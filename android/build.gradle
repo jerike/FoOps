@@ -32,3 +32,13 @@ allprojects {
         google()
     }
 }
+subprojects { subproject ->
+    afterEvaluate{
+        if((subproject.name == 'react-native-touch-id')) {
+            android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+                buildToolsVersion rootProject.ext.buildToolsVersion
+            }
+        }
+    }
+}

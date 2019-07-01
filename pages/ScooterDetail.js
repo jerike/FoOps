@@ -541,7 +541,7 @@ export default class ScooterDetail extends React.Component {
           sel_task = true;
         }
         return (
-        <View style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
+        <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
             <Header
               centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.dispatch(NavigationActions.back())}/></TouchableHighlight>}
@@ -608,7 +608,7 @@ export default class ScooterDetail extends React.Component {
                 <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
                 <Button  icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
               </View>
-        </View>
+        </SafeAreaView>
          
         );
     }

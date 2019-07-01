@@ -356,7 +356,7 @@ export default class Home extends React.Component {
             )
         }.bind(this))
         return (
-        <View style={{flex: 1,justifyContent: 'center',
+        <SafeAreaView style={{flex: 1,justifyContent: 'center',
         alignItems: 'center', backgroundColor: '#F5F5F5'}}>
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
@@ -405,7 +405,7 @@ export default class Home extends React.Component {
                 {open ? items : []
                 }
             </ScrollView>
-        </View>
+        </SafeAreaView>
          
         );
     }

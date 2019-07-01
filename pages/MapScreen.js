@@ -436,16 +436,19 @@ export default class MapScreen extends React.Component {
             var marker;
             switch(m.status){
               case "MAINTENANCE":
-                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#9B9B9B';
-                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                var isActive = (this.state.selectMarker==m.id) ? true : false;
+
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               case "RIDING":
-                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#528F0D';
-                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                var isActive = (this.state.selectMarker==m.id) ? true : false;
+
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'green'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               default:
-                var selected = (this.state.selectMarker==m.id) ? 'teal' : '#FF5622';
-                marker = <MapView.Marker key={i} coordinate={latlng} pinColor={selected} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                var isActive = (this.state.selectMarker==m.id) ? true : false;
+                
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'tomato'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
             }
             markers.push(marker);
