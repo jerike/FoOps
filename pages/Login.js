@@ -3,6 +3,8 @@ import { Text,TextInput, View,Button,Image,StyleSheet,TouchableOpacity,Alert,Pro
 import { CheckBox } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import '../global.js';
+import shallowCompare from 'react-addons-shallow-compare';
+
 export default class Login extends React.Component {
 
   
@@ -20,6 +22,16 @@ export default class Login extends React.Component {
   componentDidMount() {
     this.getStorage().done();
   }
+  shouldComponentUpdate(nextProps, nextState){
+      return shallowCompare(this, nextProps, nextState);
+  }   
+  componentWillUpdate(nextProps,nextState){
+    if(nextProps.navigation.state.params != undefined){
+        if(nextProps.navigation.state.params.logout){
+          this.setState({show_login:true});
+        }
+    }
+  }
   ShowLogin(){
     Animated.timing(this.state.fadeInOpacity, {
           toValue: 1, 
@@ -30,6 +42,7 @@ export default class Login extends React.Component {
   getStorage = async () => {
       try {
         const value = await AsyncStorage.getItem('@FoOps:token');
+        console.warn(value);
         if (value !== null) {
           global.user_id =  await AsyncStorage.getItem('@FoOps:user_id');
           global.user_email =  await AsyncStorage.getItem('@FoOps:user_email');
@@ -38,7 +51,7 @@ export default class Login extends React.Component {
           global.token =  await AsyncStorage.getItem('@FoOps:token');
           this.props.navigation.navigate('Home');
         }else{
-          console.warn('show_login');
+          // console.warn('show_login');
           this.setState({show_login:true},()=>this.ShowLogin());
         }
         const email = await AsyncStorage.getItem('@FoOps:email');

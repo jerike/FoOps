@@ -26,7 +26,7 @@ export default class MapScreen extends React.Component {
         setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta:0.005,longitudeDelta: 0.005},
         search_scooter:[],
         clickMarker:false,
-        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png",
+        avatar:global.avatar,
         selectMarker:null,
         work_area:'',
         all_work_area:[],

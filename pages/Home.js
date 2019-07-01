@@ -27,7 +27,7 @@ export default class Home extends React.Component {
         show_loading:false,
         modalVisible:false,
         jump2map:false,
-        avatar:"https://iconsgarden.com/cache/icon_256/icons/10-nguyendoan88/UKxUhl/preview.png"
+        avatar:global.avatar
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -51,9 +51,6 @@ export default class Home extends React.Component {
         this.get_scooter_status();
     }
     shouldComponentUpdate(nextProps, nextState){
-        console.warn(nextProps);
-        console.warn(nextState);
-        console.warn(this.state);
         return shallowCompare(this, nextProps, nextState);
     }   
     componentWillUpdate(nextProps,nextState){
