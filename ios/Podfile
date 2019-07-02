@@ -37,6 +37,8 @@ target 'FoOps' do
 
   pod 'react-native-webview', :path => '../node_modules/react-native-webview'
 
+  pod 'RNSVG', :path => '../node_modules/react-native-svg'
+
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|

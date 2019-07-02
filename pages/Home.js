@@ -3,7 +3,7 @@ import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
 import '../global.js';
 import styles from '../styles/home.style';
@@ -27,7 +27,7 @@ export default class Home extends React.Component {
         show_loading:false,
         modalVisible:false,
         jump2map:false,
-        avatar:global.avatar
+        
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -41,14 +41,15 @@ export default class Home extends React.Component {
     componentWillMount() {
         global.page = 'home';
         var scooter = [];
-        this.setState({ search:'',condition:[]});
-        if(this.props.navigation.state.params != undefined){
-            scooter = this.props.navigation.state.params.scooter;
-            this.setState({ scooter:scooter});
-        }else{
-            this.setState({ scooter:[]},()=>{this.get_scooter();});
-        }
-        this.get_scooter_status();
+        this.setState({ search:'',condition:[],avatar:global.avatar});
+
+
+        
+    }
+    componentDidMount(){
+        
+        this.getStorage();
+        setTimeout(()=>{this.get_scooter()},10);
     }
     shouldComponentUpdate(nextProps, nextState){
         return shallowCompare(this, nextProps, nextState);
@@ -72,21 +73,24 @@ export default class Home extends React.Component {
             }
         }
     }
-    componentDidMount(){
-        this.getStorage();
-
-
+    getScooterStorage = async () => {
+        try {
+            const value = await AsyncStorage.getItem('@FoOps:scooters');
+            if (value !== null) {
+                global.scooters = JSON.parse(value);
+                this.setState({all:global.scooters,scooter:global.scooters,open:true});
+            }
+           
+        } catch (error) {
+          console.warn(error);
+        }
     }
     getStorage = async () => {
         try {
-          const avatar = await AsyncStorage.getItem('@FoOps:avatar');
-          if (avatar !== null) {
-            this.setState({avatar:avatar});
-          }
-          const task = await AsyncStorage.getItem('@FoOps:task');
-          if (task !== null) {
-            global.task = task;
-          }
+            const task = await AsyncStorage.getItem('@FoOps:task');
+                if (task !== null) {
+                global.task = task;
+            }
         } catch (error) {
           console.warn(error);
         }
@@ -94,19 +98,22 @@ export default class Home extends React.Component {
     filter_scooter(scooter){
         this.setState({scooter:scooter});
     }
+    
     //取得電動車資訊
     get_scooter(){
+        console.warn(global.scooters);
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
-
-        if (this.state.all.length == 0) {
-            this.fetch_scooters();
+        
+        if (global.scooters == undefined) {
+            this.getScooterStorage();
         }else{
-            this.setState({scooter:this.state.all});
+            this.setState({all:global.scooters,scooter:global.scooter,open:true});
         }
     }
     fetch_scooters(){
+        console.warn('fetch?');
         var result = []
         fetch(global.API+'/scooter',{
           method: 'GET',
@@ -130,6 +137,8 @@ export default class Home extends React.Component {
         });
     }
     set_scooter_data(all_scooters){
+        global.scooters = all_scooters;
+        global.scooter = scooter;
         this.setState({ 
             all:all_scooters,
             scooter:all_scooters,
@@ -212,23 +221,7 @@ export default class Home extends React.Component {
         }
         this.setState({modalVisible: visible});
     }
-    //取得車況
-    get_scooter_status =()=>{
-        fetch(global.API+'/scooter/status',{
-          method: 'GET'
-        })
-        .then((response) => {
-          return response.json();
-        })
-        .then((json) => {
-          if(json.code == 1){
-            global.condition = JSON.stringify(json.data);
-            this.setState({ condition:json.data });
-          }else{
-            alert(json.reason);
-          }
-        });
-    }
+   
     get_status_type(type){
         var result = "";
         var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
@@ -253,7 +246,8 @@ export default class Home extends React.Component {
     }
     getConditions(id){
         var result = "";
-        this.state.condition.map(function(m, i){
+        var condition = JSON.parse(global.condition);
+        condition.map(function(m, i){
             if(parseInt(m.id) == parseInt(id)){
               var description = m.description;
               result = description;
@@ -271,7 +265,7 @@ export default class Home extends React.Component {
             credentials: 'include'
         }).then((response) => {
           this.setState({all: []});
-          this.get_scooter();
+          this.fetch_scooters();
         });
     }
     showDetail(sid){
@@ -282,6 +276,7 @@ export default class Home extends React.Component {
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter,open} = this.state;
+        
         var filter_option = {
             all:this.state.all,
             scooter:this.state.scooter,
@@ -339,8 +334,9 @@ export default class Home extends React.Component {
             }
             var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
             var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
-            var power_msg = show_power
+            var power_msg = show_power;
             var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
+
             return (
                 <TouchableOpacity key={i} onPress={() =>this.showDetail(m.id)}> 
                     <Card containerStyle={styles.cardContainerStyle} key={i} >
@@ -373,10 +369,7 @@ export default class Home extends React.Component {
                                 autoCorrect={true}  
                               />}
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
-              containerStyle={{
-                backgroundColor: '#ff5722',
-                justifyContent: 'space-around',
-              }}
+              containerStyle={styles.header}
             />
             <Filter filter_option={filter_option}/>
             <ButtonGroup
@@ -390,7 +383,7 @@ export default class Home extends React.Component {
             {show_loading &&(
               <View style={styles.loading}>
                 <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                <Text style={{color:'#fff'}}>讀取中，請稍候...</Text>
+                <Text style={{color:'#fff'}}>資料獲取中...</Text>
               </View>
             )}
 

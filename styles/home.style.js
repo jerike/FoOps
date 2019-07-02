@@ -74,4 +74,10 @@ export default StyleSheet.create({
         borderTopLeftRadius:5,
         borderTopRightRadius:5
     },
+    header:{
+        backgroundColor: '#ff5722',
+        justifyContent: 'space-around',
+        paddingTop:-25,
+        height:50
+    }
 });

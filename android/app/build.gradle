@@ -149,6 +149,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-svg')
     implementation project(':react-native-webview')
     implementation project(':react-native-action-sheet')
     implementation project(':react-native-image-picker')

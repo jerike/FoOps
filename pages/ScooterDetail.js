@@ -545,10 +545,7 @@ export default class ScooterDetail extends React.Component {
             <Header
               centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.dispatch(NavigationActions.back())}/></TouchableHighlight>}
-              containerStyle={{
-                backgroundColor: '#ff5722',
-                justifyContent: 'space-around'
-              }}
+              containerStyle={styles.header}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>
@@ -643,6 +640,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius:5,
     borderTopRightRadius:5
   },
+  header:{
+      backgroundColor: '#ff5722',
+      justifyContent: 'space-around',
+      paddingTop:-25,
+      height:50
+  }
 });
 
 

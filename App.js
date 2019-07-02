@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 import Logout from './pages/Logout';
+import Dashboard from './pages/Dashboard';
 import TimeOut from './pages/timeout';
 import { Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -31,6 +32,7 @@ const DrawerContent = (props) => (
       <Image source={require('./img/gokube-logo.png')} style={{width:150,height:36}} />
     </View>
     <View style={{alignItems: 'center',justifyContent: 'center',}}>
+      <Button title="導航頁"  type="clear" onPress={()=>props.navigation.navigate('Dashboard')}/>
       <DrawerItems {...props} />
     </View>
     <View style={{position:'absolute',bottom:0,left:0,width:'100%'}}>
@@ -53,8 +55,8 @@ const DrawerContent = (props) => (
 
 const HomeStack=createDrawerNavigator(
   {
-    Home: {screen:Home,path:'app/home',key:'show-home',navigationOptions: {drawerLabel: <Hidden />}},
-    Map:{screen: MapScreen,key:'show-map',navigationOptions: {drawerLabel: <Hidden />}},
+    Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
+    Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
     ScooterDetail:{screen: ScooterDetail,navigationOptions: {drawerLabel: <Hidden />}},
     TimeOut:{screen: TimeOut,navigationOptions: {drawerLabel: <Hidden />}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}
@@ -71,6 +73,7 @@ const App = createStackNavigator(
   {
     Login: {screen:Login},
     HomeStack:{screen:HomeStack}, 
+    Dashboard: {screen:Dashboard}
     
   },
   {

@@ -10,7 +10,7 @@ export default class Logout extends React.Component {
     this.removeStorage();
   }
   removeStorage = async () => {
-      let keys = ['@FoOps:token','@FoOps:user_id','@FoOps:user_email','@FoOps:user_givenName','@FoOps:avatar',];
+      let keys = ['@FoOps:token','@FoOps:user_id','@FoOps:user_givenName','@FoOps:avatar',];
       AsyncStorage.multiRemove(keys, (err) => {
           setTimeout(()=>{
             this.props.navigation.navigate('Login',{logout:true});

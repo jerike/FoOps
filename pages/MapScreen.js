@@ -268,7 +268,7 @@ export default class MapScreen extends React.Component {
       var nearScooter = [];
       var LatLng = {};
       var index = 0;
-      this.state.scooter.map(function(m,i){
+      this.props.navigation.getParam('scooter').map(function(m,i){
           var distance = this.GetDistance(lat,lng,m.location.lat,m.location.lng);
           distance = distance.toFixed(2);          
           if (distance < 0.1) {
@@ -390,8 +390,8 @@ export default class MapScreen extends React.Component {
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
-            latitudeDelta: 0.0005,
-            longitudeDelta: 0.0005
+            latitudeDelta: 0.0008,
+            longitudeDelta: 0.0008
         };
         this.setState({setCenter:r});
         // mapRef.animateToRegion(r);
@@ -421,6 +421,7 @@ export default class MapScreen extends React.Component {
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
 
         var markers = [];
+        console.warn(scooter);
         scooter.map(function(m,i){
 
             var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
@@ -438,17 +439,17 @@ export default class MapScreen extends React.Component {
               case "MAINTENANCE":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               case "RIDING":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'green'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'green'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
               default:
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
                 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} pinColor={isActive ? 'yellow' : 'tomato'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tomato'} onPress={(e) => {e.stopPropagation(); this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
               break;
             }
             markers.push(marker);
@@ -497,7 +498,7 @@ export default class MapScreen extends React.Component {
         return (
         <View style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
-              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
+              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
               centerComponent={<SearchBar
                                 placeholder="搜尋..."
                                 onChangeText={this.updateSearch}
@@ -509,10 +510,7 @@ export default class MapScreen extends React.Component {
                                 onClear={this.onClear}
                               />}
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
-              containerStyle={{
-                backgroundColor: '#ff5722',
-                justifyContent: 'space-around',
-              }}
+              containerStyle={styles.header}
             />
             <ButtonGroup
               onPress={this.updateIndex}
@@ -678,6 +676,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,  
+  },
+  header:{
+      backgroundColor: '#ff5722',
+      justifyContent: 'space-around',
+      paddingTop:-25,
+      height:50
   }
 });
 

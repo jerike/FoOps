@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   },
   row_view:{
     flexDirection:'row',
-    justifyContent:'flex-start',
+    justifyContent:'space-around',
     alignItems:'flex-start',
     flexWrap:'wrap',
     paddingLeft:20,

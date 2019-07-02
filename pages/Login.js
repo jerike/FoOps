@@ -28,7 +28,7 @@ export default class Login extends React.Component {
   componentWillUpdate(nextProps,nextState){
     if(nextProps.navigation.state.params != undefined){
         if(nextProps.navigation.state.params.logout){
-          this.setState({show_login:true});
+          this.setState({show_login:true},()=>this.ShowLogin());
         }
     }
   }
@@ -42,23 +42,20 @@ export default class Login extends React.Component {
   getStorage = async () => {
       try {
         const value = await AsyncStorage.getItem('@FoOps:token');
-        console.warn(value);
         if (value !== null) {
           global.user_id =  await AsyncStorage.getItem('@FoOps:user_id');
-          global.user_email =  await AsyncStorage.getItem('@FoOps:user_email');
           global.user_givenName =  await AsyncStorage.getItem('@FoOps:user_givenName');
           global.avatar =  await AsyncStorage.getItem('@FoOps:avatar');
-          global.token =  await AsyncStorage.getItem('@FoOps:token');
-          this.props.navigation.navigate('Home');
+          this.props.navigation.navigate('Dashboard');
         }else{
           // console.warn('show_login');
           this.setState({show_login:true},()=>this.ShowLogin());
         }
-        const email = await AsyncStorage.getItem('email');
+        const email = await AsyncStorage.getItem('@FoOps:email');
         if (email !== null) {
           this.setState({email:email,save_login:true});
         }
-        const pwd = await AsyncStorage.getItem('password');
+        const pwd = await AsyncStorage.getItem('@FoOps:password');
         if (pwd !== null) {
           this.setState({password:pwd});
         }
@@ -106,7 +103,7 @@ export default class Login extends React.Component {
         if(login){
           Vibration.vibrate(500);
           // this.setState({timeout:true});
-          this.props.navigation.navigate('Home');
+          this.props.navigation.navigate('Dashboard');
           this.setState({show_loading:false});
 
         }else{
@@ -119,21 +116,23 @@ export default class Login extends React.Component {
   setStorage = async () => {
     try {
       global.user_id =  this.state.user_id;
-      global.user_email =  this.state.user_email;
       global.user_givenName =  this.state.user_givenName;
       global.avatar =  this.state.avatar;
-      global.token =  this.state.token;
-      await AsyncStorage.setItem('@FoOps:user_id', this.state.user_id);
-      await AsyncStorage.setItem('@FoOps:user_email', this.state.user_email);
-      await AsyncStorage.setItem('@FoOps:user_givenName', this.state.user_givenName);
-      await AsyncStorage.setItem('@FoOps:avatar', this.state.avatar);
-      await AsyncStorage.setItem('@FoOps:token', this.state.token);
+      await AsyncStorage.multiSet([
+        ['@FoOps:token', this.state.token],
+        ['@FoOps:user_id', String(this.state.user_id)],
+        ['@FoOps:user_givenName', this.state.user_givenName],
+        ['@FoOps:avatar', this.state.avatar]
+      ]);
       if(this.state.save_login){
-        console.warn(await AsyncStorage.setItem('email', this.state.email));
-        await AsyncStorage.setItem('password', this.state.password);
+        await AsyncStorage.multiSet([
+          ['@FoOps:email', this.state.email],
+          ['@FoOps:password', this.state.password]
+        ]);
+        
       }else{
-        await AsyncStorage.removeItem('email');
-        await AsyncStorage.removeItem('password');
+        await AsyncStorage.removeItem('@FoOps:email');
+        await AsyncStorage.removeItem('@FoOps:password');
       }
     } catch (error) {
       console.warn(error);
