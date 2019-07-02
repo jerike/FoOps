@@ -79,5 +79,23 @@ export default StyleSheet.create({
         justifyContent: 'space-around',
         paddingTop:-25,
         height:50
-    }
+    },
+
+    circle:{
+       
+        marginRight:10,
+        alignItems:'center',
+        justifyContent:'center',
+        width: 50,
+        height:50,
+        backgroundColor:'#f76260',
+        borderColor:'green',
+        borderStyle:'solid',
+        borderRadius:25,
+        paddingBottom:2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,  
+    },
 });

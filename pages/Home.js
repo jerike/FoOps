@@ -395,6 +395,7 @@ export default class Home extends React.Component {
                 onRefresh={this._onRefresh}
               />
             }>
+                <View style={{backgroundColor:'#fff',justifyContent:'center',alignItems:'center',borderBottomWidth:1,borderBottomColor:'rgba(224, 224, 224,0.5)',}}><Text style={{color:'#f00',fontSize:11}}>最後更新時間：{global.reload_time}</Text></View>
                 {open ? items : []
                 }
             </ScrollView>

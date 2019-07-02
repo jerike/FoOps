@@ -167,6 +167,11 @@ export default class MapScreen extends React.Component {
           if(json.data.length == 0){
             this.props.navigation.navigate('TimeOut');
           }else{
+            global.scooters = json.data;
+            global.scooter = json.data;
+            var theTime = new Date();
+            var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+            global.reload_time = reload_time;
             this.setState({scooter:json.data});   
             this.setState({load_data:false});         
           }

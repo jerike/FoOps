@@ -17,7 +17,7 @@ import {
 export default class Dashboard extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { show_loading:true,scooter:[] };
+        this.state = { show_loading:true,scooter:[],load_data:false };
         this.setStorage=this.setStorage.bind(this);
     }
     componentWillMount() {
@@ -46,6 +46,7 @@ export default class Dashboard extends React.Component {
         }
     }
     fetch_scooters(){
+        this.setState({load_data:true});
         var result = []
         fetch(global.API+'/scooter',{
           method: 'GET',
@@ -61,7 +62,11 @@ export default class Dashboard extends React.Component {
         .then((json) => {
             global.scooters = json.data;
             global.scooter = json.data;
-            this.setState({scooter:json.data,show_loading:false},()=>{this.setStorage()});
+            var theTime = new Date();
+            var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+            global.reload_time = reload_time;
+            this.setState({reload_time:reload_time});
+            this.setState({scooter:json.data,show_loading:false,load_data:false},()=>{this.setStorage()});
                        
         });
     }
@@ -198,6 +203,22 @@ export default class Dashboard extends React.Component {
                 </View>
 
                 </ScrollView>
+                <View style={{width:'100%',marginBottom:10,marginLeft:10,flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
+                    <View style={styles.circle} >
+                       <TouchableOpacity onPress={()=>this.fetch_scooters()}>
+                        { this.state.load_data ?(
+                          <ActivityIndicator  color="#ffffff"  />
+                          ):
+                          (<Icon name="redo" size={20} color={'#ffffff'}/>)
+                        }
+                        
+                       </TouchableOpacity>
+                       
+                    </View>
+                    <View>
+                        <Text>{this.state.reload_time}</Text>
+                    </View>
+                </View>
             </SafeAreaView>
         );
     }
