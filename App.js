@@ -32,7 +32,6 @@ const DrawerContent = (props) => (
       <Image source={require('./img/gokube-logo.png')} style={{width:150,height:36}} />
     </View>
     <View style={{alignItems: 'center',justifyContent: 'center',}}>
-      <Button title="導航頁"  type="clear" onPress={()=>props.navigation.navigate('Dashboard')}/>
       <DrawerItems {...props} />
     </View>
     <View style={{position:'absolute',bottom:0,left:0,width:'100%'}}>
@@ -55,6 +54,7 @@ const DrawerContent = (props) => (
 
 const HomeStack=createDrawerNavigator(
   {
+    Dashboard: {screen:Dashboard,navigationOptions: { title: '導航頁'}},
     Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
     Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
     ScooterDetail:{screen: ScooterDetail,navigationOptions: {drawerLabel: <Hidden />}},
@@ -73,8 +73,6 @@ const App = createStackNavigator(
   {
     Login: {screen:Login},
     HomeStack:{screen:HomeStack}, 
-    Dashboard: {screen:Dashboard}
-    
   },
   {
     initialRouteName : 'Login',

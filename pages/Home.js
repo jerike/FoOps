@@ -101,7 +101,6 @@ export default class Home extends React.Component {
     
     //取得電動車資訊
     get_scooter(){
-        console.warn(global.scooters);
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
@@ -278,8 +277,6 @@ export default class Home extends React.Component {
         const {search,selectedIndex,scooter,open} = this.state;
         
         var filter_option = {
-            all:this.state.all,
-            scooter:this.state.scooter,
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
             filter_scooter:this.filter_scooter

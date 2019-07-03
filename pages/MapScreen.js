@@ -403,7 +403,7 @@ export default class MapScreen extends React.Component {
     }
     render() {
         const {search,selectedIndex,toSearch,clickMarker,geofence} = this.state;
-        var get_props_scooter = this.props.navigation.getParam('scooter');
+        var get_props_scooter = global.scooter;
         var scooter_changed = this.props.navigation.getParam('changed');
         var scooter = [];
         var set_polygon = this.state.set_polygon;
@@ -499,9 +499,18 @@ export default class MapScreen extends React.Component {
             
             
         }
-        // console.warn(setPolyPath);
+        
+        var filter_option = {
+            setModalVisible:this.setModalVisible,
+            screen:this.state.screen,
+            changeScreen:this.changeScreen,
+            search:this.state.search,
+            updateSearch:this.updateSearch,
+            save_scooter:this.state.save_scooter
+        }
+
         return (
-        <View style={{flex: 1, backgroundColor: '#ccc'}}>
+        <SafeAreaView style={{flex: 1, backgroundColor: '#ccc'}}>
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
               centerComponent={<SearchBar
@@ -517,6 +526,7 @@ export default class MapScreen extends React.Component {
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={styles.header}
             />
+            <Filter filter_option={filter_option}/>
             <ButtonGroup
               onPress={this.updateIndex}
               selectedIndex={selectedIndex}
@@ -582,7 +592,7 @@ export default class MapScreen extends React.Component {
                   
                </TouchableOpacity>
              </View>
-        </View>
+        </SafeAreaView>
          
         );
     }

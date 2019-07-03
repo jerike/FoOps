@@ -49,7 +49,7 @@ export default class Filter extends React.Component {
       this.filter_scooter_by_rent_days=this.filter_scooter_by_rent_days.bind(this);
     }
     componentWillMount(){
-      this.setState({scooter:this.props.filter_option.scooter});
+      this.setState({scooter:global.scooter});
     }
     componentDidMount(){
       // this.getStorage();
@@ -319,7 +319,7 @@ export default class Filter extends React.Component {
     }
     
     get_scooter(){
-      var all_scooters = this.props.filter_option.all;
+      var all_scooters = global.scooters;
       this.setState({scooter:all_scooters});
       this.props.filter_option.filter_scooter(all_scooters);
       this.setState({show_loading:false});
@@ -328,8 +328,8 @@ export default class Filter extends React.Component {
         const {filter_option} = this.props;
         const { selectedIndex } = this.state;
         const { show_loading } = this;
-        var total = (filter_option.scooter == undefined) ? 0 : filter_option.scooter.length;
-        var all = filter_option.all.length;
+        var total = (global.scooter == undefined) ? 0 : global.scooter.length;
+        var all = global.scooters.length;
         var work_area_btns = []
         work_area.map(function(m,i){
             var btn = <Button

@@ -38,6 +38,7 @@ export default class Dashboard extends React.Component {
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
         this.setState({reload_time:reload_time});
+        global.reload_time = reload_time;
 
         if (global.scooters == undefined) {
             this.fetch_scooters();
@@ -62,8 +63,7 @@ export default class Dashboard extends React.Component {
         .then((json) => {
             global.scooters = json.data;
             global.scooter = json.data;
-            var theTime = new Date();
-            var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+            
             global.reload_time = reload_time;
             this.setState({reload_time:reload_time});
             this.setState({scooter:json.data,show_loading:false,load_data:false},()=>{this.setStorage()});
