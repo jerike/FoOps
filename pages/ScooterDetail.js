@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS,ScrollView,ActivityIndicator } from 'react-native';
+import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS,ScrollView,ActivityIndicator,BackHandler } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -54,6 +54,7 @@ export default class ScooterDetail extends React.Component {
     }
     componentDidMount(){
       this.getStorage().done();
+
     }
     getStorage = async () => {
         try {

@@ -32,7 +32,8 @@ export default class Filter extends React.Component {
         powerSliderValue: [0, 100],
         daysSliderValue:[0,100],
         task:"",
-        sel_task:false
+        sel_task:false,
+        scooter:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.show_loading = this.show_loading.bind(this);
@@ -47,12 +48,15 @@ export default class Filter extends React.Component {
       this.get_scooter_by_status=this.get_scooter_by_status.bind(this);
       this.filter_scooter_by_power=this.filter_scooter_by_power.bind(this);
       this.filter_scooter_by_rent_days=this.filter_scooter_by_rent_days.bind(this);
+      this.after_reload_scooter=this.after_reload_scooter.bind(this);
     }
     componentWillMount(){
-      this.setState({scooter:global.scooter});
+      // this.setState({scooter:global.scooters});
     }
     componentDidMount(){
       // this.getStorage();
+      console.warn(global.scooters);
+      this.setState({scooter:global.scooters});
     }
     updateIndex (selectedIndex) {
       this.setState({selectedIndex})
@@ -61,16 +65,16 @@ export default class Filter extends React.Component {
       this.setState({show_loading:true});
     }
 
-    componentWillUpdate(nextProps,nextState){
-      if(nextProps.filter_option.scooter != this.props.filter_option.scooter){
-          this.setState({scooter:nextProps.filter_option.scooter});
-      }
-      if(nextProps.filter_option.modalVisible == true){
-        setTimeout(()=>{
-          this.setState({rangeSlide:true});
-        },1000)
-      }
-    }
+    // componentWillUpdate(nextProps,nextState){
+    //   if(nextProps.filter_option.scooter != this.props.filter_option.scooter){
+    //       this.setState({scooter:nextProps.filter_option.scooter});
+    //   }
+    //   if(nextProps.filter_option.modalVisible == true){
+    //     setTimeout(()=>{
+    //       this.setState({rangeSlide:true});
+    //     },1000)
+    //   }
+    // }
     onChangeTask(index){
       this.show_loading();
         this.setState({sel_task:index}, () => {
@@ -173,7 +177,6 @@ export default class Filter extends React.Component {
 
     }
     get_scooter_in_work_area(){
-
         var area = this.state.sel_work_area;
         var result = [];
         if(area != null){
@@ -190,6 +193,7 @@ export default class Filter extends React.Component {
                       result.push(m);
                     }
                 }.bind(this));
+                console.warn(result);
                 this.setState({ scooter:result });
             });
         }
@@ -304,7 +308,7 @@ export default class Filter extends React.Component {
     }
     after_reload_scooter(){
       var promise1 = new Promise((resolve,reject)=>{
-        this.setState({scooter:this.props.filter_option.all});
+        this.setState({scooter:global.scooters});
         resolve(0);
       });
       promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_task();setTimeout(()=>{resolve(1);},50)}))
@@ -313,7 +317,7 @@ export default class Filter extends React.Component {
               .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(6);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
+              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});console.warn(this.state.scooter);this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
         
 
     }
@@ -328,7 +332,7 @@ export default class Filter extends React.Component {
         const {filter_option} = this.props;
         const { selectedIndex } = this.state;
         const { show_loading } = this;
-        var total = (global.scooter == undefined) ? 0 : global.scooter.length;
+        var total = (this.state.scooter == undefined) ? 0 : this.state.scooter.length;
         var all = global.scooters.length;
         var work_area_btns = []
         work_area.map(function(m,i){
@@ -415,7 +419,7 @@ export default class Filter extends React.Component {
               <SafeAreaView style={{position:'relative',flex: 1,justifyContent: "center", alignItems: "center", backgroundColor: '#fff'}}>
                   <View style={{width:'100%',justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
                      <Icon name='close' size={30}  onPress={() => {
-                        filter_option.setModalVisible(!filter_option.modalVisible);
+                        filter_option.setModalVisible(false);
                       }} />
                   </View>
                   

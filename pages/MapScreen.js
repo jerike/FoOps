@@ -31,9 +31,12 @@ export default class MapScreen extends React.Component {
         work_area:'',
         all_work_area:[],
         load_data:false,
+        modalVisible:false,
+        search:""
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
+      this.setModalVisible=this.setModalVisible.bind(this);
       this.CloseCard=this.CloseCard.bind(this);
       this.onClear=this.onClear.bind(this);
       this.getFirstLatLng=this.getFirstLatLng.bind(this);
@@ -41,12 +44,12 @@ export default class MapScreen extends React.Component {
       this.getStorage=this.getStorage.bind(this);
       this.reload_all_scooter=this.reload_all_scooter.bind(this);
       this.fetch_scooters=this.fetch_scooters.bind(this);
+      this.filter_scooter=this.filter_scooter.bind(this);
     }
     componentWillMount() {
-        var scooter = this.props.navigation.state.params.scooter;
-        var search = this.props.navigation.state.params.filter_option.search;
-        var save_scooter = this.props.navigation.state.params.filter_option.save_scooter;
-        this.setState({search:'',modalVisible: false,save_scooter:scooter,scooter:scooter,condition:[],search:search },()=>{
+        var scooter = global.scooter;
+        var search = global.search;
+        this.setState({scooter:scooter,condition:[],search:search },()=>{
             if(search != ""){this.updateSearch(search);}
         });
         this.get_scooter_status();
@@ -121,12 +124,11 @@ export default class MapScreen extends React.Component {
     updateIndex (selectedIndex) {
         if(selectedIndex == 0){
           global.page = "map"; 
-          this.props.navigation.state.params.filter_option.setModalVisible(true);
+          this.setModalVisible(true);
           this.CloseCard();
         }else{
             if(selectedIndex == 1){
                 this.props.navigation.navigate("Home",{scooter:this.state.scooter});
-                this.props.navigation.state.params.filter_option.changeScreen('Home');
             }else{
                 this.props.navigation.navigate("Map");
             }
@@ -134,11 +136,12 @@ export default class MapScreen extends React.Component {
         }
     }
     updateSearch = search => {
-      this.props.navigation.state.params.filter_option.updateSearch(search);
+      global.search = search;
       this.setState({toSearch:true});
       this.setState({search:search},()=>this.filter_scooter_by_search());
     }
     onClear(){
+      global.search = "";
       this.setState({toSearch:false});
     }
     reload_all_scooter(){
@@ -356,6 +359,7 @@ export default class MapScreen extends React.Component {
       this.setState({setCenter:latlng});
     }
     filter_scooter_by_search(){
+      // console.warn(this.state.search);
         if(this.state.search !=""){
             var result = [];
             
@@ -401,9 +405,17 @@ export default class MapScreen extends React.Component {
         this.setState({setCenter:r});
         // mapRef.animateToRegion(r);
     }
+    filter_scooter(scooter){
+        this.setState({scooter:scooter});
+    }
+    setModalVisible(visible) {
+        if(global.page=="map"){
+            this.updateIndex (1);
+        }
+        this.setState({modalVisible: visible});
+    }
     render() {
         const {search,selectedIndex,toSearch,clickMarker,geofence} = this.state;
-        var get_props_scooter = global.scooter;
         var scooter_changed = this.props.navigation.getParam('changed');
         var scooter = [];
         var set_polygon = this.state.set_polygon;
@@ -412,7 +424,7 @@ export default class MapScreen extends React.Component {
               scooter = this.state.search_scooter;
             }
         }else{
-          scooter = get_props_scooter;
+          scooter = this.state.scooter;
         }
 
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
@@ -430,7 +442,7 @@ export default class MapScreen extends React.Component {
         scooter.map(function(m,i){
 
             var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
-            if(!clickMarker && scooter_changed && t == 0 && i === 0){
+            if(!clickMarker && t == 0 && i === 0){
               t++;
               setTimeout(()=>{
                 this.getFirstLatLng(latlng);
@@ -501,12 +513,9 @@ export default class MapScreen extends React.Component {
         }
         
         var filter_option = {
+            modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
-            screen:this.state.screen,
-            changeScreen:this.changeScreen,
-            search:this.state.search,
-            updateSearch:this.updateSearch,
-            save_scooter:this.state.save_scooter
+            filter_scooter:this.filter_scooter
         }
 
         return (

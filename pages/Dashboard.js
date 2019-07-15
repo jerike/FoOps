@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { TextInput, View,StyleSheet,TouchableOpacity,Alert,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView } from 'react-native';
+import { TextInput, View,StyleSheet,TouchableOpacity,Alert,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,Platform} from 'react-native';
 import { Text,Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -19,10 +19,23 @@ export default class Dashboard extends React.Component {
         super(props);
         this.state = { show_loading:true,scooter:[],load_data:false };
         this.setStorage=this.setStorage.bind(this);
+        this.onBackClicked = this._onBackClicked.bind(this);
     }
     componentWillMount() {
+        global.search = '';
         this.getStorage().done();
+        if (Platform.OS === 'android') {  
+            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
+        } 
     }
+    componentWillUnmount() {
+        if (Platform.OS === 'android') {
+           BackHandler.removeEventListener('hardwareBackPress',()=>{});
+        }
+    }
+    _onBackClicked(){
+        return true;
+      } 
     componentDidMount() {
         this.get_scooter();
         this.get_scooter_status();

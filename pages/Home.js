@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity,BackHandler,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
@@ -42,14 +42,14 @@ export default class Home extends React.Component {
         global.page = 'home';
         var scooter = [];
         this.setState({ search:'',condition:[],avatar:global.avatar});
-
-
         
     }
     componentDidMount(){
-        
         this.getStorage();
         setTimeout(()=>{this.get_scooter()},10);
+        if (Platform.OS === 'android') {
+           BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
+        }
     }
     shouldComponentUpdate(nextProps, nextState){
         return shallowCompare(this, nextProps, nextState);
@@ -78,7 +78,7 @@ export default class Home extends React.Component {
             const value = await AsyncStorage.getItem('@FoOps:scooters');
             if (value !== null) {
                 global.scooters = JSON.parse(value);
-                this.setState({all:global.scooters,scooter:global.scooters,open:true});
+                this.setState({scooter:global.scooters,open:true});
             }
            
         } catch (error) {
@@ -96,6 +96,7 @@ export default class Home extends React.Component {
         }
     }
     filter_scooter(scooter){
+        global.scooter = scooter;
         this.setState({scooter:scooter});
     }
     
@@ -108,7 +109,7 @@ export default class Home extends React.Component {
         if (global.scooters == undefined) {
             this.getScooterStorage();
         }else{
-            this.setState({all:global.scooters,scooter:global.scooter,open:true});
+            this.setState({scooter:global.scooter,open:true});
         }
     }
     fetch_scooters(){
@@ -139,7 +140,6 @@ export default class Home extends React.Component {
         global.scooters = all_scooters;
         global.scooter = scooter;
         this.setState({ 
-            all:all_scooters,
             scooter:all_scooters,
             save_scooter:all_scooters,
             open:true
@@ -185,19 +185,12 @@ export default class Home extends React.Component {
             this.setModalVisible(true);
         }else{
             this.setState({screen:'Map'});
-            var filter_option = {
-                setModalVisible:this.setModalVisible,
-                screen:this.state.screen,
-                changeScreen:this.changeScreen,
-                search:this.state.search,
-                updateSearch:this.updateSearch,
-                save_scooter:this.state.save_scooter
-            }
-            this.props.navigation.navigate("Map",{scooter:this.state.scooter,filter_option});
+            this.props.navigation.navigate("Map");
             
         }
     }
     onClear(){
+        global.search = "";
         this.setState({search:""});
     }
     updateSearch(search){  
@@ -205,7 +198,7 @@ export default class Home extends React.Component {
         setTimeout(()=>{
           this.filter_scooter_by_search();
         },100);
-
+        global.search = search;
         const navigateAction = NavigationActions.navigate({
           routeName: this.state.screen,
           params: {search:search},
@@ -275,7 +268,6 @@ export default class Home extends React.Component {
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
         const {search,selectedIndex,scooter,open} = this.state;
-        
         var filter_option = {
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
