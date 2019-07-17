@@ -39,6 +39,9 @@ target 'FoOps' do
 
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
+
+  pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
+
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|

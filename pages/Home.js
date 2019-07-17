@@ -27,7 +27,7 @@ export default class Home extends React.Component {
         show_loading:false,
         modalVisible:false,
         jump2map:false,
-        
+        toSearch:false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -37,9 +37,10 @@ export default class Home extends React.Component {
       this.updateSearch=this.updateSearch.bind(this);
       this.filter_scooter=this.filter_scooter.bind(this);
       this.getStorage=this.getStorage.bind(this);
+      this.filter_scooter_by_search=this.filter_scooter_by_search.bind(this);
     }
     componentWillMount() {
-        global.page = 'home';
+        global.page = 'Home';
         var scooter = [];
         this.setState({ search:'',condition:[],avatar:global.avatar});
         
@@ -55,23 +56,23 @@ export default class Home extends React.Component {
         return shallowCompare(this, nextProps, nextState);
     }   
     componentWillUpdate(nextProps,nextState){
-        if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
-            const navigateAction = NavigationActions.navigate({
-              routeName: this.state.screen,
-              params: {scooter:nextState.scooter,changed:true},
-              action: NavigationActions.navigate({ routeName: this.state.screen})
-            })
-            this.props.navigation.dispatch(navigateAction);
-        }
+        // if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
+        //     const navigateAction = NavigationActions.navigate({
+        //       routeName: global.page,
+        //       params: {scooter:nextState.scooter,changed:true},
+        //       action: NavigationActions.navigate({ routeName: global.page})
+        //     })
+        //     this.props.navigation.dispatch(navigateAction);
+        // }
         
-        if(nextProps.navigation.state.params != undefined){
-            if(nextProps.navigation.state.params.jump2map !=undefined){
-                jump2map = nextProps.navigation.state.params.jump2map;
-                if(jump2map){
-                    this.updateIndex(1);
-                }
-            }
-        }
+        // if(nextProps.navigation.state.params != undefined){
+        //     if(nextProps.navigation.state.params.jump2map !=undefined){
+        //         jump2map = nextProps.navigation.state.params.jump2map;
+        //         if(jump2map){
+        //             this.updateIndex(1);
+        //         }
+        //     }
+        // }
     }
     getScooterStorage = async () => {
         try {
@@ -113,7 +114,6 @@ export default class Home extends React.Component {
         }
     }
     fetch_scooters(){
-        console.warn('fetch?');
         var result = []
         fetch(global.API+'/scooter',{
           method: 'GET',
@@ -138,7 +138,7 @@ export default class Home extends React.Component {
     }
     set_scooter_data(all_scooters){
         global.scooters = all_scooters;
-        global.scooter = scooter;
+        global.scooter = all_scooters;
         this.setState({ 
             scooter:all_scooters,
             save_scooter:all_scooters,
@@ -159,11 +159,10 @@ export default class Home extends React.Component {
       return create_date;
     }
     filter_scooter_by_search(){
-
         if(this.state.search !=""){
             var result = [];
             
-            this.state.scooter.map(function(m, i){
+            global.scooter.map(function(m, i){
                 if(m.plate.indexOf(this.state.search) != -1){
                   result.push(m);
                 }
@@ -171,7 +170,7 @@ export default class Home extends React.Component {
             }.bind(this));
             this.setState({ scooter:result });
         }else{
-            this.setState({scooter : this.state.save_scooter});
+            this.setState({scooter : global.scooter});
         }
         this.setState({show_loading:false});
     }
@@ -181,7 +180,7 @@ export default class Home extends React.Component {
     updateIndex (selectedIndex) {
 
         if(selectedIndex == 0){
-            global.page = "home";
+            global.page = "Home";
             this.setModalVisible(true);
         }else{
             this.setState({screen:'Map'});
@@ -191,24 +190,19 @@ export default class Home extends React.Component {
     }
     onClear(){
         global.search = "";
-        this.setState({search:""});
+        this.setState({search:"",toSearch:false});
     }
     updateSearch(search){  
-        this.setState({search:search,show_loading:true});
+        this.setState({search:search,show_loading:true,toSearch:true});
         setTimeout(()=>{
-          this.filter_scooter_by_search();
-        },100);
+            this.filter_scooter_by_search();
+        },10);
         global.search = search;
-        const navigateAction = NavigationActions.navigate({
-          routeName: this.state.screen,
-          params: {search:search},
-          action: NavigationActions.navigate({ routeName: this.state.screen})
-        });
-        this.props.navigation.dispatch(navigateAction);
+        
 
     }
     setModalVisible(visible) {
-        if(global.page=="map"){
+        if(global.page=="Map"){
             this.updateIndex (1);
         }
         this.setState({modalVisible: visible});
@@ -238,7 +232,7 @@ export default class Home extends React.Component {
     }
     getConditions(id){
         var result = "";
-        var condition = JSON.parse(global.condition);
+        var condition = global.condition;
         condition.map(function(m, i){
             if(parseInt(m.id) == parseInt(id)){
               var description = m.description;
@@ -267,7 +261,18 @@ export default class Home extends React.Component {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        const {search,selectedIndex,scooter,open} = this.state;
+        const {selectedIndex,open,toSearch} = this.state;
+        var scooter = this.state.scooter;
+        var search = global.search;
+        // if(toSearch){
+        //     if(search == ""){
+        //         this.setState({toSearch:false});
+        //         this.setState({scooter:global.scooter});
+        //     }
+        // }
+        if(this.state.search != search){
+            this.updateSearch(search);
+        }
         var filter_option = {
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
@@ -384,10 +389,12 @@ export default class Home extends React.Component {
                 onRefresh={this._onRefresh}
               />
             }>
-                <View style={{backgroundColor:'#fff',justifyContent:'center',alignItems:'center',borderBottomWidth:1,borderBottomColor:'rgba(224, 224, 224,0.5)',}}><Text style={{color:'#f00',fontSize:11}}>最後更新時間：{global.reload_time}</Text></View>
                 {open ? items : []
                 }
             </ScrollView>
+            <View style={{position:'absolute',bottom:0,right:0,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+               <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+             </View>
         </SafeAreaView>
          
         );

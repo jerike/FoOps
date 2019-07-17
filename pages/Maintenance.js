@@ -20,7 +20,7 @@ export default class Maintenance extends React.Component {
         }
     }
     componentWillMount() {
-        this.setState({condition:JSON.parse(global.condition)});
+        this.setState({condition:global.condition});
     }
     
     pad(number){ return (number < 10 ? '0' : '') + number }

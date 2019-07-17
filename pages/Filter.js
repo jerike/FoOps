@@ -55,7 +55,6 @@ export default class Filter extends React.Component {
     }
     componentDidMount(){
       // this.getStorage();
-      console.warn(global.scooters);
       this.setState({scooter:global.scooters});
     }
     updateIndex (selectedIndex) {
@@ -193,7 +192,6 @@ export default class Filter extends React.Component {
                       result.push(m);
                     }
                 }.bind(this));
-                console.warn(result);
                 this.setState({ scooter:result });
             });
         }
@@ -317,7 +315,7 @@ export default class Filter extends React.Component {
               .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(6);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});console.warn(this.state.scooter);this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
+              .then(value=>new Promise((resolve,reject)=>{this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
         
 
     }

@@ -2,33 +2,15 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,PixelRatio,TouchableOpacity,TextInput,Picker,ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBox } from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
-import ImagePicker from 'react-native-image-picker';
-
+import ActionSheet from 'react-native-action-sheet';
+import ImagePicker from 'react-native-image-crop-picker';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 
 var t = 0;
-const options = {
-    imageCount: 4,             
-    isRecordSelected: false,   
-    isCamera: true,            
-    isCrop: false,             
-    maxWidth: 800,    
-    maxHeight: 800,    
-    isGif: false,              
-    showCropCircle: false,     
-    showCropFrame: false,       
-    showCropGrid: false,       
-    quality: 0.6,               
-    enableBase64: true,  
-    cancelButtonTitle:'取消',
-    takePhotoButtonTitle:'拍照',
-    chooseFromLibraryButtonTitle:'從相簿選擇',
-    location:"",
-    operator:""
-};
+
 export default class Violation extends React.Component {
     constructor () {
         super()
@@ -41,13 +23,17 @@ export default class Violation extends React.Component {
             avatarSource4: null,
             select_type:"",
             select_subtype:"",
+            hit_position:false,
             MainCate: ['請選擇','違規停車（巡查）','違規停車（檢舉）','雙載（巡查）','雙載（檢舉）','危險駕駛（巡查）','危險駕駛（檢舉）','營運範圍外還車','車輛損壞賠償'],
             SubCate:["禁止臨時停車處所停車。","彎道、陡坡、狹路、槽化線、交通島或道路修理地段停車。","在機場、車站、碼頭、學校、娛樂、展覽、競技、市場、或其他公共場所出、入口或消防栓之前停車。","在設有禁止停車標誌、標線之處所停車。","在顯有妨礙其他人、車通行處所停車。","不依順行方向，或不緊靠道路右側，或併排停車，或單行道不緊靠路邊停車。","停車時間、位置、方式、車種不依規定。","於身心障礙專用停車位違規停車。","還車時停放私人區域"]
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
+        this.SelectOperation=this.SelectOperation.bind(this);
         this.send_violation=this.send_violation.bind(this);
     }
-
+    componentWillMount(){
+      // this.getPosition();
+    }
     
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -56,22 +42,10 @@ export default class Violation extends React.Component {
       return create_date;
     }
     send_violation(){
-        this.setState({show_loading:true});
+        // this.setState({show_loading:true});
         var msg = [];
         var photo_count = 0;
-        if(this.state.avatarSource1 !=null){
-            photo_count++;
-        }
-        if(this.state.avatarSource2 !=null){
-            photo_count++;
-        }
-        if(this.state.avatarSource3 !=null){
-            photo_count++;
-        }
-        if(this.state.avatarSource4 !=null){
-            photo_count++;
-        }
-        if(photo_count < 2){
+        if(this.state.photos.length < 2){
           msg.push('請上傳2~4張照片');
         }
         if(this.state.select_type == ""){
@@ -91,11 +65,16 @@ export default class Violation extends React.Component {
             formData.append("type", this.state.select_type);
             formData.append("subtype", this.state.select_subtype);
             formData.append("location", this.state.location);
-            formData.append("photo1", this.state.avatarSource1);
-            formData.append("photo2", this.state.avatarSource2);
-            formData.append("photo3", this.state.avatarSource3);
-            formData.append("photo4", this.state.avatarSource4);
+            for (var i = 0; i < 4; i++) {
+              var photo = "";
+              if(this.state.photos[i] != undefined){
+                photo = 'data:image/jpeg;base64,' + this.state.photos[i].data;
+              }
+              formData.append("photo"+(i+1),photo);
+            }
+           
             formData.append("operator", global.user_givenName);
+            // console.warn(formData);
             fetch(global.API+'/scooter/violation',{
               method: 'POST',
               mode: 'cors',
@@ -117,44 +96,73 @@ export default class Violation extends React.Component {
         }
 
     }
-    selectPhotoTapped(index) {
-      ImagePicker.showImagePicker(options, (response) => {
+    SelectOperation(){
+      var BUTTONS = [
+        '開啟相機',
+        '從相簿選擇',
+        '取消',
+      ];
 
-        if (response.didCancel) {
-          console.log('User cancelled photo picker');
-        } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
-        } else if (response.customButton) {
-          console.log('User tapped custom button: ', response.customButton);
-        } else {
-          let source = 'data:image/jpeg;base64,' + response.data;
-          switch(index){
-            case 1:
-              this.setState({ avatarSource1: source});
-            break;
-            case 2:
-              this.setState({ avatarSource2: source});
-            break;
-            case 3:
-              this.setState({ avatarSource3: source});
-            break;
-            case 4:
-              this.setState({ avatarSource4: source});
-            break;
-          }
-          
+      var DESTRUCTIVE_INDEX = 1;
+      var CANCEL_INDEX = 2;
+      ActionSheet.showActionSheetWithOptions({
+        title:'拍照/上傳',
+        options: BUTTONS,
+        cancelButtonIndex: CANCEL_INDEX,
+        destructiveButtonIndex: DESTRUCTIVE_INDEX,
+        tintColor: '#ff5722'
+      },
+      (buttonIndex) => {
+        switch(buttonIndex){
+          case 0:
+            this.selectPhotoTapped('camera');
+          break;
+          case 1:
+            this.selectPhotoTapped('album');
+          break;
         }
       });
     }
+    selectPhotoTapped(type) {
+      if(type == "album"){
+        ImagePicker.openPicker({
+          compressImageMaxWidth: 800,
+          compressImageMaxHeight: 800,
+          minFiles:2,
+          maxFiles:4,
+          multiple: true,
+          includeBase64:true,
+          compressImageQuality:0.6,
+          forceJpg:true
+        }).then(image => {
+          if(image.length > 0){
+            if(this.state.photos.length > 0){
+              var photos = this.state.photos;
+              this.setState({photos:photos.concat(image)});
+            }else{
+              this.setState({photos:image});
+            }
+          }
+        });
+      }else{
+        ImagePicker.openCamera({
+          compressImageMaxWidth: 800,
+          compressImageMaxHeight: 800,
+          includeBase64:true,
+          compressImageQuality:0.6,
+          forceJpg:true
+        }).then(image => {
+          this.setState({photos:this.state.photos.concat(image)});
+        });
+      }
+    }
     clearData(){
       this.setState({ 
-        avatarSource1: null,
-        avatarSource2: null,
-        avatarSource3: null,
-        avatarSource4: null,
+        photos: [],
         location:"",
         select_type:"",
         select_subtype:"",
+        hit_position:false,
       });
     }
     PickerMain(itemIndex,itemValue){
@@ -168,8 +176,54 @@ export default class Violation extends React.Component {
     PickerSub(itemValue){
         this.setState({select_subtype: itemValue});
     }
+    getPosition(){
+      navigator.geolocation.getCurrentPosition(
+        (position: any) => {
+          const positionData: any = position.coords;
+          var latlng = positionData.latitude+","+positionData.longitude;
+          fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latlng+"&language=zh-TW&key="+global.key,{
+             method: 'GET',
+          })
+          .then((response) => response.json())
+          .then((json)=> {
+            this.setState({hit_position:true});
+            if(json.results.length > 0){
+              if(json.results.length == 1){
+                this.setState({location:json.results[0].formatted_address});  
+              }else{
+                this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
+              }
+            }
+          });
+        },
+        (error: any) => {
+          console.warn('失敗：' + JSON.stringify(error.message))
+        }, {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 1000
+        }
+      );
+
+    }
     render() {
         const {violation_option} = this.props;
+
+        var photos = this.state.photos.map(function(m,i){
+            if(i <= 3){
+              let source = 'data:image/jpeg;base64,' + m.data;
+              return (<View
+                      style={[
+                        styles.avatar,
+                        styles.avatarContainer,
+                      ]}
+                      key={"photo"+i}
+                    >
+                      <Image style={styles.avatar} source={{uri: source}} />
+                    </View>
+              );
+            }
+        })
         return (
             <Modal
               animationType="slide"
@@ -186,91 +240,53 @@ export default class Violation extends React.Component {
                         </View>
                     </View>
                   )}
-                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
-                     <Icon name='close' size={30}  onPress={() => {
+                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                     <Icon name='times-circle' size={30}  onPress={() => {
                         violation_option.onClose('violation_modal');this.clearData();
                       }} />
                   </View>
                     <View style={{justifyContent:'center',alignItems:'center'}}><Text>📷 拍照/上傳 (請上傳2~4張)</Text></View>
-                    <View style={{flexDirection:'row',justifyContent: "space-between",alignItems: "flex-start",marginTop:10}}>
-                        <TouchableOpacity onPress={()=>this.selectPhotoTapped(1)}>
-                          <View
-                            style={[
+                    <View style={{flexDirection:'row',justifyContent: "space-around",alignItems: "flex-start",marginTop:10}}>
+                        
+                        {photos}
+                        {this.state.photos.length < 4 && (
+                          <TouchableOpacity onPress={()=>this.SelectOperation()}>
+                            <View style={[
                               styles.avatar,
                               styles.avatarContainer,
-                            ]}
-                          >
-                            {this.state.avatarSource1 === null ? (
-                              <Text style={{color:'#000',}}>+</Text>
-                            ) : (
-                              <Image style={styles.avatar} source={{uri: this.state.avatarSource1}} />
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={()=>this.selectPhotoTapped(2)}>
-                          <View
-                            style={[
-                              styles.avatar,
-                              styles.avatarContainer,
-                            ]}
-                          >
-                            {this.state.avatarSource2 === null ? (
-                              <Text style={{color:'#000'}}>+</Text>
-                            ) : (
-                              <Image style={styles.avatar} source={{uri:this.state.avatarSource2}} />
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={()=>this.selectPhotoTapped(3)}>
-                          <View
-                            style={[
-                              styles.avatar,
-                              styles.avatarContainer,
-                            ]}
-                          >
-                            {this.state.avatarSource3 === null ? (
-                              <Text style={{color:'#000'}}>+</Text>
-                            ) : (
-                              <Image style={styles.avatar} source={{uri: this.state.avatarSource3}} />
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={()=>this.selectPhotoTapped(4)}>
-                          <View
-                            style={[
-                              styles.avatar,
-                              styles.avatarContainer
-                            ]}
-                          >
-                            {this.state.avatarSource4 === null ? (
-                              <Text style={{color:'#000'}}>+</Text>
-                            ) : (
-                              <Image style={styles.avatar} source={{uri: this.state.avatarSource4}} />
-                            )}
-                          </View>
-                        </TouchableOpacity>
+                            ]}>
+                                <Text>+</Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
                       </View>
-                    <View style={{padding:30}}>
+                    <View style={{paddingLeft:30,paddingRight:30,paddingTop:10,paddingBottom:10}}>
                       <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}><Text>📌 地點</Text></View>
-                      <TextInput
-                        editable = {true}
-                        multiline = {true}
-                        numberOfLines = {4}
-                        onChangeText={(location) => this.setState({location})}
-                        value={this.state.location}
-                        placeholder="請描述發生地點"
-                        style={{height: 80, borderColor: '#ccc', borderWidth: 1,}}
-                      />
+                        <TextInput
+                          editable = {true}
+                          multiline = {true}
+                          numberOfLines = {5}
+                          onChangeText={(location) => this.setState({location})}
+                          value={this.state.location}
+                          placeholder="請描述發生地點"
+                          style={{height: 100, borderColor: '#ccc', borderWidth: 1,textAlign:'left',textAlignVertical: 'top',fontSize:12}}
+                        />
+                        {!this.state.hit_position &&(
+                          <Button icon={
+                              <Icon
+                                name="search-location"
+                                size={12}
+                                color="white"
+                              />
+                            } title=" 取得目前所在地" onPress={()=>this.getPosition()} titleStyle={{fontSize:12}} buttonStyle={{borderTopLeftRadius:0,borderTopRightRadius:0}}/>
+                        )}
                     </View>
                     <View style={{justifyContent:'center',alignItems:'center'}}><Text>⚠️ 請選擇違規項目</Text></View>
-                    <View style={{justifyContent:'center',alignItems:'center',paddingLeft:20,paddingRight:20,marginTop:10}}>
-                        <Text style={{fontSize:13,marginBottom:5,color:'#900'}}>{this.state.select_type}</Text>
-                        <Text style={{fontSize:11,color:'#333'}}>{this.state.select_subtype}</Text>
-                    </View>
-                    <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+
+                    <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}>
                       <Picker
                         selectedValue={this.state.select_type}
-                        style={{height: 20, width: 150}}
+                        style={{height: 20, width: '96%'}}
                         itemStyle={{fontSize:12}}
                         onValueChange={(itemValue, itemIndex) =>
                           this.PickerMain(itemIndex,itemValue)
@@ -282,7 +298,7 @@ export default class Violation extends React.Component {
                       {this.state.showSubpick &&(
                         <Picker
                           selectedValue={this.state.select_subtype}
-                          style={{height: 20, width: 200}}
+                          style={{height: 20, width: '96%',marginTop:20}}
                           itemStyle={{fontSize:12}}
                           onValueChange={(itemValue, itemIndex) =>
                             this.PickerSub(itemValue)

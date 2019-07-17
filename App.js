@@ -44,7 +44,7 @@ const DrawerContent = (props) => (
             />}
         iconRight
         containerStyle={{borderBottomLeftRadius:0}}
-        buttonStyle={{backgroundColor:'#ff5722'}}
+        buttonStyle={{backgroundColor:'#ff5722',borderRadius:0}}
         onPress={()=>props.navigation.dispatch(DrawerActions.closeDrawer())}
       />
     </View>
@@ -52,16 +52,28 @@ const DrawerContent = (props) => (
   </View>
 )
 
-const HomeStack=createDrawerNavigator(
+const HomeStack=createStackNavigator(
   {
+    Dashboard: {screen:Dashboard},
+    Home: {screen:Home,path:'app/home'},
+    Map:{screen: MapScreen},
+    ScooterDetail:{screen: ScooterDetail},
+    TimeOut:{screen: TimeOut},
+
+  },{
+    headerMode:'none',
+  }
+);
+
+const MenuScreen=createDrawerNavigator(
+  {
+    HomeStack:{screen:HomeStack,navigationOptions: {drawerLabel: <Hidden />}},
     Dashboard: {screen:Dashboard,navigationOptions: { title: '導航頁'}},
-    Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
-    Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
-    ScooterDetail:{screen: ScooterDetail,navigationOptions: {drawerLabel: <Hidden />}},
-    TimeOut:{screen: TimeOut,navigationOptions: {drawerLabel: <Hidden />}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}
 
   },{
+    initialRouteName: 'HomeStack',
+    headerMode:'none',
     drawerPosition: 'right',
     drawerLabel:'Menu',
     contentComponent: DrawerContent,
@@ -69,10 +81,12 @@ const HomeStack=createDrawerNavigator(
   }
 );
 
+
+
 const App = createStackNavigator(
   {
     Login: {screen:Login},
-    HomeStack:{screen:HomeStack}, 
+    MenuScreen:{screen:MenuScreen}, 
   },
   {
     initialRouteName : 'Login',

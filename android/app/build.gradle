@@ -107,7 +107,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.1"
+        versionName "1.2"
+        vectorDrawables.useSupportLibrary = true
         missingDimensionStrategy 'react-native-camera', 'general'
     }
     signingConfigs {
@@ -149,12 +150,16 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-camera')
+    // implementation project(':react-native-image-crop-picker')
+    implementation (project(':react-native-image-crop-picker')) {
+        exclude group: "com.android.support"
+    }
     implementation project(':react-native-svg')
     implementation project(':react-native-webview')
     implementation project(':react-native-action-sheet')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-maps')
-    implementation project(':react-native-camera')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-cookies')
     implementation project(':@react-native-community_async-storage')

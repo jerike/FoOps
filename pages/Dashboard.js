@@ -39,6 +39,8 @@ export default class Dashboard extends React.Component {
     componentDidMount() {
         this.get_scooter();
         this.get_scooter_status();
+        this.get_geofence();
+        this.get_work_area();
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -76,12 +78,37 @@ export default class Dashboard extends React.Component {
         .then((json) => {
             global.scooters = json.data;
             global.scooter = json.data;
-            
             global.reload_time = reload_time;
             this.setState({reload_time:reload_time});
             this.setState({scooter:json.data,show_loading:false,load_data:false},()=>{this.setStorage()});
                        
         });
+    }
+    get_work_area = () =>{
+      //取得工作區域
+      fetch(global.API+'/scooter/get_all_work_zone',{
+          method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+          return response.json();
+      })
+      .then((json) => {
+          if(json.code == 1){
+            global.all_work_area = json.data;
+          }
+      });
+    }
+    get_geofence =()=>{
+      //取得電子柵欄
+      fetch(global.API+'/tools/get_geofence',{
+         method: 'GET',
+         credentials: 'include'
+      })
+      .then((response) => response.json())
+      .then((json)=> {
+        global.geofence = json.data;
+      });
     }
     getStorage = async () => {
       try {
@@ -110,7 +137,7 @@ export default class Dashboard extends React.Component {
         })
         .then((json) => {
           if(json.code == 1){
-            global.condition = JSON.stringify(json.data);
+            global.condition = json.data;
             this.setState({ condition:json.data });
           }else{
             alert(json.reason);
