@@ -23,14 +23,14 @@ export default StyleSheet.create({
         width: itemWidth,
         height: slideHeight,
         paddingHorizontal: itemHorizontalMargin,
-        paddingBottom: 18 // needed for shadow
+        paddingBottom: 10 // needed for shadow
     },
     shadow: {
         position: 'absolute',
         top: 0,
         left: itemHorizontalMargin,
         right: itemHorizontalMargin,
-        bottom: 18,
+        bottom: 10,
         shadowColor: colors.black,
         shadowOpacity: 0.25,
         shadowOffset: { width: 0, height: 10 },

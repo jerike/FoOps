@@ -501,9 +501,11 @@ export default class MapScreen extends React.Component {
                   <View style={{position:'absolute',top:0,right:2}}>
                     <Button
                       style={styles.work_area_btn}
-                      buttonStyle={{backgroundColor:'#666'}}
-                      icon={<Icon name="times-circle" size={15}  color="white" />}
+                      buttonStyle={{backgroundColor:'#666',padding:5}}
+                      icon={<Icon name="times-circle" size={13}  color="white" />}
                       onPress={()=>this.CloseCard()}
+                      title=" Colse"
+                      titleStyle={{fontSize:13}}
                     />
                   </View>
                   <Carousel
