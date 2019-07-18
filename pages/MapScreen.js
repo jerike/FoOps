@@ -10,7 +10,10 @@ import Carousel from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import slideStyle, { colors } from '../styles/index.style';
 import SliderEntry from '../component/SliderEntry';
+import Geolocation from '@react-native-community/geolocation';
+import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
+
 const marker1 = require("../img/marker-normal.png");
 const marker2 = require("../img/marker-green.png");
 const marker3 = require("../img/marker-gray.png");
@@ -32,7 +35,8 @@ export default class MapScreen extends React.Component {
         all_work_area:[],
         load_data:false,
         modalVisible:false,
-        search:""
+        search:"",
+        changed:false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -58,21 +62,32 @@ export default class MapScreen extends React.Component {
           geofence:global.geofence,
           set_polygon:true
         });
+        
     }
     componentDidMount() {
         if (Platform.OS === 'android') {
            BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
         }
+        setTimeout(()=>{this.getPosition();},100);
     }
-    
+    shouldComponentUpdate(nextProps, nextState){
+        return shallowCompare(this, nextProps, nextState);
+    }   
+    componentWillUpdate(nextProps,nextState){
+       if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
+            this.setState({changed:true});
+        }
+
+
+    }
     getPosition(){
-      navigator.geolocation.getCurrentPosition(
+      Geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
           this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         },
         (error: any) => {
-          console.warn('失敗：' + JSON.stringify(error.message))
+          Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
         }, {
           enableHighAccuracy: true,
           timeout: 20000,
@@ -366,7 +381,7 @@ export default class MapScreen extends React.Component {
         this.setState({modalVisible: visible});
     }
     render() {
-        const {selectedIndex,toSearch,clickMarker,geofence} = this.state;
+        const {selectedIndex,toSearch,clickMarker,geofence,changed} = this.state;
         var scooter = this.state.scooter;
         var search = global.search;
         var set_polygon = this.state.set_polygon;
@@ -379,7 +394,6 @@ export default class MapScreen extends React.Component {
               }
             }
         }
-
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
@@ -395,7 +409,7 @@ export default class MapScreen extends React.Component {
 
             var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
 
-            if(!clickMarker && t == 0 && i === 0){
+            if(!clickMarker && changed && t == 0 && i === 0){
               t++;
               setTimeout(()=>{
                 this.getFirstLatLng(latlng);

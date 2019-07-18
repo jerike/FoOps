@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ActionSheet from 'react-native-action-sheet';
 import ImagePicker from 'react-native-image-crop-picker';
+import Geolocation from '@react-native-community/geolocation';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 
@@ -177,7 +178,8 @@ export default class Violation extends React.Component {
         this.setState({select_subtype: itemValue});
     }
     getPosition(){
-      navigator.geolocation.getCurrentPosition(
+      // Geolocation.getCurrentPosition(info => console.log(info));
+      Geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
           var latlng = positionData.latitude+","+positionData.longitude;

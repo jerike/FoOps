@@ -42,6 +42,8 @@ target 'FoOps' do
 
   pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
 
+  pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
+
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
