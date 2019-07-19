@@ -3,7 +3,7 @@ import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
-import MapView, { Marker,PROVIDER_GOOGLE,Polygon,Polyline } from 'react-native-maps';
+import MapView, { Marker,PROVIDER_GOOGLE,Polygon,Polyline,Callout } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
 import Carousel from 'react-native-snap-carousel';
@@ -90,8 +90,7 @@ export default class MapScreen extends React.Component {
           Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
         }, {
           enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 1000
+          timeout: 20000
         }
       );
     }
@@ -108,7 +107,7 @@ export default class MapScreen extends React.Component {
           this.CloseCard();
         }else{
             if(selectedIndex == 1){
-                this.props.navigation.navigate("Home",{scooter:this.state.scooter});
+                this.props.navigation.navigate("Home");
             }else{
                 this.props.navigation.navigate("Map");
             }
@@ -245,7 +244,7 @@ export default class MapScreen extends React.Component {
       this.state.scooter.map(function(m,i){
           var distance = this.GetDistance(parseFloat(lat),parseFloat(lng),parseFloat(m.location.lat),parseFloat(m.location.lng));
           distance = distance.toFixed(2);          
-          if (distance < 0.1) {
+          if (distance < 0.3) {
               var stats_type = this.get_status_type(m.status);
               var severe_lvl = this.get_severe_lvl(m.severe);
               var card_header = <div>{severe_lvl}</div>;
@@ -361,12 +360,13 @@ export default class MapScreen extends React.Component {
         if (!markerData || !mapRef) {
             return;
         }
+
         this.setState({selectMarker:markerData.id});
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.001
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005
         };
         this.setState({setCenter:r});
         // mapRef.animateToRegion(r);
@@ -422,7 +422,10 @@ export default class MapScreen extends React.Component {
               case "MAINTENANCE":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                 
+                </Marker>
+
               break;
               case "RIDING":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;

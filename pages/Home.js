@@ -41,8 +41,7 @@ export default class Home extends React.Component {
     }
     componentWillMount() {
         global.page = 'Home';
-        var scooter = [];
-        this.setState({ search:'',condition:[],avatar:global.avatar});
+        this.setState({scooter:[], search:'',condition:[],avatar:global.avatar});
         
     }
     componentDidMount(){

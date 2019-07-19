@@ -202,8 +202,7 @@ export default class Violation extends React.Component {
           Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
         }, {
           enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 1000
+          timeout: 20000
         }
       );
 

@@ -54,7 +54,9 @@ export default class ScooterDetail extends React.Component {
     }
     componentDidMount(){
       this.getStorage().done();
-
+      if (Platform.OS === 'android') {
+         BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
+      }
     }
     getStorage = async () => {
         try {
@@ -656,17 +658,17 @@ export default class ScooterDetail extends React.Component {
               <View style={{flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
                 {sel_task ? (
                   <View>
-                  <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
+                  <Button key={"btn_0"}  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
                   <Badge status="error" containerStyle={{position:'absolute',top:0,right:0}} />
                   </View>
                 ):(
-                  <Button  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
+                  <Button  key={"btn_0"} icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
                 )}
                 
-                <Button  icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
-                <Button  icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
-                <Button  icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
-                <Button  icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                <Button  key={"btn_1"} icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
+                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
+                <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
+                <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
               </View>
         </SafeAreaView>
          
