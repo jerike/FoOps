@@ -94,7 +94,7 @@ export default class ScooterDetail extends React.Component {
             this.getScooterType(sid);
             this.getRemark(sid);
           }else{
-             Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}]);           
+             Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}],{ cancelable: false });           
           }
         });
     }

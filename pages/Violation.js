@@ -89,7 +89,7 @@ export default class Violation extends React.Component {
               this.setState({show_loading:false});
               if(json.code ==1){
                 Alert.alert('👍🏻 Success',"送出成功",[{text: 'OK',onPress: () => {this.props.violation_option.onClose('violation_modal');
-                this.clearData();}}]);
+                this.clearData();}}],{ cancelable: false });
               }else{
                 Alert.alert('⚠️ Warning',json.reason,[{text: 'OK'}]);
               }

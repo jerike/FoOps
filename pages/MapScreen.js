@@ -13,6 +13,7 @@ import SliderEntry from '../component/SliderEntry';
 import Geolocation from '@react-native-community/geolocation';
 import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
+import isEqual from 'lodash.isequal'
 
 const marker1 = require("../img/marker-normal.png");
 const marker2 = require("../img/marker-green.png");
@@ -37,6 +38,7 @@ export default class MapScreen extends React.Component {
         modalVisible:false,
         search:"",
         changed:false,
+        tracksViewChanges: true
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -77,8 +79,23 @@ export default class MapScreen extends React.Component {
        if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
             this.setState({changed:true});
         }
+    }
+    componentWillReceiveProps(nextProps: any) {
+        if (!isEqual(this.props, nextProps)) {
+            this.setState({
+                tracksViewChanges: true,
+            }, () => {
+                this.setState({tracksViewChanges: false})
+            })
+        }
+    }
 
-
+    componentDidUpdate() {
+        if (this.state.tracksViewChanges) {
+            this.setState({
+                tracksViewChanges: false,
+            })
+        }
     }
     getPosition(){
       Geolocation.getCurrentPosition(
@@ -422,20 +439,27 @@ export default class MapScreen extends React.Component {
               case "MAINTENANCE":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tan'}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                 
-                </Marker>
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  <Image source={require('../img/marker-gray.png')} style={{ width: 40, height: 40 }}  />
+                </MapView.Marker>
 
               break;
               case "RIDING":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'green'} onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  <Image source={require('../img/marker-green.png')} style={{ width: 40, height: 40 }} />
+                </MapView.Marker>
               break;
               default:
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
                 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng}  pinColor={isActive ? 'yellow' : 'tomato'} onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} />
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  <Image source={require('../img/marker-normal.png')} style={{ width: 40, height: 40 }} />
+                </MapView.Marker>
               break;
             }
             markers.push(marker);
@@ -443,13 +467,6 @@ export default class MapScreen extends React.Component {
         }.bind(this));
         var setPolyPath=[];
         if(set_polygon){
-            var worldCoords = [
-              {latitude:-85.1054596961173,longitude: -180},
-              {latitude:85.1054596961173,longitude: -180},
-              {latitude:85.1054596961173,longitude: 180},
-              {latitude:-85.1054596961173,longitude: 180},
-              {latitude:-85.1054596961173,longitude: 0}
-            ]; 
             var fence = [];
             if(geofence != undefined){
               geofence.map(function(value,index){
