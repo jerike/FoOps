@@ -441,7 +441,7 @@ export default class MapScreen extends React.Component {
 
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                  <Image source={require('../img/marker-gray.png')} style={{ width: 40, height: 40 }}  />
+                  <Image source={require('../img/marker-gray.png')} style={{ width: 30, height: 40 }}  />
                 </MapView.Marker>
 
               break;
@@ -450,7 +450,7 @@ export default class MapScreen extends React.Component {
 
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                  <Image source={require('../img/marker-green.png')} style={{ width: 40, height: 40 }} />
+                  <Image source={require('../img/marker-green.png')} style={{ width: 30, height: 40 }} />
                 </MapView.Marker>
               break;
               default:
@@ -458,7 +458,7 @@ export default class MapScreen extends React.Component {
                 
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                  <Image source={require('../img/marker-normal.png')} style={{ width: 40, height: 40 }} />
+                  <Image source={require('../img/marker-normal.png')} style={{ width: 30, height: 40 }} />
                 </MapView.Marker>
               break;
             }
