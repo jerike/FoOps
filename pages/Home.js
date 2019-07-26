@@ -27,7 +27,7 @@ export default class Home extends React.Component {
         show_loading:false,
         modalVisible:false,
         jump2map:false,
-        toSearch:false,
+        toSearch:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
@@ -41,7 +41,8 @@ export default class Home extends React.Component {
     }
     componentWillMount() {
         global.page = 'Home';
-        this.setState({scooter:[], search:'',condition:[],avatar:global.avatar});
+        var select_severe = global.select_severe;
+        this.setState({scooter:[],select_severe:select_severe, search:'',condition:[],avatar:global.avatar});
         
     }
     componentDidMount(){
@@ -281,6 +282,11 @@ export default class Home extends React.Component {
             show_loading = true;
         }
         var items = scooter.map(function(m,i){
+            if(global.select_severe != undefined){
+                if(m.severe != global.select_severe){
+                    return;
+                }
+            }
             var stats_type = this.get_status_type(m.status);
             var severe_lvl = this.get_severe_lvl(m.severe);
             var card_header = <View style={{flexDirection: 'row',justifyContent:'space-between',marginBottom:10}}><Icon name="motorcycle"  size={20} style={{marginRight:10}}/><Text>{m.plate}</Text><Text>{severe_lvl}</Text></View>;

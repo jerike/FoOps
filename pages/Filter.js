@@ -40,7 +40,7 @@ export default class Filter extends React.Component {
       this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
       this.onChangeTask=this.onChangeTask.bind(this);
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
-      this.onChangeSever=this.onChangeSever.bind(this);
+      this.onChangeSevere=this.onChangeSevere.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
       this.get_days_change=this.get_days_change.bind(this);
       this.get_scooter_in_work_area=this.get_scooter_in_work_area.bind(this);
@@ -52,6 +52,9 @@ export default class Filter extends React.Component {
     }
     componentWillMount(){
       // this.setState({scooter:global.scooters});
+      if(global.select_severe != undefined){
+        this.onChangeSevere(global.select_severe);
+      }
     }
     componentDidMount(){
       // this.getStorage();
@@ -254,9 +257,10 @@ export default class Filter extends React.Component {
         return false;
     }
     // 選擇車輛狀況
-    onChangeSever(e){
+    onChangeSevere(e){
         this.show_loading();
         e = (this.state.sel_severe_data == e) ? null : e;
+        global.select_severe = undefined;
         this.setState({sel_severe_data:e}, () => {
             this.after_reload_scooter();
         });
@@ -366,7 +370,7 @@ export default class Filter extends React.Component {
               style={styles.work_area_btn}
               buttonStyle={{borderColor:'rgb(255, 204, 34)',}}
               titleStyle={styles.titleStyle}
-              onPress={()=>this.onChangeSever(index)}
+              onPress={()=>this.onChangeSevere(index)}
             />
             if(this.state.sel_severe_data === index) {
               btn = <Button
@@ -376,7 +380,7 @@ export default class Filter extends React.Component {
                 icon={<Icon name="check-circle" size={15}  color="white" />}
                 buttonStyle={{borderColor:'rgb(255, 204, 34)',backgroundColor:'rgb(255, 204, 34)'}}
                 titleStyle={styles.titleStyleActive}
-                onPress={()=>this.onChangeSever(index)}
+                onPress={()=>this.onChangeSevere(index)}
               />
             }
             severe_btns.push(btn);
@@ -501,7 +505,7 @@ export default class Filter extends React.Component {
                   <View style={styles.footer_view}>
                     {this.state.show_loading ? 
                       (
-                        <View>
+                        <View style={{flexDirection:'row'}}>
                           <Text>篩選結果：</Text>
                           <ActivityIndicator color="#ccc"  />
                         </View>

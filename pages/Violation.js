@@ -25,6 +25,7 @@ export default class Violation extends React.Component {
             select_type:"",
             select_subtype:"",
             hit_position:false,
+            send_now:false,
             MainCate: ['請選擇','違規停車（巡查）','違規停車（檢舉）','雙載（巡查）','雙載（檢舉）','危險駕駛（巡查）','危險駕駛（檢舉）','營運範圍外還車','車輛損壞賠償'],
             SubCate:["禁止臨時停車處所停車。","彎道、陡坡、狹路、槽化線、交通島或道路修理地段停車。","在機場、車站、碼頭、學校、娛樂、展覽、競技、市場、或其他公共場所出、入口或消防栓之前停車。","在設有禁止停車標誌、標線之處所停車。","在顯有妨礙其他人、車通行處所停車。","不依順行方向，或不緊靠道路右側，或併排停車，或單行道不緊靠路邊停車。","停車時間、位置、方式、車種不依規定。","於身心障礙專用停車位違規停車。","還車時停放私人區域"]
         }
@@ -43,7 +44,8 @@ export default class Violation extends React.Component {
       return create_date;
     }
     send_violation(){
-        // this.setState({show_loading:true});
+        this.setState({send_now:true});
+        this.setState({show_loading:true});
         var msg = [];
         var photo_count = 0;
         if(this.state.photos.length < 2){
@@ -87,6 +89,7 @@ export default class Violation extends React.Component {
             })
             .then((json) => {
               this.setState({show_loading:false});
+              this.setState({send_now:false});
               if(json.code ==1){
                 Alert.alert('👍🏻 Success',"送出成功",[{text: 'OK',onPress: () => {this.props.violation_option.onClose('violation_modal');
                 this.clearData();}}],{ cancelable: false });
@@ -311,11 +314,11 @@ export default class Violation extends React.Component {
                       )}
                     </View>
                     <View style={{position:'absolute',width:'100%',bottom:0,left:0,zIndex:1}}>
-                    <Button
-                      title="送出"
-                      titleStyle={styles.view_titleStyle}
-                      onPress={()=>this.send_violation()}
-                    />
+                    {this.state.send_now ? 
+                      <Button title="傳送中..."  titleStyle={styles.view_titleStyle} disabled  disabledStyle={{backgroundColor:'#e0e0e0',color:'#7b7b7b'}}/>
+                    :
+                      <Button title="送出" titleStyle={styles.view_titleStyle} onPress={()=>this.send_violation()} />
+                    }
                     </View>
                 </SafeAreaView>
             </Modal>
