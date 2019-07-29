@@ -4,6 +4,7 @@ import {Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import '../global.js';
 import { WebView } from 'react-native-webview';
+import Geolocation from '@react-native-community/geolocation';
 
 var t = 0;
 
@@ -16,7 +17,7 @@ export default class Direction extends React.Component {
 
     }
     componentWillMount(){
-      navigator.geolocation.getCurrentPosition(
+      Geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
           this.setState({positionData:positionData});
@@ -25,8 +26,7 @@ export default class Direction extends React.Component {
           console.warn('失敗：' + JSON.stringify(error.message))
         }, {
           enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 1000
+          timeout: 20000
         }
       );
     }
@@ -65,6 +65,8 @@ export default class Direction extends React.Component {
                       }} />
                   </View>
                   <WebView
+                    originWhitelist={['*']}
+                    geolocationEnabled={true}
                     source={{uri: 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+latlng+'&travelmode=two-wheeler'}}
                   />
                 </SafeAreaView>

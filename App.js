@@ -54,8 +54,8 @@ const DrawerContent = (props) => (
 
 const HomeStack=createStackNavigator(
   {
-    Dashboard: {screen:Dashboard},
     Home: {screen:Home,path:'app/home'},
+    Dashboard: {screen:Dashboard},
     Map:{screen: MapScreen},
     ScooterDetail:{screen: ScooterDetail},
     TimeOut:{screen: TimeOut},

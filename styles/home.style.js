@@ -62,6 +62,32 @@ export default StyleSheet.create({
     btn_selectedButtonStyle: {
         backgroundColor: '#fff'
     },
+    btn2_containerStyle:{
+        height: 20,
+        width: '90%',
+        // borderTopRightRadius: 20,
+        borderWidth: 0,
+        backgroundColor: '#ff5722',
+        marginTop: 0,
+        borderRadius: 20,
+        marginTop:5
+    },
+    btn2_buttonStyle: {
+        backgroundColor: '#ff5722',
+        borderWidth: 0
+    },
+    btn2_selectedButtonStyle:{
+        backgroundColor: '#fff',
+    },
+    btn2_textStyle:{
+        fontSize:12,
+        color:'#ffffff',
+    },
+    btn2_selectedTextStyle:{
+        fontSize:12,
+        color:'#ff5722',
+    },
+
     loading:{
         position:'absolute',
         zIndex:101,

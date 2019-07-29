@@ -10,7 +10,7 @@ export default class Login extends React.Component {
   
   constructor(props) {
     super(props);
-    this.state = { email: null,password:null,progress:0,timeout:true,show_loading:false };
+    this.state = { email: null,password:null,progress:0,timeout:true,show_loading:false,loading_title:'Loading...' };
     this.close_msg = this.close_msg.bind(this);
     this.login=this.login.bind(this);
     this.ShowLogin=this.ShowLogin.bind(this);
@@ -32,6 +32,12 @@ export default class Login extends React.Component {
         }
     }
   }
+  pad(number){ return (number < 10 ? '0' : '') + number }
+  dateFormat(date){
+    var format_date = new Date(date);
+    var create_date = this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
+    return create_date;
+  }
   ShowLogin(){
     Animated.timing(this.state.fadeInOpacity, {
           toValue: 1, 
@@ -46,7 +52,15 @@ export default class Login extends React.Component {
           global.user_id =  await AsyncStorage.getItem('@FoOps:user_id');
           global.user_givenName =  await AsyncStorage.getItem('@FoOps:user_givenName');
           global.avatar =  await AsyncStorage.getItem('@FoOps:avatar');
-          this.props.navigation.navigate('Dashboard');
+          var scooters =  await AsyncStorage.getItem('@FoOps:scooters');
+          global.scooter = global.scooters = JSON.parse(scooters);
+          global.reload_time = await AsyncStorage.getItem('@FoOps:reload_time');
+          // console.warn(global.scooter);
+          if(global.scooter ==undefined){
+            this.props.navigation.navigate('TimeOut');
+          }else{
+            this.props.navigation.navigate('Home');
+          }
         }else{
           // console.warn('show_login');
           this.setState({show_login:true},()=>this.ShowLogin());
@@ -68,7 +82,7 @@ export default class Login extends React.Component {
   login(){
     // this.props.navigation.navigate('Home');
     // return false;
-    this.setState({show_loading:true});
+    this.setState({show_loading:true,loading_title:'登入中...'});
     var formData  = new FormData();
     formData.append("email",this.state.email);
     formData.append("password",this.state.password);
@@ -95,17 +109,13 @@ export default class Login extends React.Component {
           if(data.Name == "OPERATOR"){
               var account = json.data.email;
               // 儲存資料
-              this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar},()=>{this.setStorage()});
+              this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar});
               login = true;
           }
         }.bind(this));
 
         if(login){
-          Vibration.vibrate(500);
-          // this.setState({timeout:true});
-          this.props.navigation.navigate('Dashboard');
-          this.setState({show_loading:false});
-
+          this.get_scooter();
         }else{
           Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
           this.setState({show_loading:false});
@@ -113,6 +123,38 @@ export default class Login extends React.Component {
 
     });
   }
+  //取得電動車資訊
+  get_scooter(){
+      this.setState({loading_title:'取得車輛資料'});
+      var theTime = new Date();
+      var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+      global.reload_time = reload_time;
+      this.fetch_scooters();
+  }
+  fetch_scooters(){
+      var result = []
+      fetch(global.API+'/scooter',{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+          if(response.status == 200){
+            return response.json();
+          }else{
+            this.props.navigation.navigate('TimeOut');
+          }
+      })
+      .then((json) => {
+          global.scooters = json.data;
+          global.scooter = json.data;
+          this.setState({scooter:json.data,show_loading:false},()=>{this.setStorage()});
+          Vibration.vibrate(500);
+          this.props.navigation.navigate('Home');
+          this.setState({show_loading:false});           
+      });
+  }
+
+
   setStorage = async () => {
     try {
       global.user_id =  this.state.user_id;
@@ -122,7 +164,10 @@ export default class Login extends React.Component {
         ['@FoOps:token', this.state.token],
         ['@FoOps:user_id', String(this.state.user_id)],
         ['@FoOps:user_givenName', this.state.user_givenName],
-        ['@FoOps:avatar', this.state.avatar]
+        ['@FoOps:avatar', this.state.avatar],
+        ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
+        ['@FoOps:reload_time', global.reload_time]
+
       ]);
       if(this.state.save_login){
         await AsyncStorage.multiSet([
@@ -141,7 +186,6 @@ export default class Login extends React.Component {
   close_msg(){
     this.setState({timeout:false});
   }
-
   
   render() {
     return (
@@ -150,7 +194,7 @@ export default class Login extends React.Component {
         {this.state.show_loading &&(
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-            <Text style={{color:'#fff'}}>Loading...</Text>
+            <Text style={{color:'#fff'}}>{this.state.loading_title}</Text>
           </View>
         )}
         {this.state.show_login &&(

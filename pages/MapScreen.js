@@ -342,30 +342,30 @@ export default class MapScreen extends React.Component {
     }
     filter_scooter_by_search(){
       // console.warn(this.state.search);
-        if(this.state.search !=""){
-            var result = [];
-            
-            global.scooter.map(function(m, i){
-              var plate = m.plate.toUpperCase();
-              if(plate.indexOf(this.state.search.toUpperCase()) != -1){
-                result.push(m);
-              }
-                
-            }.bind(this));
-            if(result.length > 0){
-              let r = {
-                  latitude: parseFloat(result[0].location.lat),
-                  longitude: parseFloat(result[0].location.lng),
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-              };
-              this.setState({setCenter:r});
+      if(this.state.search != undefined){
+          var result = [];
+          
+          global.scooter.map(function(m, i){
+            var plate = m.plate.toUpperCase();
+            if(plate.indexOf(this.state.search.toUpperCase()) != -1){
+              result.push(m);
             }
-            this.setState({ scooter:result });
-        }else{
-            this.setState({ toSearch:false });
-            this.setState({ scooter:global.scooter });
-        }
+              
+          }.bind(this));
+          if(result.length > 0){
+            let r = {
+                latitude: parseFloat(result[0].location.lat),
+                longitude: parseFloat(result[0].location.lng),
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            };
+            this.setState({setCenter:r});
+          }
+          this.setState({ scooter:result });
+      }else{
+          this.setState({ toSearch:false });
+          this.setState({ scooter:global.scooter });
+      }
     }
     _renderDarkItem ({item, index}) {
         global.page = 'Map';

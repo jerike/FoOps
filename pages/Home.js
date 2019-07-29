@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity,BackHandler,Platform } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar,Badge } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
 import '../global.js';
@@ -16,6 +16,8 @@ export default class Home extends React.Component {
       super()
       this.state = {
         selectedIndex: 1,
+        selectedIndex2: null,
+        selectedIndex2_sort:"asc",
         sel_scooter:{},
         sel_condition:[],
         scooter:[],
@@ -30,6 +32,7 @@ export default class Home extends React.Component {
         toSearch:false
       }
       this.updateIndex = this.updateIndex.bind(this);
+      this.selectSort=this.selectSort.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
       this.changeScreen=this.changeScreen.bind(this);
       this.showDetail=this.showDetail.bind(this);
@@ -43,7 +46,9 @@ export default class Home extends React.Component {
         global.page = 'Home';
         var select_severe = global.select_severe;
         this.setState({scooter:[],select_severe:select_severe, search:'',condition:[],avatar:global.avatar});
-        
+        this.get_geofence();
+        this.get_work_area();
+        this.get_scooter_status();
     }
     componentDidMount(){
         this.getStorage();
@@ -100,13 +105,59 @@ export default class Home extends React.Component {
         global.scooter = scooter;
         this.setState({scooter:scooter});
     }
-    
-    //取得電動車資訊
-    get_scooter(){
+    get_work_area = () =>{
+        //取得工作區域
+        fetch(global.API+'/scooter/get_all_work_zone',{
+            method: 'GET',
+          credentials: 'include'
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((json) => {
+            if(json.code == 1){
+              global.all_work_area = json.data;
+            }
+        });
+    }
+    get_geofence =()=>{
+        //取得電子柵欄
+        fetch(global.API+'/tools/get_geofence',{
+           method: 'GET',
+           credentials: 'include'
+        })
+        .then((response) => response.json())
+        .then((json)=> {
+          global.geofence = json.data;
+        });
+    }
+    //取得車況
+    get_scooter_status =()=>{
+        fetch(global.API+'/scooter/status',{
+            method: 'GET'
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((json) => {
+            if(json.code == 1){
+              global.condition = json.data;
+              this.setState({ condition:json.data });
+            }else{
+              alert(json.reason);
+            }
+        });
+    }
+    get_timestamp(){
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+        return reload_time;
+    }
+    //取得電動車資訊
+    get_scooter(){
+        var reload_time = this.get_timestamp();
         this.setState({reload_time:reload_time});
-        
+        global.reload_time = reload_time;
         if (global.scooters == undefined) {
             this.getScooterStorage();
         }else{
@@ -137,6 +188,9 @@ export default class Home extends React.Component {
         });
     }
     set_scooter_data(all_scooters){
+        var reload_time = this.get_timestamp();
+        this.setState({reload_time:reload_time});
+        global.reload_time = reload_time;
         global.scooters = all_scooters;
         global.scooter = all_scooters;
         this.setState({ 
@@ -188,6 +242,56 @@ export default class Home extends React.Component {
             
         }
     }
+    selectSort(selectedIndex){
+        this.setState({show_loading:true});
+        var scooter = this.state.scooter;
+        var sort = this.state.selectedIndex2_sort;
+        if(parseInt(selectedIndex) === this.state.selectedIndex2){
+            sort = (sort == "asc") ? "desc" : "asc";
+            this.setState({selectedIndex2_sort:sort});
+        }else{
+            this.setState({selectedIndex2_sort:"asc"});
+        }
+        switch(selectedIndex){
+            case 0:
+                scooter = scooter.sort(function (a, b) {
+                    if(sort == "asc"){
+                        return a.plate > b.plate ? 1 : -1;       
+                    }else{
+                        return a.plate < b.plate ? 1 : -1;
+                    }
+                });
+            break;
+            case 1:
+                scooter = scooter.sort(function (a, b) {
+                    if(sort == "asc"){
+                        return a.power > b.power ? 1 : -1;       
+                    }else{
+                        return a.power < b.power ? 1 : -1;
+                    }
+                });
+            break;
+            case 2:
+                scooter = scooter.sort(function (a, b) {
+                    if(sort == "asc"){
+                        return a.status > b.status ? 1 : -1;       
+                    }else{
+                        return a.status < b.status ? 1 : -1;
+                    }
+                });
+            break;
+            case 3:
+                scooter = scooter.sort(function (a, b) {
+                    if(sort == "asc"){
+                        return a.severe > b.severe ? 1 : -1;       
+                    }else{
+                        return a.severe < b.severe ? 1 : -1;
+                    }
+                });
+            break;
+        }
+        this.setState({scooter:scooter,selectedIndex2:selectedIndex});
+    }
     onClear(){
         global.search = "";
         this.setState({search:"",toSearch:false});
@@ -210,10 +314,10 @@ export default class Home extends React.Component {
    
     get_status_type(type){
         var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
+        var scooter_color = ['error','primary','success','warning'];
         scootet_status.map(function(m,i){
             if(m.type == type){
-                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
+                result = <Badge status={scooter_color[i]} value={<Text style={{fontSize:11,padding:5,color:'#fff'}}>{m.title}</Text>} />;
             }
         })
         return result;
@@ -232,7 +336,7 @@ export default class Home extends React.Component {
     }
     getConditions(id){
         var result = "";
-        var condition = global.condition;
+        var condition = this.state.condition;
         condition.map(function(m, i){
             if(parseInt(m.id) == parseInt(id)){
               var description = m.description;
@@ -261,15 +365,16 @@ export default class Home extends React.Component {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        const {selectedIndex,open,toSearch,scooter} = this.state;
+        var c1 = (this.state.selectedIndex2 === 0) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺車牌" : "🔻車牌") : "車牌" ;
+        var c2 = (this.state.selectedIndex2 === 1) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺電量" : "🔻電量") : "電量" ;
+        var c3 = (this.state.selectedIndex2 === 2) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺服務" : "🔻服務") : "服務" ;
+        var c4 = (this.state.selectedIndex2 === 3) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺狀態" : "🔻狀態") : "狀態" ;
+        const buttons2 = [c1, c2,c3,c4];
+        // const buttons2 = [{ element: c1 }, { element: c2 }, { element: c3 }, { element: c4 }]
+        const {selectedIndex,open,toSearch,selectedIndex2} = this.state;
+        var scooter = this.state.scooter;
         var search = global.search;
-        // if(toSearch){
-        //     if(search == ""){
-        //         this.setState({toSearch:false});
-        //         this.setState({scooter:global.scooter});
-        //     }
-        // }
-        if(this.state.search != search){
+        if(search != undefined && this.state.search != search){
             this.updateSearch(search);
         }
         var filter_option = {
@@ -281,6 +386,7 @@ export default class Home extends React.Component {
         if(!open){
             show_loading = true;
         }
+        
         var items = scooter.map(function(m,i){
             if(global.select_severe != undefined){
                 if(m.severe != global.select_severe){
@@ -334,13 +440,15 @@ export default class Home extends React.Component {
             var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
             var power_msg = show_power;
             var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
-
+            if(parseInt(i) + 1 === scooter.length){
+                show_loading = false;
+            }
             return (
                 <TouchableOpacity key={i} onPress={() =>this.showDetail(m.id)}> 
                     <Card containerStyle={styles.cardContainerStyle} key={i} >
                         <View>{card_header}</View>
                         <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
-                            <Text>{stats_type}</Text>
+                            {stats_type}
                             <Text>{power_msg}</Text>
                         </View>
                         <View>{status_content}</View>
@@ -348,7 +456,7 @@ export default class Home extends React.Component {
                     </Card>
                 </TouchableOpacity>
             )
-        }.bind(this))
+        }.bind(this));
         return (
         <SafeAreaView style={{flex: 1,justifyContent: 'center',
         alignItems: 'center', backgroundColor: '#F5F5F5'}}>
@@ -377,6 +485,16 @@ export default class Home extends React.Component {
               containerStyle={styles.btn_containerStyle}
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
+            />
+            <ButtonGroup
+              onPress={this.selectSort}
+              selectedIndex={selectedIndex2}
+              buttons={buttons2}
+              containerStyle={styles.btn2_containerStyle}
+              buttonStyle={styles.btn2_buttonStyle}
+              selectedButtonStyle={styles.btn2_selectedButtonStyle}
+              textStyle={styles.btn2_textStyle}
+              selectedTextStyle={styles.btn2_selectedTextStyle}
             />
             {show_loading &&(
               <View style={styles.loading}>

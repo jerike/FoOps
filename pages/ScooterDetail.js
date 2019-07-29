@@ -13,7 +13,7 @@ import ActionSheet from 'react-native-action-sheet';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 const API = global.API;
-
+const icon = (name: string) => <Icon key={name} name={name} size={24} />;
 var t = 0;
 export default class ScooterDetail extends React.Component {
     constructor () {
@@ -46,11 +46,12 @@ export default class ScooterDetail extends React.Component {
       this.updateCondition=this.updateCondition.bind(this);
       this.onPressTask=this.onPressTask.bind(this);
       this.removeRemark=this.removeRemark.bind(this);
+      this.confirm_controller=this.confirm_controller.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
         this.newScooter(sid);
-        this.setState({sid:sid,condition:global.condition});
+        this.setState({sid:sid,condition:global.condition,show_loading:true});
     }
     componentDidMount(){
       this.getStorage().done();
@@ -90,7 +91,7 @@ export default class ScooterDetail extends React.Component {
         })
         .then((json) => {
           if(json.code == 1){
-            this.setState({scooter:json.data});
+            this.setState({scooter:json.data,show_loading:false});
             this.getScooterType(sid);
             this.getRemark(sid);
           }else{
@@ -134,7 +135,7 @@ export default class ScooterDetail extends React.Component {
     }
     get_status_type(type){
         var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
+        var scooter_color = ['#ff5722','#33CCFF','#00DD00','#ccc'];
         scootet_status.map(function(m,i){
             if(m.type == type){
                 result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
@@ -165,38 +166,6 @@ export default class ScooterDetail extends React.Component {
         return result;
     }
     
-    get_status_type(type){
-        var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
-        scootet_status.map(function(m,i){
-            if(m.type == type){
-                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
-            }
-        })
-        return result;
-    }
-    get_severe_lvl(severe,output){
-        var result = "";
-        var color=['#FF3333','#ff5722','#f5a623','#7ed321'];
-
-        if(output == "text"){
-            result = severe_title[severe-1];
-        }else{
-            result = <Text style={{color:color[severe-1]}}>{severe_title[severe-1]}</Text>;
-        }
-
-        return result;
-    }
-    getConditions(id){
-        var result = "";
-        this.state.condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
-            }
-        });
-        return result;
-    }
     ListHeaderComponent(){
       return(
          <View style={{height:40,backgroundColor:'#fff',justifyContent: 'center',borderBottomWidth:1,borderBottomColor:'#f5f5f5'}}>
@@ -291,7 +260,15 @@ export default class ScooterDetail extends React.Component {
       this.showModal('direction_modal');
     }
     showController(){
+      var Status = "車輛下線(維護)";
+      var button_status = "MAINTENANCE";
+      if(this.state.scooter.status == "MAINTENANCE"){
+        var Status = '車輛上線(營運)';
+        var button_status = "FREE";
+      }
+
       var BUTTONS = [
+        Status,
         '啟動(4G)',
         '熄火(4G)',
         '車廂(4G)',
@@ -299,42 +276,61 @@ export default class ScooterDetail extends React.Component {
         '取消',
       ];
 
-      var DESTRUCTIVE_INDEX = 3;
-      var CANCEL_INDEX = 4;
+      var DESTRUCTIVE_INDEX = parseInt(BUTTONS.length) - 2;
+      var CANCEL_INDEX = parseInt(BUTTONS.length) - 1;
       ActionSheet.showActionSheetWithOptions({
         title:'車輛控制項',
         message:'目前只提供 4G 網路操作，無法提供藍芽選項',
         options: BUTTONS,
         cancelButtonIndex: CANCEL_INDEX,
         destructiveButtonIndex: DESTRUCTIVE_INDEX,
-        tintColor: '#ff5722'
+        tintColor: '#ff5722',
       },
       (buttonIndex) => {
         switch(buttonIndex){
           case 0:
-            this.controller('unlock');
+            this.confirm_controller(button_status,BUTTONS[buttonIndex]);
           break;
           case 1:
-            this.controller('lock');
+            this.confirm_controller('unlock',BUTTONS[buttonIndex]);
           break;
           case 2:
-            this.controller('trunk');
+            this.confirm_controller('lock',BUTTONS[buttonIndex]);
           break;
           case 3:
-            this.controller('whistle');
+            this.confirm_controller('trunk',BUTTONS[buttonIndex]);
+          break;
+          case 4:
+            this.confirm_controller('whistle',BUTTONS[buttonIndex]);
           break;
         }
       });
       
       // this.showModal('controller_modal');
     }
+    confirm_controller(type,msg){
+      Alert.alert(
+        '🤔 三思而後行',
+        '確定執行【'+msg+'】?',
+        [
+          {text: 'Yes', onPress: () => this.controller(type)},
+          {text: 'No'},
+        ],
+        {cancelable: false},
+      );
+    }
+
+
     controller(type){
       this.setState({show_loading:true});
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
-
-      fetch(global.API+'/scooter/'+this.state.scooter.id+'/type',{
+      var request_option = '/scooter/'+this.state.scooter.id+'/type';
+      if(type == "MAINTENANCE" || type == "FREE"){
+        request_option = '/scooter/'+this.state.scooter.id+'/status';
+      }
+      fetch(global.API+request_option,{
         method: 'PUT',
         credentials: 'include',
         body: formData
@@ -351,6 +347,12 @@ export default class ScooterDetail extends React.Component {
         if(json.code == 1){
           var msg = "";
           switch(type){
+            case "FREE":
+              msg = "車輛已上線";
+            break;
+            case "MAINTENANCE":
+              msg = "車輛已下線";
+            break;
             case "unlock":
               msg = "車輛已啟動";
             break;
@@ -479,13 +481,11 @@ export default class ScooterDetail extends React.Component {
         var severe_lvl = this.get_severe_lvl(scooter.severe);
         var stats_type = this.get_status_type(scooter.status);
         var acc = (this.state.acc == undefined) ? false : this.state.acc;
-        
+        var acc_icon = "lock";
         if(acc){
-          var acc_icon = "lock-open";
-          var acc_status = <Text style={{color:'#f00'}}>啟動中</Text>;
+          var acc_status = <Text style={{color:'#f00'}}>啟動</Text>;
         }else{
-          var acc_icon = "lock";
-          var acc_status = <Text style={{color:'#ccc'}}>熄火中</Text>;
+          var acc_status = <Text style={{color:'#ccc'}}>熄火</Text>;
         }
 
         SCooter_ticket = scooter.ticket;
@@ -621,32 +621,36 @@ export default class ScooterDetail extends React.Component {
                       <Text style={{marginLeft:10}}>{stats_type}</Text>
                     </View>
                     <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name={acc_icon} size={19} style={{width:24,paddingLeft:5}} />
+                      <Icon name={acc_icon} size={18} style={{width:24,paddingLeft:5}} />
                       <Text style={{marginLeft:10}}>是否啟動</Text>
                       <Text style={{marginLeft:10}}>{acc_status}</Text>
                     </View>
                   </View>
-                </Card>
-                <Card key={"card1"} title="車輛備註" titleStyle={{fontSize:12,color:'#900'}}>
                   {this.state.remark == null ?(
-                    <View>
-                      <Input placeholder='備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0,height:50}} inputStyle={{marginLeft:10,height:50}} leftIcon={
-                      <Icon name='user-edit' color='black'  size={24} style={{width:24}} /> } onChangeText={(text)=>this.setState({txt_remark:text})} />
-                      <Button title="新增備註" onPress={()=>this.addRemark()}/>
+                    <View style={{backgroundColor:'#fff',marginTop:10}}>
+                        <Input placeholder='輸入車輛備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0}} inputStyle={{marginLeft:10,height:50}} leftIcon={
+                        <Icon name='user-edit' color='black'  size={20}  /> } onChangeText={(text)=>this.setState({txt_remark:text})} rightIcon={<Button title="新增" buttonStyle={{height:30}} titleStyle={{fontSize:12}} onPress={()=>this.addRemark()}/>} />
                     </View>
                   ):(
-                    <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',height:50}}>
-                      <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                    <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                      <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
                         <Icon name='user-edit' color='black'  size={24} style={{width:24,marginLeft:12,marginRight:20}} />
                         <Text>{this.state.remark}</Text>
                       </View>
-                      <Button title="清除備註" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
+                      <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
                     </View>
                   )}
+                  <View style={{justifyContent:'center',marginTop:20}}>
+                    <View style={{justifyContent:'center'}}>
+                      <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} />
+                    </View>
+                  </View>
+
                 </Card>
+
                 {conditions &&(
                     <FlatList  
-                      style={{marginTop:20}}
+                      style={{marginTop:10}}
                       data={conditions}
                       renderItem={({item, index}) => <ListItem key={"fl_"+index} leftAvatar={<Icon name="wrench" />} title={item}  style={styles.listItem} />}
                       ListHeaderComponent={this.ListHeaderComponent}
@@ -696,6 +700,8 @@ const styles = StyleSheet.create({
   loading:{
     position:'absolute',
     zIndex:101,
+    top:'40%',
+    left:'40%',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor:'rgba(1,1,1,0.8)',
@@ -705,6 +711,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius:5,
     borderTopRightRadius:5
   },
+
   header:{
       backgroundColor: '#ff5722',
       justifyContent: 'space-around',
