@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -44,7 +43,6 @@
 		50248830DF5747BB8D432B8B /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 697A304B99434C44A801658D /* MaterialIcons.ttf */; };
 		533C11CAFE7F443B94599D98 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 460D6F9EAFD24E98BA413C1B /* Zocial.ttf */; };
 		5ADC324DF46D416F81B3A018 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 707D67CD60C646F1B3126998 /* libRNVectorIcons.a */; };
-		5BBABB25C681420C8586452B /* libRNCookieManagerIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 966651651FBE4B25B3C643A2 /* libRNCookieManagerIOS.a */; };
 		5CD05E6163384B428AB09500 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2EF719FB11B94AB681AB2286 /* Octicons.ttf */; };
 		613B765022BB442A000E7826 /* libRNImagePicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61D0592C22B8F3B800B193C6 /* libRNImagePicker.a */; };
 		61895D1022CC587A006E550E /* libRNSVG.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61895D0B22CC5865006E550E /* libRNSVG.a */; };
@@ -330,13 +328,6 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCAsyncStorage;
 		};
-		6146CC6622AF8CDC00CDBCF6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BCF413CA90B749EB986EF769 /* RNCookieManagerIOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1BD725DA1CF77A8B005DBD79;
-			remoteInfo = RNCookieManagerIOS;
-		};
 		6146CC6A22AF8CDC00CDBCF6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ACDE6F00BD7848C4BAFE975D /* RNGestureHandler.xcodeproj */;
@@ -477,13 +468,11 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8CF9F38CB3244BC38B6F4AEF /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Brands.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf"; sourceTree = "<group>"; };
-		966651651FBE4B25B3C643A2 /* libRNCookieManagerIOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCookieManagerIOS.a; sourceTree = "<group>"; };
 		96EE3562ADB642AA8CD61D7B /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		98C93866DDBF4862B984BE89 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		ACDE6F00BD7848C4BAFE975D /* RNGestureHandler.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNGestureHandler.xcodeproj; path = "../node_modules/react-native-gesture-handler/ios/RNGestureHandler.xcodeproj"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B3A0F9DD3B184F5CB76A5059 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
-		BCF413CA90B749EB986EF769 /* RNCookieManagerIOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCookieManagerIOS.xcodeproj; path = "../node_modules/react-native-cookies/ios/RNCookieManagerIOS.xcodeproj"; sourceTree = "<group>"; };
 		C88B9230F54341C1BED089A9 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		CCA7B40FF2744E33AA0F054B /* libRangeSlider.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRangeSlider.a; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -526,7 +515,6 @@
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				7D5EDD8085D0483F926B23B2 /* libRNGestureHandler.a in Frameworks */,
 				1A2AC279EAC94834BB21EE08 /* libRNCAsyncStorage.a in Frameworks */,
-				5BBABB25C681420C8586452B /* libRNCookieManagerIOS.a in Frameworks */,
 				5ADC324DF46D416F81B3A018 /* libRNVectorIcons.a in Frameworks */,
 				4578B6AE88514F1F86055FFD /* libRangeSlider.a in Frameworks */,
 			);
@@ -727,14 +715,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		6146CC5E22AF8CDC00CDBCF6 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				6146CC6722AF8CDC00CDBCF6 /* libRNCookieManagerIOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		6146CC6022AF8CDC00CDBCF6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -837,7 +817,6 @@
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				ACDE6F00BD7848C4BAFE975D /* RNGestureHandler.xcodeproj */,
 				4009A06BB18B46B386607745 /* RNCAsyncStorage.xcodeproj */,
-				BCF413CA90B749EB986EF769 /* RNCookieManagerIOS.xcodeproj */,
 				FB4DA06A3855477D8407DE29 /* RNVectorIcons.xcodeproj */,
 				14DB52DC1C4345E5B23D15F9 /* RangeSlider.xcodeproj */,
 			);
@@ -1066,10 +1045,6 @@
 				{
 					ProductGroup = 6146CC5C22AF8CDC00CDBCF6 /* Products */;
 					ProjectRef = 4009A06BB18B46B386607745 /* RNCAsyncStorage.xcodeproj */;
-				},
-				{
-					ProductGroup = 6146CC5E22AF8CDC00CDBCF6 /* Products */;
-					ProjectRef = BCF413CA90B749EB986EF769 /* RNCookieManagerIOS.xcodeproj */;
 				},
 				{
 					ProductGroup = 61A4613622C7DCEC00DBBB44 /* Products */;
@@ -1346,13 +1321,6 @@
 			fileType = archive.ar;
 			path = libRNCAsyncStorage.a;
 			remoteRef = 6146CC6322AF8CDC00CDBCF6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		6146CC6722AF8CDC00CDBCF6 /* libRNCookieManagerIOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNCookieManagerIOS.a;
-			remoteRef = 6146CC6622AF8CDC00CDBCF6 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		6146CC6B22AF8CDC00CDBCF6 /* libRNGestureHandler.a */ = {
@@ -1644,7 +1612,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);
@@ -1672,7 +1639,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);
@@ -1701,7 +1667,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-maps/lib/ios/AirMap/**",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
@@ -1728,7 +1693,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-maps/lib/ios/AirMap/**",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
@@ -1761,7 +1725,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);
@@ -1796,7 +1759,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);
@@ -1830,7 +1792,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);
@@ -1864,7 +1825,6 @@
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-gesture-handler/ios/**",
 					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
-					"$(SRCROOT)/../node_modules/react-native-cookies/ios/RNCookieManagerIOS",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-range-slider/ios/**",
 				);

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "939824558556",
+    "firebase_url": "https://foops-eef72.firebaseio.com",
+    "project_id": "foops-eef72",
+    "storage_bucket": "foops-eef72.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939824558556:android:5f8bfb3502c10ae9",
+        "android_client_info": {
+          "package_name": "com.foops"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "939824558556-pmuglo4d99u2ic8abj1nv241lh3qsh8i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8RPrxwRInK0cP8VQ5ADCqbc1r_onci3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939824558556-pmuglo4d99u2ic8abj1nv241lh3qsh8i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

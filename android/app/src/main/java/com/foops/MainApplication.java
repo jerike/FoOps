@@ -11,7 +11,6 @@ import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.actionsheet.ActionSheetPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.psykar.cookiemanager.CookieManagerPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.facebook.react.ReactNativeHost;
@@ -43,7 +42,6 @@ public class MainApplication extends Application implements ReactApplication {
             new ImagePickerPackage(),
             new MapsPackage(),
             new VectorIconsPackage(),
-            new CookieManagerPackage(),
             new AsyncStoragePackage(),
             new RNGestureHandlerPackage()
       );
