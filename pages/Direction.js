@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,SafeAreaView,StyleSheet,Modal,Platform } from 'react-native';
+import { Text, View,SafeAreaView,StyleSheet,Modal,Platform,Linking } from 'react-native';
 import {Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import '../global.js';
@@ -40,7 +40,13 @@ export default class Direction extends React.Component {
       var create_date = this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
       return create_date;
     }
-    
+    _onNavigationStateChange(webViewState){
+      if(webViewState.url.indexOf('intent') != -1){
+          var url = webViewState.url.replace('intent://navlite.app.goo.gl/?link=',"");
+          Linking.openURL(url).catch((err) => console.error('An error occurred', err));
+      }
+      
+    }
     render() {
         const {direction_option} = this.props;
         var latlng = "";
@@ -65,7 +71,7 @@ export default class Direction extends React.Component {
                       }} />
                   </View>
                   <WebView
-                    originWhitelist={['*']}
+                    onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                     geolocationEnabled={true}
                     source={{uri: 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+latlng+'&travelmode=two-wheeler'}}
                   />

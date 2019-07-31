@@ -29,7 +29,8 @@ export default class Home extends React.Component {
         show_loading:false,
         modalVisible:false,
         jump2map:false,
-        toSearch:false
+        toSearch:false,
+        hit_sort:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.selectSort=this.selectSort.bind(this);
@@ -41,6 +42,7 @@ export default class Home extends React.Component {
       this.filter_scooter=this.filter_scooter.bind(this);
       this.getStorage=this.getStorage.bind(this);
       this.filter_scooter_by_search=this.filter_scooter_by_search.bind(this);
+      this.SortType=this.SortType.bind(this);
     }
     componentWillMount() {
         global.page = 'Home';
@@ -243,7 +245,12 @@ export default class Home extends React.Component {
         }
     }
     selectSort(selectedIndex){
-        this.setState({show_loading:true});
+        if(!this.state.hit_sort){
+            this.setState({show_loading:true,hit_sort:true});
+            setTimeout(()=>{this.SortType(selectedIndex)},10);
+        }
+    }
+    SortType(selectedIndex){
         var scooter = this.state.scooter;
         var sort = this.state.selectedIndex2_sort;
         if(parseInt(selectedIndex) === this.state.selectedIndex2){
@@ -290,8 +297,10 @@ export default class Home extends React.Component {
                 });
             break;
         }
+        setTimeout(()=>{this.setState({show_loading:false,hit_sort:false})},100);
         this.setState({scooter:scooter,selectedIndex2:selectedIndex});
     }
+
     onClear(){
         global.search = "";
         this.setState({search:"",toSearch:false});
@@ -440,9 +449,6 @@ export default class Home extends React.Component {
             var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
             var power_msg = show_power;
             var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
-            if(parseInt(i) + 1 === scooter.length){
-                show_loading = false;
-            }
             return (
                 <TouchableOpacity key={i} onPress={() =>this.showDetail(m.id)}> 
                     <Card containerStyle={styles.cardContainerStyle} key={i} >

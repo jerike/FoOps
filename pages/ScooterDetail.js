@@ -47,6 +47,7 @@ export default class ScooterDetail extends React.Component {
       this.onPressTask=this.onPressTask.bind(this);
       this.removeRemark=this.removeRemark.bind(this);
       this.confirm_controller=this.confirm_controller.bind(this);
+      this.ViewViolationRecord=this.ViewViolationRecord.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -55,9 +56,9 @@ export default class ScooterDetail extends React.Component {
     }
     componentDidMount(){
       this.getStorage().done();
-      if (Platform.OS === 'android') {
-         BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
-      }
+      if (Platform.OS === 'android') {  
+            BackHandler.addEventListener('hardwareBackPress', ()=>{return true;});
+      } 
     }
     getStorage = async () => {
         try {
@@ -106,7 +107,6 @@ export default class ScooterDetail extends React.Component {
       })
       .then((response) => response.json())
       .then((json)=>{
-          console.log(json);
           this.setState({
               acc:json.data['acc']
           });
@@ -343,7 +343,6 @@ export default class ScooterDetail extends React.Component {
           }
       })
       .then((json) => {
-        console.warn(json);
         if(json.code == 1){
           var msg = "";
           switch(type){
@@ -467,6 +466,9 @@ export default class ScooterDetail extends React.Component {
         }
       });
     }
+    ViewViolationRecord(){
+      this.props.navigation.navigate("ViolationRecord",{scooter:this.state.scooter});
+    }
     render() {
         const {search,selectedIndex,toSearch,scooter} = this.state;
 
@@ -572,7 +574,7 @@ export default class ScooterDetail extends React.Component {
         return (
         <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
             <Header
-              centerComponent={<Text color='#ffffff'>{scooter.plate}</Text>}
+              centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.navigate(backpage)}/></TouchableHighlight>}
               containerStyle={styles.header}
             />
@@ -642,7 +644,7 @@ export default class ScooterDetail extends React.Component {
                   )}
                   <View style={{justifyContent:'center',marginTop:20}}>
                     <View style={{justifyContent:'center'}}>
-                      <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} />
+                      <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} onPress={()=>{this.ViewViolationRecord()}} />
                     </View>
                   </View>
 

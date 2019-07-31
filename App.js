@@ -7,6 +7,7 @@ import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 import Logout from './pages/Logout';
 import Dashboard from './pages/Dashboard';
+import ViolationRecord from './pages/ViolationRecord';
 import TimeOut from './pages/timeout';
 import { Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -58,6 +59,7 @@ const HomeStack=createStackNavigator(
     Dashboard: {screen:Dashboard},
     Map:{screen: MapScreen},
     ScooterDetail:{screen: ScooterDetail},
+    ViolationRecord:{screen: ViolationRecord},
     TimeOut:{screen: TimeOut},
 
   },{
