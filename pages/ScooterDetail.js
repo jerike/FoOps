@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import Maintenance from './Maintenance'
+import FastRecord from './FastRecord'
 import Violation from './Violation'
 import Direction from './Direction'
 import Controller from './Controller'
@@ -26,6 +27,7 @@ export default class ScooterDetail extends React.Component {
         violation_modal:false,
         direction_modal:false,
         controller_modal:false,
+        fastrecord_modal:false,
         sel_condition:[],
         top_other:"",
         medium_other:"",
@@ -34,7 +36,8 @@ export default class ScooterDetail extends React.Component {
         operator_id:"",
         tasks:[],
         task:"",
-        remark:null
+        remark:null,
+        other_summaries:[]
       }
       this.newScooter=this.newScooter.bind(this);
       this.updateIndex = this.updateIndex.bind(this);
@@ -181,7 +184,9 @@ export default class ScooterDetail extends React.Component {
       );
     }
     onChangeOther(key,value){
-      this.setState({[key]:value});
+      var other_summaries = this.state.other_summaries;
+      other_summaries[key] = value;
+      this.setState({other_summaries:other_summaries});
     }
     updateCondition(id){
         var formData  = new FormData();
@@ -192,13 +197,20 @@ export default class ScooterDetail extends React.Component {
         formData.append("zendesk", "");
 
         var sel_condition = this.state.sel_condition;
+        if(sel_condition.indexOf(700) != -1 && sel_condition.length == 1){
+          Alert.alert('⚠️ Warning',"車輛下限需要勾選車況原因！",[{text: '好的！'}]);
+          return false;
+        }
         sel_condition && sel_condition.map(function(m,i){
             formData.append("scooter_status[]", m);
         });
-
-        formData.append("top_other", this.state.top_other);
-        formData.append("medium_other", this.state.medium_other);
-        formData.append("low_other", this.state.low_other);
+        var other_summaries = this.state.other_summaries;
+        other_summaries && other_summaries.map(function(m,i){
+            if(m != null){
+              formData.append("other_summary_id[]", i);
+              formData.append("other_summary_value[]", m);
+            }
+        });
 
         fetch(API+'/ticket',{
             method: 'POST',
@@ -252,6 +264,9 @@ export default class ScooterDetail extends React.Component {
           this.setState({sel_condition:scooter_conditions});
       }
       this.showModal('maintain_modal');
+    }
+    showFastRecord(){
+      this.showModal('fastrecord_modal');
     }
     showViolation(){
       this.showModal('violation_modal');
@@ -526,6 +541,11 @@ export default class ScooterDetail extends React.Component {
           onChangeOther:this.onChangeOther,
           updateCondition:this.updateCondition
         }
+        const fastrecord_option={
+          onClose:this.onClose,
+          fastrecord_modal:this.state.fastrecord_modal,
+          scooter:this.state.scooter,
+        }
         const violation_option={
           onClose:this.onClose,
           violation_modal:this.state.violation_modal,
@@ -576,6 +596,7 @@ export default class ScooterDetail extends React.Component {
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.navigate(backpage)}/></TouchableHighlight>}
+              rightComponent={<Button  key={"btn_1"} icon={<Icon name="directions" size={25} color="#fff"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />}
               containerStyle={styles.header}
             />
             {this.state.show_loading &&(
@@ -585,6 +606,7 @@ export default class ScooterDetail extends React.Component {
               </View>
             )}
             <Maintenance  maintain_option={maintain_option}/>
+            <FastRecord fastrecord_option={fastrecord_option} />
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
@@ -642,7 +664,7 @@ export default class ScooterDetail extends React.Component {
                       <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
                     </View>
                   )}
-                  <View style={{justifyContent:'center',marginTop:20}}>
+                   <View style={{justifyContent:'center',marginTop:20}}>
                     <View style={{justifyContent:'center'}}>
                       <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} onPress={()=>{this.ViewViolationRecord()}} />
                     </View>
@@ -668,13 +690,12 @@ export default class ScooterDetail extends React.Component {
                   <Badge status="error" containerStyle={{position:'absolute',top:0,right:0}} />
                   </View>
                 ):(
-                  <Button  key={"btn_0"} icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
+                  <Button  key={"btn_0"} icon={<Icon name="tasks" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.onPressTask(scooter.id)} />
                 )}
-                
-                <Button  key={"btn_1"} icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
-                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showViolation()} />
                 <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
-                <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:1,borderColor:'rgba(191, 191, 191,0.9)',borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
+                <Button  key={"btn_4"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()} />
+                <Button  key={"btn_5"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
               </View>
         </SafeAreaView>
          

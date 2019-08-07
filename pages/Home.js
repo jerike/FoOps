@@ -30,7 +30,8 @@ export default class Home extends React.Component {
         modalVisible:false,
         jump2map:false,
         toSearch:false,
-        hit_sort:false
+        hit_sort:false,
+        select_sort:null
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.selectSort=this.selectSort.bind(this);
@@ -205,7 +206,9 @@ export default class Home extends React.Component {
         });
     }
     after_reload_scooter(){
-        
+        if(this.state.select_sort != null){
+            this.setState({selectedIndex2:null},()=>{this.SortType(this.state.select_sort)});
+        }
         this.filter_scooter_by_search();
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
@@ -246,7 +249,7 @@ export default class Home extends React.Component {
     }
     selectSort(selectedIndex){
         if(!this.state.hit_sort){
-            this.setState({show_loading:true,hit_sort:true});
+            this.setState({show_loading:true,hit_sort:true,select_sort:selectedIndex});
             setTimeout(()=>{this.SortType(selectedIndex)},10);
         }
     }
@@ -348,8 +351,12 @@ export default class Home extends React.Component {
         var condition = this.state.condition;
         condition.map(function(m, i){
             if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
+                var description = m.description;
+                if(m.name.indexOf('(option)') != -1){
+                    description = m.description + "_option";
+                }
+              
+                result = description;
             }
         });
         return result;
@@ -424,14 +431,15 @@ export default class Home extends React.Component {
             }
             if(m.ticket){
               if(m.ticket.scooter_conditions){
+                console.warn(m.ticket.other_conditions);
                 m.ticket.scooter_conditions.map(function(d,k){
                   var description = this.getConditions(d);
-                    if(description == "其他"){
+                    if(description.indexOf("_option") != -1){
                         // console.log(m.ticket.other_conditions);
                         m.ticket.other_conditions.map(function(s,i){
                             if(s.id == d){
 
-                                conditions.push(s.summary);
+                                conditions.push(description.replace("_option",":")+s.summary);
                             }
                         });
                     }else{

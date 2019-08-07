@@ -202,10 +202,15 @@ export default class MapScreen extends React.Component {
     }
     getConditions(id){
         var result = "";
-        this.state.condition.map(function(m, i){
+        var condition = this.state.condition;
+        condition.map(function(m, i){
             if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
+                var description = m.description;
+                if(m.name.indexOf('(option)') != -1){
+                    description = m.description + "_option";
+                }
+              
+                result = description;
             }
         });
         return result;
@@ -287,18 +292,19 @@ export default class MapScreen extends React.Component {
                 if(m.ticket.scooter_conditions){
                   m.ticket.scooter_conditions.map(function(d,k){
                     var description = this.getConditions(d);
-                      if(description == "其他"){
+                      if(description.indexOf("_option") != -1){
                           // console.log(m.ticket.other_conditions);
                           m.ticket.other_conditions.map(function(s,i){
                               if(s.id == d){
 
-                                  conditions.push(s.summary);
+                                  conditions.push(description.replace("_option",":")+s.summary);
                               }
                           });
                       }else{
                           conditions.push(description);
                       }
                   }.bind(this));
+
                   
                 }
 

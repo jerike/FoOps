@@ -109,32 +109,26 @@ export default class Maintenance extends React.Component {
           scooter_conditions = SCooter_ticket.scooter_conditions;
         }
         var condition_list = condition.map(function(m,i){
-            var description = m.description
-            var other_input = <View></View>;
-            if(description == "其他"){
-              var summary = "";
-              if(other_conditions != undefined){
-                other_conditions.map(function(s,k){
-                    if(parseInt(s.id) == parseInt(m.id)){
-                        summary = s.summary;
-                    }
-                });
-              }
-              switch(m.severe_id){
-                case 1:
-                  other_input = <Input defaultValue={summary} placeholder="請輸入原因" name="top_other" containerStyle={{width:200}} onChangeText={(text) => maintain_option.onChangeOther('top_other',text)}  inputStyle={{fontSize:13,height:15}}/>
-                break;
-                case 2:
-                  other_input = <Input defaultValue={summary} placeholder="請輸入原因" name="medium_other" containerStyle={{width:200}} onChangeText={(text) => maintain_option.onChangeOther('medium_other',text)} inputStyle={{fontSize:13,height:15}}/>
-                break;
-                case 3:
-                  other_input = <Input defaultValue={summary} placeholder="請輸入原因" name="low_other" containerStyle={{width:200}} onChangeText={(text) => maintain_option.onChangeOther('low_other',text)} inputStyle={{fontSize:13,height:15}}/>
-                break;
-              }
+          if(m.id < 600 || m.status == 0){
+            return true;
+          }
+          var description = m.description
+          var other_input = <View></View>;
+          
+          if(m.name.indexOf('(option)') != -1){
+            var summary = "";
+            if(other_conditions != undefined){
+              other_conditions.map(function(s,k){
+                  if(parseInt(s.id) == parseInt(m.id)){
+                      summary = s.summary;
+                  }
+              });
             }
-            var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
+            other_input = <Input type="text" defaultValue={summary} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  onChangeText={(text) => maintain_option.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
+          }
+          var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
 
-            return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>maintain_option.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
+          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>maintain_option.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
         });
         return (
             <Modal

@@ -9,7 +9,7 @@ const work_area = []
 for(var i=0 ; i<6 ; i++){
     work_area.push({area:"區域"+(parseInt(i)+1),value:"KS_Zone"+(parseInt(i)+1)})
 } 
-const severe_title=["優先處理","次要處理","待處理","正常"];
+const severe_title=["優先處理",null,"處理中","正常"];
 
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
 
@@ -309,6 +309,7 @@ export default class Filter extends React.Component {
         });
     }
     after_reload_scooter(){
+      console.warn('load after_reload_scooter');
       var promise1 = new Promise((resolve,reject)=>{
         this.setState({scooter:global.scooters});
         resolve(0);
@@ -362,6 +363,9 @@ export default class Filter extends React.Component {
         }.bind(this));
         var severe_btns = []
         severe_title.map(function(m,i){
+          if(m == null){
+            return true;
+          }
             var index = parseInt(i) + 1;
             var btn = <Button
               key={i}
