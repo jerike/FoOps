@@ -124,7 +124,7 @@ export default class Maintenance extends React.Component {
                   }
               });
             }
-            other_input = <Input type="text" defaultValue={summary} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  onChangeText={(text) => maintain_option.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
+            other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => maintain_option.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
           }
           var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
 

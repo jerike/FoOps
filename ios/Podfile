@@ -27,9 +27,9 @@ target 'FoOps' do
     pod 'Folly', :podspec => "#{rn_path}/third-party-podspecs/Folly.podspec"
 
     pod 'react-native-maps', path: rn_maps_path
-    pod 'react-native-google-maps', path: rn_maps_path  # Uncomment this line if you want to support GoogleMaps on iOS
-  #  pod 'GoogleMaps'  # Uncomment this line if you want to support GoogleMaps on iOS
-   # pod 'Google-Maps-iOS-Utils' # Uncomment this line if you want to support GoogleMaps on iOS
+    pod 'react-native-google-maps', path: rn_maps_path
+    pod 'GoogleMaps'  
+    pod 'Google-Maps-iOS-Utils' 
     
 #  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
@@ -40,9 +40,9 @@ target 'FoOps' do
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
 
-  pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
+  #pod 'RNImageCropPicker', :path => '../node_modules/react-native-image-crop-picker'
 
-  pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
+  #pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
 
 end
 post_install do |installer|

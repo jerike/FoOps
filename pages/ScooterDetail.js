@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS,ScrollView,ActivityIndicator,BackHandler } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
+import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input,Divider } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
@@ -272,6 +272,7 @@ export default class ScooterDetail extends React.Component {
       this.showModal('violation_modal');
     }
     showDirection(){
+      // console.warn('open direction');
       this.showModal('direction_modal');
     }
     showController(){
@@ -592,11 +593,10 @@ export default class ScooterDetail extends React.Component {
         }
         var backpage = (global.page != undefined) ? global.page : "Home" ;
         return (
-        <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
+        <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.navigate(backpage)}/></TouchableHighlight>}
-              rightComponent={<Button  key={"btn_1"} icon={<Icon name="directions" size={25} color="#fff"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />}
               containerStyle={styles.header}
             />
             {this.state.show_loading &&(
@@ -610,8 +610,13 @@ export default class ScooterDetail extends React.Component {
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
-            <ScrollView>
-                <Card key={"card0"} title="車輛狀態" titleStyle={{fontSize:12,color:'#333'}} >
+            <ScrollView style={{backgroundColor: '#EFF1F4'}}>
+                <Card key={"card0"} >
+                  <TouchableHighlight style={{width:25,position:'absolute',right:0,top:-5,textAlign:'center'}} onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#f00" /></TouchableHighlight>
+                  <View style={{justifyContent:'center',alignItems:'center'}}>
+                      <Text>車輛狀態</Text>
+                  </View>
+                  <Divider style={{marginTop:10,marginBottom:10}} />
                   <View style={{flexDirection:'row',justifyContent:'space-between'}}>
                     <View style={{flexDirection:'row',justifyContent:'space-around'}}>
                       <Icon name="motorcycle" size={19} style={{width:24}} />
@@ -683,7 +688,7 @@ export default class ScooterDetail extends React.Component {
                 )}
                 
             </ScrollView>
-              <View style={{flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
+              <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
                 {sel_task ? (
                   <View>
                   <Button key={"btn_0"}  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
@@ -693,7 +698,7 @@ export default class ScooterDetail extends React.Component {
                   <Button  key={"btn_0"} icon={<Icon name="tasks" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.onPressTask(scooter.id)} />
                 )}
                 <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
-                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:1,borderColor:'rgba(191, 191, 191,0.9)',borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
+                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
                 <Button  key={"btn_4"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()} />
                 <Button  key={"btn_5"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
               </View>

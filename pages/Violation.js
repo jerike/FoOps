@@ -174,7 +174,7 @@ export default class Violation extends React.Component {
         if(itemIndex == 1 || itemIndex == 2){
           this.setState({showSubpick:true});
         }else{
-          this.setState({showSubpick:false});
+          this.setState({select_subtype:"",showSubpick:false});
         }
     }
     PickerSub(itemValue){
@@ -286,33 +286,64 @@ export default class Violation extends React.Component {
                         )}
                     </View>
                     <View style={{justifyContent:'center',alignItems:'center'}}><Text>⚠️ 請選擇違規項目</Text></View>
-
-                    <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}>
-                      <Picker
-                        selectedValue={this.state.select_type}
-                        style={{height: 20, width: '96%'}}
-                        itemStyle={{fontSize:12}}
-                        onValueChange={(itemValue, itemIndex) =>
-                          this.PickerMain(itemIndex,itemValue)
-                        }>
-                        {this.state.MainCate.map(function(m,i){
-                          return <Picker.Item key={"m"+i} label={m} value={m}  />
-                        })}
-                      </Picker>
-                      {this.state.showSubpick &&(
+                    {Platform.OS === 'ios' && (
+                      <View style={{padding:10,justifyContent:'center'}}><Text style={{textAlign:'center',color:'#f00',marginBottom:10}}>{this.state.select_type}</Text><Text  style={{textAlign:'center',color:'#666',fontSize:10}}>{this.state.select_subtype}</Text></View>
+                    )}
+                    {Platform.OS === 'android' ? (
+                      <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}>
                         <Picker
-                          selectedValue={this.state.select_subtype}
-                          style={{height: 20, width: '96%',marginTop:20}}
+                          selectedValue={this.state.select_type}
+                          style={{height: 20, width: '96%'}}
                           itemStyle={{fontSize:12}}
                           onValueChange={(itemValue, itemIndex) =>
-                            this.PickerSub(itemValue)
+                            this.PickerMain(itemIndex,itemValue)
                           }>
-                          {this.state.SubCate.map(function(m,i){
-                            return <Picker.Item key={"s"+i} label={m} value={m}  />
+                          {this.state.MainCate.map(function(m,i){
+                            return <Picker.Item key={"m"+i} label={m} value={m}  />
                           })}
                         </Picker>
-                      )}
-                    </View>
+                        {this.state.showSubpick &&(
+                          <Picker
+                            selectedValue={this.state.select_subtype}
+                            style={{height: 20, width: '96%',marginTop:20}}
+                            itemStyle={{fontSize:12}}
+                            onValueChange={(itemValue, itemIndex) =>
+                              this.PickerSub(itemValue)
+                            }>
+                            {this.state.SubCate.map(function(m,i){
+                              return <Picker.Item key={"s"+i} label={m} value={m}  />
+                            })}
+                          </Picker>
+                        )}
+                      </View>
+                    ):(
+                      <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                        <Picker
+                          selectedValue={this.state.select_type}
+                          style={{height: 20, width: '45%'}}
+                          itemStyle={{fontSize:12}}
+                          onValueChange={(itemValue, itemIndex) =>
+                            this.PickerMain(itemIndex,itemValue)
+                          }>
+                          {this.state.MainCate.map(function(m,i){
+                            return <Picker.Item key={"m"+i} label={m} value={m}  />
+                          })}
+                        </Picker>
+                        {this.state.showSubpick &&(
+                          <Picker
+                            selectedValue={this.state.select_subtype}
+                            style={{height: 20, width: '45%'}}
+                            itemStyle={{fontSize:12}}
+                            onValueChange={(itemValue, itemIndex) =>
+                              this.PickerSub(itemValue)
+                            }>
+                            {this.state.SubCate.map(function(m,i){
+                              return <Picker.Item key={"s"+i} label={m} value={m}  />
+                            })}
+                          </Picker>
+                        )}
+                      </View>
+                    )}
                     <View style={{position:'absolute',width:'100%',bottom:0,left:0,zIndex:1}}>
                     {this.state.send_now ? 
                       <Button title="傳送中..."  titleStyle={styles.view_titleStyle} disabled  disabledStyle={{backgroundColor:'#e0e0e0',color:'#7b7b7b'}}/>

@@ -23,7 +23,8 @@ export default class Direction extends React.Component {
           this.setState({positionData:positionData});
         },
         (error: any) => {
-          console.warn('失敗：' + JSON.stringify(error.message))
+          console.warn(error.message);
+          // console.warn('失敗：' + JSON.stringify(error.message))
         }, {
           enableHighAccuracy: true,
           timeout: 20000

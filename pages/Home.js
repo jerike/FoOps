@@ -431,7 +431,6 @@ export default class Home extends React.Component {
             }
             if(m.ticket){
               if(m.ticket.scooter_conditions){
-                console.warn(m.ticket.other_conditions);
                 m.ticket.scooter_conditions.map(function(d,k){
                   var description = this.getConditions(d);
                     if(description.indexOf("_option") != -1){
@@ -473,7 +472,7 @@ export default class Home extends React.Component {
         }.bind(this));
         return (
         <SafeAreaView style={{flex: 1,justifyContent: 'center',
-        alignItems: 'center', backgroundColor: '#F5F5F5'}}>
+        alignItems: 'center',backgroundColor: '#ff5722'}}>
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
               centerComponent={<SearchBar
@@ -491,46 +490,49 @@ export default class Home extends React.Component {
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={styles.header}
             />
-            <Filter filter_option={filter_option}/>
-            <ButtonGroup
-              onPress={this.updateIndex}
-              selectedIndex={selectedIndex}
-              buttons={buttons}
-              containerStyle={styles.btn_containerStyle}
-              buttonStyle={styles.btn_buttonStyle}
-              selectedButtonStyle={styles.btn_selectedButtonStyle}
-            />
-            <ButtonGroup
-              onPress={this.selectSort}
-              selectedIndex={selectedIndex2}
-              buttons={buttons2}
-              containerStyle={styles.btn2_containerStyle}
-              buttonStyle={styles.btn2_buttonStyle}
-              selectedButtonStyle={styles.btn2_selectedButtonStyle}
-              textStyle={styles.btn2_textStyle}
-              selectedTextStyle={styles.btn2_selectedTextStyle}
-            />
-            {show_loading &&(
-              <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                <Text style={{color:'#fff'}}>資料獲取中...</Text>
-              </View>
-            )}
+            <View style={{flex: 1,justifyContent: 'center',
+        alignItems: 'center',backgroundColor:'#F5F5F5'}}>
+                <Filter filter_option={filter_option}/>
+                <ButtonGroup
+                  onPress={this.updateIndex}
+                  selectedIndex={selectedIndex}
+                  buttons={buttons}
+                  containerStyle={styles.btn_containerStyle}
+                  buttonStyle={styles.btn_buttonStyle}
+                  selectedButtonStyle={styles.btn_selectedButtonStyle}
+                />
+                <ButtonGroup
+                  onPress={this.selectSort}
+                  selectedIndex={selectedIndex2}
+                  buttons={buttons2}
+                  containerStyle={styles.btn2_containerStyle}
+                  buttonStyle={styles.btn2_buttonStyle}
+                  selectedButtonStyle={styles.btn2_selectedButtonStyle}
+                  textStyle={styles.btn2_textStyle}
+                  selectedTextStyle={styles.btn2_selectedTextStyle}
+                />
+                {show_loading &&(
+                  <View style={styles.loading}>
+                    <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                    <Text style={{color:'#fff'}}>資料獲取中...</Text>
+                  </View>
+                )}
 
 
 
-            <ScrollView style={{width:'100%'}}  refreshControl={
-              <RefreshControl
-                refreshing={this.state.refreshing}
-                onRefresh={this._onRefresh}
-              />
-            }>
-                {open ? items : []
-                }
-            </ScrollView>
-            <View style={{position:'absolute',bottom:0,right:0,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
-               <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
-             </View>
+                <ScrollView style={{width:'100%'}}  refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh}
+                  />
+                }>
+                    {open ? items : []
+                    }
+                </ScrollView>
+                <View style={{position:'absolute',bottom:0,right:0,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                   <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+                </View>
+            </View>
         </SafeAreaView>
          
         );
