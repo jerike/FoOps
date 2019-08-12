@@ -90,7 +90,7 @@ PODS:
     - React/Core
     - React/fishhook
     - React/RCTBlob
-  - RNSVG (9.5.1):
+  - RNSVG (9.6.2):
     - React
   - yoga (0.59.9.React)
 
@@ -154,7 +154,7 @@ SPEC CHECKSUMS:
   react-native-google-maps: 568cb03d0eae7fef93626f65d05be55642404ed4
   react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
   react-native-webview: 26d8993b090ca5d59eb9a9466dcb8291baa3223e
-  RNSVG: 0eb087cfb5d7937be93c45b163b26352a647e681
+  RNSVG: ff9b094e39dd4a437ebe17d1c7ceed286e75f426
   yoga: 03ff42a6f223fb88deeaed60249020d80c3091ee
 
 PODFILE CHECKSUM: 823e8b7d5818d906aaadd102e5799ee6a36aec3d

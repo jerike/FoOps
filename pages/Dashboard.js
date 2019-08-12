@@ -198,7 +198,7 @@ export default class Dashboard extends React.Component {
         };
 
         return (
-            <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center'}}>
+            <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#ff5722'}}>
                 {this.state.show_loading &&(
                   <View style={styles.loading}>
                     <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
@@ -207,11 +207,11 @@ export default class Dashboard extends React.Component {
                 )}
                 <Header
                   leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
-                  centerComponent={<Text color={'#ffffff'}>Dashboard</Text>}
+                  centerComponent={{ text: '導航頁', style: { color: '#fff' } }}
                   rightComponent={<Icon name="hand-point-right" size={20} color='#fff' onPress={()=>{this.props.navigation.navigate('Home');}}/>}
                   containerStyle={styles.header}
                 />
-                <ScrollView style={{flexDirection:'column',width:'100%' }}>
+                <ScrollView style={{flexDirection:'column',width:'100%',backgroundColor:'#fff' }}>
                 {show_ss &&(
                     <View style={{justifyContent:'center',alignItems:'center',marginTop:20}}>
                       <Text>
@@ -232,7 +232,7 @@ export default class Dashboard extends React.Component {
                     flexDirection:'row',
                     justifyContent:'space-around',
                     alignItems:'center',
-                    paddingRight:20,
+                    paddingRight:20
 
                   }}>
                   {
@@ -249,7 +249,7 @@ export default class Dashboard extends React.Component {
                 </View>
 
                 </ScrollView>
-                <View style={{width:'100%',marginBottom:10,marginLeft:10,flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
+                <View style={{width:'100%',paddingBottom:10,paddingLeft:10,flexDirection:'row',justifyContent:'flex-start',alignItems:'center',backgroundColor:'#fff'}}>
                     <View style={styles.circle} >
                        <TouchableOpacity onPress={()=>this.fetch_scooters()}>
                         { this.state.load_data ?(

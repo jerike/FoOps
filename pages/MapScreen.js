@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,BackHandler,Platform,TouchableOpacity,ActivityIndicator } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Image,Modal,TouchableHighlight,BackHandler,Platform,TouchableOpacity,ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
+import { Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
 import MapView, { Marker,PROVIDER_GOOGLE,Polygon,Polyline,Callout } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
@@ -15,9 +15,9 @@ import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
 import isEqual from 'lodash.isequal'
 
-const marker1 = require("../img/marker-normal.png");
-const marker2 = require("../img/marker-green.png");
-const marker3 = require("../img/marker-gray.png");
+const marker_normal = require("../img/marker-normal.png");
+const marker_green = require("../img/marker-normal-green.png");
+const marker_gray = require("../img/marker-normal-gray.png");
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 var t = 0;
@@ -51,6 +51,8 @@ export default class MapScreen extends React.Component {
       this.fetch_scooters=this.fetch_scooters.bind(this);
       this.filter_scooter=this.filter_scooter.bind(this);
       this.updateSearch=this.updateSearch.bind(this);
+      this.stopRendering=this.stopRendering.bind(this);
+      this.startRendering=this.startRendering.bind(this);
     }
     componentWillMount() {
         var scooter = global.scooter;
@@ -81,21 +83,25 @@ export default class MapScreen extends React.Component {
         }
     }
     componentWillReceiveProps(nextProps: any) {
-        if (!isEqual(this.props, nextProps)) {
-            this.setState({
-                tracksViewChanges: true,
-            }, () => {
-                this.setState({tracksViewChanges: false})
-            })
-        }
+      // if (Platform.OS === 'android') {
+        // if (!isEqual(this.props, nextProps)) {
+        //     this.setState({
+        //         tracksViewChanges: true,
+        //     }, () => {
+        //         this.setState({tracksViewChanges: false})
+        //     })
+        // }
+      // }
     }
 
     componentDidUpdate() {
-        if (this.state.tracksViewChanges) {
-            this.setState({
-                tracksViewChanges: false,
-            })
-        }
+      // if (Platform.OS === 'android') {
+        // if (this.state.tracksViewChanges) {
+        //     this.setState({
+        //         tracksViewChanges: false,
+        //     })
+        // }
+      // }
     }
     getPosition(){
       Geolocation.getCurrentPosition(
@@ -259,6 +265,7 @@ export default class MapScreen extends React.Component {
         return result;
     }
     onMarkerClick = (id,lat,lng) => {
+      this.startRendering();
       this.setState({nearScooter:null,selectScooter:id,clickMarker:true});
       var nearScooter = [];
       var LatLng = {};
@@ -341,6 +348,7 @@ export default class MapScreen extends React.Component {
       
     }
     CloseCard(){
+      this.startRendering();
       this.setState({nearScooter:null,clickMarker:false,selectMarker:null});
     }
     getFirstLatLng(latlng){
@@ -385,6 +393,7 @@ export default class MapScreen extends React.Component {
         }
 
         this.setState({selectMarker:markerData.id});
+        this.startRendering();
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
@@ -392,6 +401,7 @@ export default class MapScreen extends React.Component {
             longitudeDelta: 0.001
         };
         this.setState({setCenter:r});
+        
         // mapRef.animateToRegion(r);
     }
     filter_scooter(scooter){
@@ -403,6 +413,15 @@ export default class MapScreen extends React.Component {
         }
         this.setState({modalVisible: visible});
     }
+    stopRendering = () =>
+    {
+        this.setState({ tracksViewChanges: false });
+    }
+    startRendering = () =>
+    {
+        this.setState({ tracksViewChanges: true });
+    }
+
     render() {
         const {selectedIndex,toSearch,clickMarker,geofence,changed} = this.state;
         var scooter = this.state.scooter;
@@ -452,9 +471,9 @@ export default class MapScreen extends React.Component {
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
                   {isActive ? 
-                    <Image source={require('../img/marker-gray.png')} style={{ width: 40, height: 53 }} />
+                    <Image source={require('../img/marker-normal-gray.png')} style={{ width: 40, height: 53 }}  />
                   :
-                    <Image source={require('../img/marker-gray.png')} style={{ width: 30, height: 40 }} />
+                    <Image source={require('../img/marker-normal-gray.png')} style={{ width: 30, height: 40 }}  />
                   }
                 </MapView.Marker>
 
@@ -465,9 +484,9 @@ export default class MapScreen extends React.Component {
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
                   {isActive ? 
-                    <Image source={require('../img/marker-green.png')} style={{ width: 40, height: 53 }} />
+                    <Image source={require('../img/marker-normal-green.png')} style={{ width: 40, height: 53 }}  />
                   :
-                    <Image source={require('../img/marker-green.png')} style={{ width: 30, height: 40 }} />
+                    <Image source={require('../img/marker-normal-green.png')} style={{ width: 30, height: 40 }}  />
                   }
                 </MapView.Marker>
               break;
@@ -477,9 +496,9 @@ export default class MapScreen extends React.Component {
                 marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
                 {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
                   {isActive ? 
-                    <Image source={require('../img/marker-normal.png')} style={{ width: 40, height: 53 }} />
+                    <Image source={require('../img/marker-normal.png')} style={{ width: 40, height: 53 }}  />
                   :
-                    <Image source={require('../img/marker-normal.png')} style={{ width: 30, height: 40 }} />
+                    <Image source={require('../img/marker-normal.png')} style={{ width: 30, height: 40 }}  />
                   }
                 </MapView.Marker>
               break;
@@ -487,6 +506,9 @@ export default class MapScreen extends React.Component {
             markers.push(marker);
 
         }.bind(this));
+        if(this.state.tracksViewChanges){
+          setTimeout(()=>{this.stopRendering()},2000);
+        }
         var setPolyPath=[];
         if(set_polygon){
             var fence = [];
@@ -527,7 +549,7 @@ export default class MapScreen extends React.Component {
         }
 
         return (
-        <SafeAreaView style={{flex: 1, backgroundColor: '#ccc'}}>
+        <SafeAreaView style={{flex: 1, backgroundColor: '#ff5722'}}>
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
               centerComponent={<SearchBar
