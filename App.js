@@ -64,6 +64,9 @@ const HomeStack=createStackNavigator(
 
   },{
     headerMode:'none',
+    defaultNavigationOptions: {
+      gesturesEnabled: false 
+    },
   }
 );
 

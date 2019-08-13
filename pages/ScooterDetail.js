@@ -612,7 +612,7 @@ export default class ScooterDetail extends React.Component {
             <Controller controller_option={controller_option} />
             <ScrollView style={{backgroundColor: '#EFF1F4'}}>
                 <Card key={"card0"} >
-                  <TouchableHighlight style={{width:25,position:'absolute',right:0,top:-5}} onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#f00" /></TouchableHighlight>
+                  <TouchableHighlight style={{width:40,height:25,position:'absolute',right:0,top:-5,paddingLeft:10,zIndex:101}} onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#f00" onPress={()=>this.showDirection()} /></TouchableHighlight>
                   <View style={{justifyContent:'center',alignItems:'center'}}>
                       <Text>車輛狀態</Text>
                   </View>

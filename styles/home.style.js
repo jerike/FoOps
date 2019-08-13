@@ -4,8 +4,6 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     search_container: {
         backgroundColor:'#ff5722',
-        paddingTop:-50,
-
         borderWidth:0,
         borderBottomColor: 'transparent',
         borderTopColor: 'transparent'

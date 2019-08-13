@@ -38,7 +38,8 @@ export default class MapScreen extends React.Component {
         modalVisible:false,
         search:"",
         changed:false,
-        tracksViewChanges: true
+        tracksViewChanges: true,
+        first_loadMarker:true,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -53,6 +54,7 @@ export default class MapScreen extends React.Component {
       this.updateSearch=this.updateSearch.bind(this);
       this.stopRendering=this.stopRendering.bind(this);
       this.startRendering=this.startRendering.bind(this);
+      this.onBackClicked = this._onBackClicked.bind(this);
     }
     componentWillMount() {
         var scooter = global.scooter;
@@ -71,9 +73,20 @@ export default class MapScreen extends React.Component {
     componentDidMount() {
         if (Platform.OS === 'android') {
            BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
+        }else{
+            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
         }
+
         setTimeout(()=>{this.getPosition();},100);
     }
+    componentWillUnmount() {
+        if (Platform.OS === 'ios') {
+           BackHandler.removeEventListener('hardwareBackPress',()=>{});
+        }
+    }
+    _onBackClicked(){
+      return true;
+    } 
     shouldComponentUpdate(nextProps, nextState){
         return shallowCompare(this, nextProps, nextState);
     }   
@@ -326,8 +339,8 @@ export default class MapScreen extends React.Component {
                 LatLng = {
                     latitude: parseFloat(m.location.lat),
                     longitude: parseFloat(m.location.lng),
-                    latitudeDelta: 0.001,
-                    longitudeDelta: 0.001
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005
                 }
               }
               nearScooter.push({
@@ -397,11 +410,11 @@ export default class MapScreen extends React.Component {
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.001
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005
         };
         this.setState({setCenter:r});
-        
+
         // mapRef.animateToRegion(r);
     }
     filter_scooter(scooter){
@@ -427,6 +440,12 @@ export default class MapScreen extends React.Component {
         var scooter = this.state.scooter;
         var search = global.search;
         var set_polygon = this.state.set_polygon;
+        var stop_time = 2000;
+        if(this.state.first_loadMarker){
+          this.setState({first_loadMarker:false});
+        }else{
+          stop_time = 1000;
+        }
         if(toSearch){
             if(search == ""){
               this.state.scooter;
@@ -504,10 +523,9 @@ export default class MapScreen extends React.Component {
               break;
             }
             markers.push(marker);
-
         }.bind(this));
         if(this.state.tracksViewChanges){
-          setTimeout(()=>{this.stopRendering()},2000);
+          setTimeout(()=>{this.stopRendering()},stop_time);
         }
         var setPolyPath=[];
         if(set_polygon){
