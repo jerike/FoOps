@@ -4,7 +4,8 @@ import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,CheckBox,Slider } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
-import MultiSlider from '@ptomasroos/react-native-multi-slider'
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import shallowCompare from 'react-addons-shallow-compare';
 const work_area = [] 
 for(var i=0 ; i<6 ; i++){
     work_area.push({area:"區域"+(parseInt(i)+1),value:"KS_Zone"+(parseInt(i)+1)})
@@ -43,6 +44,8 @@ export default class Filter extends React.Component {
       this.onChangeSevere=this.onChangeSevere.bind(this);
       this.get_power_change=this.get_power_change.bind(this);
       this.get_days_change=this.get_days_change.bind(this);
+      this.set_power_change=this.set_power_change.bind(this);
+      this.set_days_change=this.set_days_change.bind(this);
       this.get_scooter_in_work_area=this.get_scooter_in_work_area.bind(this);
       this.get_scooter_by_severe=this.get_scooter_by_severe.bind(this);
       this.get_scooter_by_status=this.get_scooter_by_status.bind(this);
@@ -55,10 +58,27 @@ export default class Filter extends React.Component {
       if(global.select_severe != undefined){
         this.onChangeSevere(global.select_severe);
       }
+      // if(global.powerSliderValue != undefined){
+      //   var save_power = global.powerSliderValue;
+      //   console.warn(save_power);
+      //   this.setState({powerSliderValue:save_power,power_min:save_power[0],power_max:save_power[1]});
+      // }
+      // if(global.daysSliderValue != undefined){
+      //   var save_day = global.daysSliderValue;
+      //   console.warn(save_day);
+      //   this.setState({daysSliderValue:save_day,day_min:save_day[0],day_max:save_day[1]});
+      // }
+      // this.setState({
+      //   sel_severe_data:global.sel_severe_data,
+      //   sel_scooter_status:global.sel_scooter_status,
+      //   sel_task:global.sel_task,
+      //   sel_work_area:global.sel_work_area,
+      // });
+
     }
     componentDidMount(){
       // this.getStorage();
-      this.setState({scooter:global.scooters});
+      this.setState({scooter:global.scooters},()=>{this.after_reload_scooter()});
     }
     updateIndex (selectedIndex) {
       this.setState({selectedIndex})
@@ -79,9 +99,10 @@ export default class Filter extends React.Component {
     // }
     onChangeTask(index){
       this.show_loading();
-        this.setState({sel_task:index}, () => {
-            this.after_reload_scooter();
-        });
+      global.sel_task = index;
+      this.setState({sel_task:index}, () => {
+          this.after_reload_scooter();
+      });
     }
     // getStorage = async () => {
     //     try {
@@ -96,7 +117,7 @@ export default class Filter extends React.Component {
     // }
 
     filter_scooter_by_task(){
-        if(this.state.sel_task){
+        if(global.sel_task != undefined && global.sel_task){
 
             var local_task = global.task;
             var task = [];
@@ -116,7 +137,15 @@ export default class Filter extends React.Component {
         }
     }
     get_power_change(value){
+        global.powerSliderValue = value;
+        this.setState({powerSliderValue:value});
+        this.setState({power_min:value[0],power_max:value[1]});
+    }
+    set_power_change(value){
         this.show_loading();
+        global.powerSliderValue = value;
+        global.power_min = value[0];
+        global.power_max = value[1];
         this.setState({powerSliderValue:value});
         this.setState({power_min:value[0],power_max:value[1]},()=>{
           this.after_reload_scooter();
@@ -139,8 +168,16 @@ export default class Filter extends React.Component {
         this.setState({ scooter:result });
     }
     get_days_change(value){
+      global.daysSliderValue = value;
+      // this.setState({daysSliderValue:value});
+      global.day_min = value[0];
+      global.day_max = value[1];
+    }
+    set_days_change(value){
         this.show_loading();
-        this.setState({daysSliderValue:value});
+        global.daysSliderValue = value;
+        global.day_min = value[0];
+        global.day_max = value[1];
         this.setState({day_min:value[0],day_max:value[1]},()=>{
           this.after_reload_scooter();
         });
@@ -149,14 +186,14 @@ export default class Filter extends React.Component {
         var result = new Array();
         this.state.scooter.map(function(m, i){
             var pushed = true;
-            if(this.state.day_max == 100){
-                if(m.range_days >= this.state.day_min){
+            if(global.day_max == 100){
+                if(m.range_days >= global.day_min){
                   pushed = true;
                 }else{
                   pushed = false;
                 }
             }else{
-                if(m.range_days >= this.state.day_min && m.range_days <= this.state.day_max){
+                if(m.range_days >= global.day_min && m.range_days <= global.day_max){
                     pushed = true;
                 }else{
                   pushed = false;
@@ -173,15 +210,16 @@ export default class Filter extends React.Component {
         this.show_loading();
         // 帶入區域內經緯度資料
         area = (this.state.sel_work_area == area) ? null : area;
+        global.sel_work_area = area;
         this.setState({sel_work_area:area}, () => {
             this.after_reload_scooter();
         });
 
     }
     get_scooter_in_work_area(){
-        var area = this.state.sel_work_area;
+        var area = global.sel_work_area;
         var result = [];
-        if(area != null){
+        if(area != undefined && area != null){
             fetch(global.API+'/scooter/work_area/'+area,{
                   method: 'GET'
               })
@@ -261,12 +299,13 @@ export default class Filter extends React.Component {
         this.show_loading();
         e = (this.state.sel_severe_data == e) ? null : e;
         global.select_severe = undefined;
+        global.sel_severe_data = e;
         this.setState({sel_severe_data:e}, () => {
             this.after_reload_scooter();
         });
     }
     get_scooter_by_severe(){
-        var severe = this.state.sel_severe_data;
+        var severe =  global.sel_severe_data;
         var result = [];
         if(severe != null){
             this.state.scooter.map(function(m, i){
@@ -281,14 +320,15 @@ export default class Filter extends React.Component {
     onChangeScooterStatus(type){
         this.show_loading();
         type = (this.state.sel_scooter_status == type) ? null : type;
+        global.sel_scooter_status = type;
         this.setState({sel_scooter_status:type}, () => {
             this.after_reload_scooter();
         });
     }
     get_scooter_by_status(){
-        var status = this.state.sel_scooter_status;
+        var status = global.sel_scooter_status;
         var result = [];
-        if(status != null){
+        if(status != undefined && status != null){
             this.state.scooter.map(function(m, i){
                 if(m.status == status){
                   result.push(m);
@@ -309,7 +349,6 @@ export default class Filter extends React.Component {
         });
     }
     after_reload_scooter(){
-      console.warn('load after_reload_scooter');
       var promise1 = new Promise((resolve,reject)=>{
         this.setState({scooter:global.scooters});
         resolve(0);
@@ -325,18 +364,19 @@ export default class Filter extends React.Component {
 
     }
     
-    get_scooter(){
-      var all_scooters = global.scooters;
-      this.setState({scooter:all_scooters});
-      this.props.filter_option.filter_scooter(all_scooters);
-      this.setState({show_loading:false});
-    }
+    // get_scooter(){
+    //   var all_scooters = global.scooters;
+    //   this.setState({scooter:all_scooters});
+    //   this.props.filter_option.filter_scooter(all_scooters);
+    //   this.setState({show_loading:false});
+    // }
     render() {
         const {filter_option} = this.props;
         const { selectedIndex } = this.state;
         const { show_loading } = this;
-        var total = (this.state.scooter == undefined) ? 0 : this.state.scooter.length;
+        var total = (global.scooter == undefined) ? 0 : global.scooter.length;
         var all = global.scooters.length;
+        // 工作區域選項按鈕
         var work_area_btns = []
         work_area.map(function(m,i){
             var btn = <Button
@@ -348,7 +388,7 @@ export default class Filter extends React.Component {
               titleStyle={styles.titleStyle}
               onPress={()=>{ this.onChangeWorkArea(m.value)  }}
             />
-            if (this.state.sel_work_area == m.value) {
+            if (global.sel_work_area == m.value) {
               btn = <Button
                 key={i}
                 title={m.area}
@@ -361,6 +401,7 @@ export default class Filter extends React.Component {
             }
             work_area_btns.push(btn);
         }.bind(this));
+        // 車輛狀況選項按鈕
         var severe_btns = []
         severe_title.map(function(m,i){
           if(m == null){
@@ -376,7 +417,7 @@ export default class Filter extends React.Component {
               titleStyle={styles.titleStyle}
               onPress={()=>this.onChangeSevere(index)}
             />
-            if(this.state.sel_severe_data === index) {
+            if(global.sel_severe_data === index) {
               btn = <Button
                 key={i}
                 title={m}
@@ -389,6 +430,7 @@ export default class Filter extends React.Component {
             }
             severe_btns.push(btn);
         }.bind(this));
+        // 車輛服務狀態選項按鈕
         var scooter_status_btns = []
         scootet_status.map(function(m,i){
             var btn = <Button
@@ -400,7 +442,7 @@ export default class Filter extends React.Component {
               titleStyle={styles.titleStyle}
               onPress={()=>this.onChangeScooterStatus(m.type)}
             />
-            if(this.state.sel_scooter_status === m.type) {
+            if(global.sel_scooter_status === m.type) {
               btn = <Button
                 key={i}
                 title={m.title}
@@ -431,7 +473,7 @@ export default class Filter extends React.Component {
                   
                   <ScrollView style={{flexDirection:'column', }}>
                     <View style={{paddingBottom:10,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
-                        {this.state.sel_task ?(
+                        {global.sel_task ?(
                           <Button
                             title="我的任務清單"
                             style={styles.work_area_btn}
@@ -465,21 +507,22 @@ export default class Filter extends React.Component {
                     <View style={styles.slider_view}>
                       <View style={{width:'20%'}}><Text>電量</Text></View>
                       <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
-                        <View style={{marginRight:30}}><Text>{this.state.power_min}</Text></View>
+                        <View style={{marginRight:30}}><Text>{global.power_min}</Text></View>
                         <View>
                           <MultiSlider
-                            values={this.state.powerSliderValue}
+                            values={global.powerSliderValue}
                             min={0}
                             max={100}
                             step={1}
                             allowOverlap
                             snapped
-                            onValuesChangeFinish={this.get_power_change}
+                            onValuesChange={this.get_power_change}
+                            onValuesChangeFinish={this.set_power_change}
                             sliderLength={180}
                             selectedStyle={{borderWidth:1,borderColor:'#00AA00'}}
                           />
                         </View>
-                        <View style={{marginLeft:30}}><Text>{this.state.power_max}</Text></View>
+                        <View style={{marginLeft:30}}><Text>{global.power_max}</Text></View>
                       </View>
                      
                    
@@ -487,21 +530,22 @@ export default class Filter extends React.Component {
                     <View style={styles.slider_view}>
                       <View style={{width:'20%'}}><Text>天數</Text></View>
                       <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
-                        <View style={{marginRight:30}}><Text>{this.state.day_min}</Text></View>
+                        <View style={{marginRight:30}}><Text>{global.day_min}</Text></View>
                         <View>
                           <MultiSlider
-                            values={this.state.daysSliderValue}
+                            values={global.daysSliderValue}
                             min={0}
                             max={100}
                             step={1}
                             allowOverlap
                             snapped
-                            onValuesChangeFinish={this.get_days_change}
+                            onValuesChange={this.get_days_change}
+                            onValuesChangeFinish={this.set_days_change}
                             sliderLength={180}
                             selectedStyle={{borderWidth:1,borderColor:'#FF5511'}}
                           />
                         </View>
-                        <View style={{marginLeft:30}}><Text>{this.state.day_max}</Text></View>
+                        <View style={{marginLeft:30}}><Text>{global.day_max}</Text></View>
                       </View>
 
                     </View>

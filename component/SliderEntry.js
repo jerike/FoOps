@@ -36,7 +36,7 @@ export default class SliderEntry extends Component {
     }
 
     render () {
-        const { data: { title, stats_type,power_msg,scooter_status,range_days }, even ,sid,CloseCard} = this.props;
+        const { data: { title,power_msg }, even ,sid,CloseCard} = this.props;
 
         const uppercaseTitle = title ? (
             <Text
@@ -47,7 +47,7 @@ export default class SliderEntry extends Component {
             </Text>
         ) : false;
 
-        var status = scooter_status ? <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>{scooter_status}</Text> : ""
+        // var status = scooter_status ? <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>{scooter_status}</Text> : ""
 
         return (
             <TouchableOpacity
@@ -63,13 +63,7 @@ export default class SliderEntry extends Component {
                         { uppercaseTitle }
                     </View>
                      
-                     
-                    <Text  style={{fontSize:13,marginTop:10,marginBottom:10}} >
-                        { stats_type }
-                    </Text>
                     <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>{power_msg}</Text>
-                    <Text>{status}</Text>
-                    <Text style={{color:'#fff',fontSize:13,marginTop:10,marginBottom:10}}>【{range_days}】天未租用</Text>
 
 
                     

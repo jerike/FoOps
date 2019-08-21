@@ -138,11 +138,12 @@ export default class MapScreen extends React.Component {
     }
     updateIndex (selectedIndex) {
         if(selectedIndex == 0){
-          global.page = "map"; 
+          global.page = "Map"; 
           this.setModalVisible(true);
           this.CloseCard();
         }else{
             if(selectedIndex == 1){
+                global.page = "Home"; 
                 this.props.navigation.navigate("Home");
             }else{
                 this.props.navigation.navigate("Map");
@@ -287,14 +288,9 @@ export default class MapScreen extends React.Component {
           var distance = this.GetDistance(parseFloat(lat),parseFloat(lng),parseFloat(m.location.lat),parseFloat(m.location.lng));
           distance = distance.toFixed(2);          
           if (distance < 0.1) {
-              var stats_type = this.get_status_type(m.status);
-              var severe_lvl = this.get_severe_lvl(m.severe);
-              var card_header = <div>{severe_lvl}</div>;
+             
               var show_power = "";
-              var power_type = "";
               var power = m.power;
-              var ticket_id = "";
-              var conditions = [];
               var scooter_status = "";
               var power = m.power;
               switch(true){
@@ -308,48 +304,22 @@ export default class MapScreen extends React.Component {
                       show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
                   break;
               }
-              if(m.ticket){
-                if(m.ticket.scooter_conditions){
-                  m.ticket.scooter_conditions.map(function(d,k){
-                    var description = this.getConditions(d);
-                      if(description.indexOf("_option") != -1){
-                          // console.log(m.ticket.other_conditions);
-                          m.ticket.other_conditions.map(function(s,i){
-                              if(s.id == d){
+              
 
-                                  conditions.push(description.replace("_option",":")+s.summary);
-                              }
-                          });
-                      }else{
-                          conditions.push(description);
-                      }
-                  }.bind(this));
-
-                  
-                }
-
-                if(m.ticket.id != undefined){
-                  scooter_status = <Text>車況：【{conditions.join(" 、 ")}】</Text>;
-                }
-              }
-              var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
               var power_msg = show_power;
               if(index == 0){
                 this.setState({selectMarker:m.id});
                 LatLng = {
                     latitude: parseFloat(m.location.lat),
                     longitude: parseFloat(m.location.lng),
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005
+                    latitudeDelta: 0.008,
+                    longitudeDelta: 0.008
                 }
               }
               nearScooter.push({
                   id: m.id,
                   title: m.plate,
-                  stats_type: stats_type,
                   power_msg: power_msg,
-                  scooter_status: scooter_status,
-                  range_days: m.range_days,
                   location: m.location,
 
               });
@@ -410,15 +380,16 @@ export default class MapScreen extends React.Component {
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005
+            latitudeDelta: 0.008,
+            longitudeDelta: 0.008
         };
         this.setState({setCenter:r});
 
         // mapRef.animateToRegion(r);
     }
     filter_scooter(scooter){
-        this.setState({scooter:scooter});
+      global.scooter = scooter;
+      this.setState({scooter:scooter});
     }
     setModalVisible(visible) {
         if(global.page=="Map"){

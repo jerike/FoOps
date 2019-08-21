@@ -237,13 +237,13 @@ export default class Dashboard extends React.Component {
                   }}>
                   {
                     scooter_severe.map((l, i) => (
-                        <TouchableOpacity key={"hit_card"+i} onPress={()=>this.linkSevere(parseInt(i) + 1)}>
+                        <View key={"ss_view_"+i} >
                             <Card key={"ss_card_"+i} title={severe_labels[i]} titleStyle={{fontSize:13,color:`${severe_color[i]}`}} >
                                 <View key={"ss_card_view_"+i} style={{justifyContent:'center'}}>
                                   <Text style={{fontSize:11}}>{l}</Text>
                                 </View>
                             </Card>
-                        </TouchableOpacity>
+                        </View>
                     ))
                   }
                 </View>

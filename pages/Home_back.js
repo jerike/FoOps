@@ -383,16 +383,16 @@ export default class Home extends React.Component {
         const buttons = [{ element: component1 }, { element: component2 }]
         var c1 = (this.state.selectedIndex2 === 0) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺車牌" : "🔻車牌") : "車牌" ;
         var c2 = (this.state.selectedIndex2 === 1) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺電量" : "🔻電量") : "電量" ;
-        // var c3 = (this.state.selectedIndex2 === 2) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺服務" : "🔻服務") : "服務" ;
-        // var c4 = (this.state.selectedIndex2 === 3) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺狀態" : "🔻狀態") : "狀態" ;
-        const buttons2 = [c1, c2];
+        var c3 = (this.state.selectedIndex2 === 2) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺服務" : "🔻服務") : "服務" ;
+        var c4 = (this.state.selectedIndex2 === 3) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺狀態" : "🔻狀態") : "狀態" ;
+        const buttons2 = [c1, c2,c3,c4];
         // const buttons2 = [{ element: c1 }, { element: c2 }, { element: c3 }, { element: c4 }]
         const {selectedIndex,open,toSearch,selectedIndex2} = this.state;
-        var scooter = global.scooter;
-        // if(global.scooter != this.state.scooter){
-        //     scooter = global.scooter;
-        //     this.setState({scooter:global.scooter});
-        // }
+        var scooter = this.state.scooter;
+        if(global.scooter != this.state.scooter){
+            scooter = global.scooter;
+            this.setState({scooter:global.scooter});
+        }
         var search = global.search;
         if(search != undefined && this.state.search != search){
             this.updateSearch(search);
@@ -413,8 +413,15 @@ export default class Home extends React.Component {
                     return;
                 }
             }
+            var stats_type = this.get_status_type(m.status);
+            var severe_lvl = this.get_severe_lvl(m.severe);
+            var card_header = <View style={{flexDirection: 'row',justifyContent:'space-between',marginBottom:10}}><Icon name="motorcycle"  size={20} style={{marginRight:10}}/><Text>{m.plate}</Text><Text>{severe_lvl}</Text></View>;
             var show_power = "";
+            var power_type = "";
             var power = m.power;
+            var ticket_id = "";
+            var conditions = [];
+            var scooter_status = "";
             switch(true){
                 case power >= 50:
                     show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
@@ -426,17 +433,45 @@ export default class Home extends React.Component {
                     show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
                 break;
             }
+            if(m.ticket){
+              if(m.ticket.scooter_conditions){
+                m.ticket.scooter_conditions.map(function(d,k){
+                  var description = this.getConditions(d);
+                    if(description.indexOf("_option") != -1){
+                        // console.log(m.ticket.other_conditions);
+                        m.ticket.other_conditions.map(function(s,i){
+                            if(s.id == d){
+
+                                conditions.push(description.replace("_option",":")+s.summary);
+                            }
+                        });
+                    }else{
+                        conditions.push(description);
+                    }
+                }.bind(this));
+                
+              }
+
+              if(m.ticket.id != undefined){
+                scooter_status = <Text>車況：【{conditions.join(" 、 ")}】</Text>;
+              }
+            }
+            var last_rental_day = (m.last_rental == "") ? "無" : this.dateFormat(m.last_rental);
+            var card_thumb = (m.severe != 4) ? "https://i.imgur.com/N0jlChK.png" : ""; 
+            var power_msg = show_power;
+            var status_content = (scooter_status != "") ? <Text style={{marginBottom: 10}}>{scooter_status}</Text> : [];
             return (
-                <ListItem
-                    key={"list_"+i}
-                    leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}
-                    title={m.plate}
-                    subtitle={show_power}
-                    onPress={() =>this.showDetail(m.id)}
-                    chevron
-                    bottomDivider={true}
-                />
-               
+                <TouchableOpacity key={i} onPress={() =>this.showDetail(m.id)}> 
+                    <Card containerStyle={styles.cardContainerStyle} key={i} >
+                        <View>{card_header}</View>
+                        <View style={{flexDirection: 'row',marginBottom: 10,justifyContent:'space-between'}}>
+                            {stats_type}
+                            <Text>{power_msg}</Text>
+                        </View>
+                        <View>{status_content}</View>
+                        <Text style={{marginBottom: 10,color:'#f00',fontWeight:'bold'}}>{m.range_days} 天未租用</Text>
+                    </Card>
+                </TouchableOpacity>
             )
         }.bind(this));
         return (
@@ -460,11 +495,11 @@ export default class Home extends React.Component {
               containerStyle={styles.header}
             />
             {show_loading &&(
-              <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                <Text style={{color:'#fff'}}>資料獲取中...</Text>
-              </View>
-            )}
+                  <View style={styles.loading}>
+                    <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                    <Text style={{color:'#fff'}}>資料獲取中...</Text>
+                  </View>
+                )}
             <View style={{flex: 1,backgroundColor:'#F5F5F5'}}>
                 <Filter filter_option={filter_option}/>
                 <ButtonGroup

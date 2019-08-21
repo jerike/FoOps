@@ -325,15 +325,16 @@ export default class ScooterDetail extends React.Component {
       // this.showModal('controller_modal');
     }
     confirm_controller(type,msg){
-      Alert.alert(
-        '🤔 三思而後行',
-        '確定執行【'+msg+'】?',
-        [
-          {text: 'Yes', onPress: () => this.controller(type)},
-          {text: 'No'},
-        ],
-        {cancelable: false},
-      );
+      this.controller(type);
+      // Alert.alert(
+      //   '🤔 三思而後行',
+      //   '確定執行【'+msg+'】?',
+      //   [
+      //     {text: 'Yes', onPress: () => this.controller(type)},
+      //     {text: 'No'},
+      //   ],
+      //   {cancelable: false},
+      // );
     }
 
 
@@ -592,6 +593,7 @@ export default class ScooterDetail extends React.Component {
             break;
         }
         var backpage = (global.page != undefined) ? global.page : "Home" ;
+        console.warn(backpage);
         return (
         <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header

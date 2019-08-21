@@ -54,39 +54,7 @@ export default class Maintenance extends React.Component {
 
         return result;
     }
-    getConditions(id){
-        var result = "";
-        this.state.condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
-            }
-        });
-        return result;
-    }
-    
-    get_status_type(type){
-        var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
-        scootet_status.map(function(m,i){
-            if(m.type == type){
-                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
-            }
-        })
-        return result;
-    }
-    get_severe_lvl(severe,output){
-        var result = "";
-        var color=['#FF3333','#ff5722','#f5a623','#7ed321'];
 
-        if(output == "text"){
-            result = severe_title[severe-1];
-        }else{
-            result = <Text style={{color:color[severe-1]}}>{severe_title[severe-1]}</Text>;
-        }
-
-        return result;
-    }
     getConditions(id){
         var result = "";
         this.state.condition.map(function(m, i){
@@ -136,7 +104,7 @@ export default class Maintenance extends React.Component {
               transparent={false}
               visible={maintain_option.maintain_modal}
               presentationStyle="fullScreen"
-              >
+            >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
                      <Icon name='close' size={30}  onPress={() => {
