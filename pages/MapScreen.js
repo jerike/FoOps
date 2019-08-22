@@ -96,25 +96,25 @@ export default class MapScreen extends React.Component {
         }
     }
     componentWillReceiveProps(nextProps: any) {
-      // if (Platform.OS === 'android') {
-        // if (!isEqual(this.props, nextProps)) {
-        //     this.setState({
-        //         tracksViewChanges: true,
-        //     }, () => {
-        //         this.setState({tracksViewChanges: false})
-        //     })
-        // }
-      // }
+      if (Platform.OS === 'android') {
+        if (!isEqual(this.props, nextProps)) {
+            this.setState({
+                tracksViewChanges: true,
+            }, () => {
+                this.setState({tracksViewChanges: false})
+            })
+        }
+      }
     }
 
     componentDidUpdate() {
-      // if (Platform.OS === 'android') {
-        // if (this.state.tracksViewChanges) {
-        //     this.setState({
-        //         tracksViewChanges: false,
-        //     })
-        // }
-      // }
+      if (Platform.OS === 'android') {
+        if (this.state.tracksViewChanges) {
+            this.setState({
+                tracksViewChanges: false,
+            })
+        }
+      }
     }
     getPosition(){
       Geolocation.getCurrentPosition(
@@ -279,7 +279,9 @@ export default class MapScreen extends React.Component {
         return result;
     }
     onMarkerClick = (id,lat,lng) => {
-      this.startRendering();
+      if (Platform.OS === 'ios') {
+        this.startRendering();
+      }
       this.setState({nearScooter:null,selectScooter:id,clickMarker:true});
       var nearScooter = [];
       var LatLng = {};
@@ -331,7 +333,9 @@ export default class MapScreen extends React.Component {
       
     }
     CloseCard(){
-      this.startRendering();
+      if (Platform.OS === 'ios') {
+        this.startRendering();
+      }
       this.setState({nearScooter:null,clickMarker:false,selectMarker:null});
     }
     getFirstLatLng(latlng){
@@ -376,7 +380,9 @@ export default class MapScreen extends React.Component {
         }
 
         this.setState({selectMarker:markerData.id});
-        this.startRendering();
+        if (Platform.OS === 'ios') {
+          this.startRendering();
+        }
         let r = {
             latitude: parseFloat(markerData.location.lat),
             longitude: parseFloat(markerData.location.lng),
@@ -412,10 +418,12 @@ export default class MapScreen extends React.Component {
         var search = global.search;
         var set_polygon = this.state.set_polygon;
         var stop_time = 2000;
-        if(this.state.first_loadMarker){
-          this.setState({first_loadMarker:false});
-        }else{
-          stop_time = 1000;
+        if (Platform.OS === 'ios') {
+          if(this.state.first_loadMarker){
+            this.setState({first_loadMarker:false});
+          }else{
+            stop_time = 1000;
+          }
         }
         if(toSearch){
             if(search == ""){
@@ -495,8 +503,10 @@ export default class MapScreen extends React.Component {
             }
             markers.push(marker);
         }.bind(this));
-        if(this.state.tracksViewChanges){
-          setTimeout(()=>{this.stopRendering()},stop_time);
+        if (Platform.OS === 'ios') {
+          if(this.state.tracksViewChanges){
+            setTimeout(()=>{this.stopRendering()},stop_time);
+          }
         }
         var setPolyPath=[];
         if(set_polygon){
