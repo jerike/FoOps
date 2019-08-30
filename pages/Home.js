@@ -31,7 +31,8 @@ export default class Home extends React.Component {
         jump2map:false,
         toSearch:false,
         hit_sort:false,
-        select_sort:null
+        select_sort:null,
+        search_loading:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.selectSort=this.selectSort.bind(this);
@@ -52,12 +53,20 @@ export default class Home extends React.Component {
         this.get_geofence();
         this.get_work_area();
         this.get_scooter_status();
+        if (Platform.OS === 'android') {  
+            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
+        } 
     }
     componentDidMount(){
         this.getStorage();
         setTimeout(()=>{this.get_scooter()},10);
         if (Platform.OS === 'android') {
            BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
+        }
+    }
+    componentWillUnmount() {
+        if (Platform.OS === 'android') {
+           BackHandler.removeEventListener('hardwareBackPress',()=>{});
         }
     }
     shouldComponentUpdate(nextProps, nextState){
@@ -82,6 +91,9 @@ export default class Home extends React.Component {
         //     }
         // }
     }
+    _onBackClicked(){
+        return true;
+    }
     getScooterStorage = async () => {
         try {
             const value = await AsyncStorage.getItem('@FoOps:scooters');
@@ -105,6 +117,7 @@ export default class Home extends React.Component {
         }
     }
     filter_scooter(scooter){
+        global.temp_scooter = scooter;
         global.scooter = scooter;
         this.setState({scooter:scooter});
     }
@@ -218,20 +231,29 @@ export default class Home extends React.Component {
       return create_date;
     }
     filter_scooter_by_search(){
+
         if(this.state.search !=""){
             var result = [];
-            
             global.scooter.map(function(m, i){
                 if(m.plate.indexOf(this.state.search) != -1){
                   result.push(m);
                 }
                 
             }.bind(this));
+            global.scooter = result;
             this.setState({ scooter:result });
         }else{
-            this.setState({scooter : global.scooter});
+            if(global.temp_scooter != undefined){
+                global.scooter = global.temp_scooter;
+                delete global.temp_scooter;
+            }else{
+                global.scooter = global.scooters;
+            }
+            // this.setState({trigger_filter:true});
+            // setTimeout(()=>{this.after_reload_scooter()},10);
+            // this.setState({scooter : global.scooters},()=>{this.after_reload_scooter()});
         }
-        this.setState({show_loading:false});
+        this.setState({show_loading:false,search_loading:false});
     }
     changeScreen(screen){
         this.setState({screen:screen});
@@ -309,7 +331,8 @@ export default class Home extends React.Component {
         this.setState({search:"",toSearch:false});
     }
     updateSearch(search){  
-        this.setState({search:search,show_loading:true,toSearch:true});
+
+        this.setState({search:search,search_loading:true,toSearch:true});
         setTimeout(()=>{
             this.filter_scooter_by_search();
         },10);
@@ -394,6 +417,7 @@ export default class Home extends React.Component {
         //     this.setState({scooter:global.scooter});
         // }
         var search = global.search;
+        console.warn(search);
         if(search != undefined && this.state.search != search){
             this.updateSearch(search);
         }
@@ -445,6 +469,7 @@ export default class Home extends React.Component {
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
               centerComponent={<SearchBar
+                                showLoading={this.state.search_loading}
                                 placeholder="搜尋..."
                                 onChangeText={text => this.updateSearch(text)}
                                 onClear={this.onClear}

@@ -15,6 +15,9 @@ import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
 import isEqual from 'lodash.isequal'
 
+const marker_normal = require("../img/marker-normal.png");
+const marker_green = require("../img/marker-normal-green.png");
+const marker_gray = require("../img/marker-normal-gray.png");
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 var t = 0;
@@ -24,7 +27,7 @@ export default class MapScreen extends React.Component {
       this.state = {
         selectedIndex: null,
         nearScooter:null,
-        setCenter:{latitude: 22.622673,longitude: 120.300267,latitudeDelta:0.005,longitudeDelta: 0.005},
+        setCenter:{latitude: 22.6209962,longitude: 120.297948,latitudeDelta:0.005,longitudeDelta: 0.005},
         scooter:[],
         clickMarker:false,
         avatar:global.avatar,
@@ -68,19 +71,18 @@ export default class MapScreen extends React.Component {
         
     }
     componentDidMount() {
-
-        // if (Platform.OS === 'android') {
-        //    BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
-        // }else{
-        //     BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
-        // }
+        if (Platform.OS === 'android') {
+           BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
+        }else{
+            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
+        }
 
         setTimeout(()=>{this.getPosition();},100);
     }
     componentWillUnmount() {
-        // if (Platform.OS === 'ios') {
-        //    BackHandler.removeEventListener('hardwareBackPress',()=>{});
-        // }
+        if (Platform.OS === 'ios') {
+           BackHandler.removeEventListener('hardwareBackPress',()=>{});
+        }
     }
     _onBackClicked(){
       return true;
@@ -94,25 +96,25 @@ export default class MapScreen extends React.Component {
         }
     }
     componentWillReceiveProps(nextProps: any) {
-      // if (Platform.OS === 'android') {
-      //   if (!isEqual(this.props, nextProps)) {
-      //       this.setState({
-      //           tracksViewChanges: true,
-      //       }, () => {
-      //           this.setState({tracksViewChanges: false})
-      //       })
-      //   }
-      // }
+      if (Platform.OS === 'android') {
+        if (!isEqual(this.props, nextProps)) {
+            this.setState({
+                tracksViewChanges: true,
+            }, () => {
+                this.setState({tracksViewChanges: false})
+            })
+        }
+      }
     }
 
     componentDidUpdate() {
-      // if (Platform.OS === 'android') {
-      //   if (this.state.tracksViewChanges) {
-      //       this.setState({
-      //           tracksViewChanges: false,
-      //       })
-      //   }
-      // }
+      if (Platform.OS === 'android') {
+        if (this.state.tracksViewChanges) {
+            this.setState({
+                tracksViewChanges: false,
+            })
+        }
+      }
     }
     getPosition(){
       Geolocation.getCurrentPosition(
@@ -138,7 +140,7 @@ export default class MapScreen extends React.Component {
         if(selectedIndex == 0){
           global.page = "Map"; 
           this.setModalVisible(true);
-          // this.CloseCard();
+          this.CloseCard();
         }else{
             if(selectedIndex == 1){
                 global.page = "Home"; 
@@ -150,12 +152,12 @@ export default class MapScreen extends React.Component {
         }
     }
     updateSearch = search => {
+
       global.search = search;
       this.setState({toSearch:true});
       this.setState({search:search},()=>this.filter_scooter_by_search());
     }
     onClear(){
-      console.warn('clear');
       global.search = "";
       this.setState({toSearch:false,scooter:global.scooter});
     }
@@ -281,12 +283,52 @@ export default class MapScreen extends React.Component {
         this.startRendering();
       }
       this.setState({nearScooter:null,selectScooter:id,clickMarker:true});
-      var LatLng = {
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng),
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005
-      }
+      var nearScooter = [];
+      var LatLng = {};
+      var index = 0;
+      this.state.scooter.map(function(m,i){
+          var distance = this.GetDistance(parseFloat(lat),parseFloat(lng),parseFloat(m.location.lat),parseFloat(m.location.lng));
+          distance = distance.toFixed(2);          
+          if (distance < 0.1) {
+             
+              var show_power = "";
+              var power = m.power;
+              var scooter_status = "";
+              var power = m.power;
+              switch(true){
+                  case power >= 50:
+                      show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
+                  break;
+                  case power >= 20 && power < 50:
+                      show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
+                  break;
+                  case power < 20:
+                      show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
+                  break;
+              }
+              
+
+              var power_msg = show_power;
+              if(index == 0){
+                this.setState({selectMarker:m.id});
+                LatLng = {
+                    latitude: parseFloat(m.location.lat),
+                    longitude: parseFloat(m.location.lng),
+                    latitudeDelta: 0.008,
+                    longitudeDelta: 0.008
+                }
+              }
+              nearScooter.push({
+                  id: m.id,
+                  title: m.plate,
+                  power_msg: power_msg,
+                  location: m.location,
+
+              });
+              index++;
+          }
+      }.bind(this));
+      this.setState({nearScooter:nearScooter});
       this.setState({setCenter:LatLng});
       
     }
@@ -300,6 +342,7 @@ export default class MapScreen extends React.Component {
       this.setState({setCenter:latlng});
     }
     filter_scooter_by_search(){
+      // console.warn(this.state.search);
       if(this.state.search != undefined){
           var result = [];
           
@@ -352,12 +395,12 @@ export default class MapScreen extends React.Component {
     }
     filter_scooter(scooter){
       global.scooter = scooter;
-      this.setState({scooter:scooter},()=>{this.filter_scooter_by_search()});
+      this.setState({scooter:scooter});
     }
     setModalVisible(visible) {
-        // if(global.page=="Map"){
-        //     this.updateIndex (1);
-        // }
+        if(global.page=="Map"){
+            this.updateIndex (1);
+        }
         this.setState({modalVisible: visible});
     }
     stopRendering = () =>
@@ -382,20 +425,22 @@ export default class MapScreen extends React.Component {
             stop_time = 1000;
           }
         }
-        // if(toSearch){
-        //     if(search == ""){
-        //       scooter = this.state.scooter;
-        //     }else{
-        //       if(this.state.scooter.length > 0){
-        //         scooter = this.state.scooter;
-        //       }
-        //     }
-        // }
+        if(toSearch){
+            if(search == ""){
+              this.state.scooter;
+            }else{
+              if(this.state.scooter.length > 0){
+                scooter = this.state.scooter;
+              }
+            }
+        }
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
         
-
+        if(this.props.navigation.getParam('search') != undefined && this.state.search != this.props.navigation.getParam('search')){
+            this.updateSearch(this.props.navigation.getParam('search'));
+        }
         
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
 
@@ -417,37 +462,52 @@ export default class MapScreen extends React.Component {
               },100);
             }
             var marker;
-
-            if(m.power <= 30){
+            switch(m.status){
+              case "MAINTENANCE":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
-                {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                    <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                      <Text>{m.plate}</Text>
-                      <Text>電量：{m.power}%</Text>
-                    </Callout>
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  {isActive ? 
+                    <Image source={require('../img/marker-normal-gray.png')} style={{ width: 40, height: 53 }}  />
+                  :
+                    <Image source={require('../img/marker-normal-gray.png')} style={{ width: 30, height: 40 }}  />
+                  }
                 </MapView.Marker>
-            }else{
+
+              break;
+              case "RIDING":
                 var isActive = (this.state.selectMarker==m.id) ? true : false;
 
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
-                {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                    <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                      <Text>{m.plate}</Text>
-                      <Text>電量：{m.power}%</Text>
-                    </Callout>
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}  onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  {isActive ? 
+                    <Image source={require('../img/marker-normal-green.png')} style={{ width: 40, height: 53 }}  />
+                  :
+                    <Image source={require('../img/marker-normal-green.png')} style={{ width: 30, height: 40 }}  />
+                  }
                 </MapView.Marker>
+              break;
+              default:
+                var isActive = (this.state.selectMarker==m.id) ? true : false;
+                
+                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`} coordinate={latlng} tracksViewChanges={this.state.tracksViewChanges}
+                {...this.props}   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  {isActive ? 
+                    <Image source={require('../img/marker-normal.png')} style={{ width: 40, height: 53 }}  />
+                  :
+                    <Image source={require('../img/marker-normal.png')} style={{ width: 30, height: 40 }}  />
+                  }
+                </MapView.Marker>
+              break;
             }
-
-            
             markers.push(marker);
         }.bind(this));
-        // if (Platform.OS === 'ios') {
-        //   if(this.state.tracksViewChanges){
-        //     setTimeout(()=>{this.stopRendering()},stop_time);
-        //   }
-        // }
+        if (Platform.OS === 'ios') {
+          if(this.state.tracksViewChanges){
+            setTimeout(()=>{this.stopRendering()},stop_time);
+          }
+        }
         var setPolyPath=[];
         if(set_polygon){
             var fence = [];
@@ -513,7 +573,33 @@ export default class MapScreen extends React.Component {
               buttonStyle={styles.btn_buttonStyle}
               selectedButtonStyle={styles.btn_selectedButtonStyle}
             />
-           
+            {this.state.nearScooter && (
+              <View style={{position:'absolute',bottom:0,zIndex:101,flexDirection: 'row',justifyContent: "flex-end", alignItems: "center"}}>
+                  <View style={{position:'absolute',top:0,right:2}}>
+                    <Button
+                      style={styles.work_area_btn}
+                      buttonStyle={{backgroundColor:'#666',padding:5}}
+                      icon={<Icon name="times-circle" size={13}  color="white" />}
+                      onPress={()=>this.CloseCard()}
+                      title=" Colse"
+                      titleStyle={{fontSize:13}}
+                    />
+                  </View>
+                  <Carousel
+                    ref={(c) => { this._carousel = c; }}
+                    data={this.state.nearScooter}
+                    renderItem={this._renderDarkItem}
+                    sliderWidth={sliderWidth}
+                    itemWidth={itemWidth}
+                    loop={true}
+                    containerCustomStyle={slideStyle.slider}
+                    contentContainerCustomStyle={slideStyle.sliderContentContainer}
+                    onSnapToItem={(index, marker) => this._centerMapOnMarker(index)}
+                  />
+
+              </View>
+
+            )}
             
              <MapView
                ref = {(ref)=>this.mapView=ref}

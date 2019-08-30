@@ -35,7 +35,7 @@ export default class Dashboard extends React.Component {
     }
     _onBackClicked(){
         return true;
-      } 
+    } 
     componentDidMount() {
         this.get_scooter();
         this.get_scooter_status();
