@@ -37,6 +37,10 @@ export default class MapScreen extends React.Component {
         changed:false,
         tracksViewChanges: true,
         first_loadMarker:true,
+        work_areas:[],
+        markers:[],
+        setPolyPath:[],
+        setMasker:null
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -52,11 +56,14 @@ export default class MapScreen extends React.Component {
       this.stopRendering=this.stopRendering.bind(this);
       this.startRendering=this.startRendering.bind(this);
       this.onBackClicked = this._onBackClicked.bind(this);
+      this.draw_polygon=this.draw_polygon.bind(this);
+      this.setMarkers=this.setMarkers.bind(this);
     }
     componentWillMount() {
         var scooter = global.scooter;
         var search = global.search;
         var condition = global.condition;
+        console.warn(search);
         this.setState({scooter:scooter,condition:condition,search:search },()=>{
             if(search != ""){this.updateSearch(search);}
         });
@@ -75,7 +82,9 @@ export default class MapScreen extends React.Component {
         //     BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
         // }
 
-        setTimeout(()=>{this.getPosition();},100);
+        setTimeout(()=>{this.getPosition();},10);
+        setTimeout(()=>{this.draw_polygon();this.setMarkers();},20);
+        
     }
     componentWillUnmount() {
         // if (Platform.OS === 'ios') {
@@ -157,7 +166,7 @@ export default class MapScreen extends React.Component {
     onClear(){
       console.warn('clear');
       global.search = "";
-      this.setState({toSearch:false,scooter:global.scooter});
+      this.setState({toSearch:false,scooter:global.scooter},()=>{this.setMarkers();});
     }
     reload_all_scooter(){
         this.setState({load_data:true});
@@ -354,6 +363,98 @@ export default class MapScreen extends React.Component {
       global.scooter = scooter;
       this.setState({scooter:scooter},()=>{this.filter_scooter_by_search()});
     }
+    draw_polygon(){
+      var setPolyPath=[];
+      if(this.state.set_polygon){
+          var fence = [];
+          if(this.state.geofence != undefined){
+            this.state.geofence.map(function(value,index){
+                fence[index] = [];
+                value.zone.map(function(v,i){
+                  fence[index].push({latitude:parseFloat(v[1]),longitude: parseFloat(v[0])});
+                });
+                setPolyPath.push(fence[index]);
+            });
+          }
+          var work_area_color1 = ['rgba(255,255,119,0.6)','rgba(204,238,255,0.6)','rgba(255,204,204,0.6)','rgba(204,204,255,0.6)','rgba(119,255,204,0.6)','rgba(238,119,0,0.6)'];
+          var work_area_color2 = ['rgba(255,255,119,0.2)','rgba(204,238,255,0.2)','rgba(255,204,204,0.2)','rgba(204,204,255,0.2)','rgba(119,255,204,0.2)','rgba(238,119,0,0.2)'];
+          var work_areas = this.state.all_work_area.map(function(value,index){
+            // console.log(index);
+              var set_work_area = []
+              value.map(function(m,i){
+                  set_work_area.push({latitude:parseFloat(m.lat),longitude:parseFloat(m.lng)});
+              });
+              return <MapView.Polygon
+                key={index}
+                coordinates = {set_work_area}
+                strokeColor = {work_area_color1[index]}
+                fillColor={work_area_color2[index]}
+                strokeWidth={3}
+              />
+          });
+          
+          this.setState({work_areas:work_areas});
+          
+      }
+      var setMasker;
+      if(setPolyPath.length > 0){
+        setMasker =  <MapView.Polygon
+                coordinates={[{ latitude: -89, longitude: -179.99999999 },{ latitude: 0, longitude: -179.99999999 },{ latitude: 89, longitude: -179.99999999 },{ latitude: 89, longitude: 0 },{ latitude: 89, longitude: 179.99999999 },{ latitude: 0, longitude: 179.99999999 },{ latitude: -89, longitude: 179.99999999 },{ latitude: -89, longitude: 0 },{ latitude: -89, longitude: -179.99999999 }]}
+                strokeColor={'#ff0000'}
+                fillColor={'rgba(0,0,0,0.5)'}
+                strokeWidth={2}
+                holes={setPolyPath}
+              />
+      }
+
+      this.setState({setPolyPath:setPolyPath,setMasker:setMasker});
+    }
+    setMarkers(){
+      var markers = [];
+      this.state.scooter.map(function(m,i){
+          if(global.select_severe != undefined){
+              if(m.severe != global.select_severe){
+                  return;
+              }
+          }
+          var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
+
+          if(!this.state.clickMarker && this.state.changed && t == 0 && i === 0){
+            t++;
+            setTimeout(()=>{
+              this.getFirstLatLng(latlng);
+              t = 0;
+            },100);
+          }
+          var marker;
+
+          if(m.power <= 30){
+              var isActive = (this.state.selectMarker==m.id) ? true : false;
+
+              marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
+              {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                    <Text>{m.plate}</Text>
+                    <Text>電量：{m.power}%</Text>
+                  </Callout>
+              </MapView.Marker>
+          }else{
+              var isActive = (this.state.selectMarker==m.id) ? true : false;
+
+              marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
+              {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
+                  <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                    <Text>{m.plate}</Text>
+                    <Text>電量：{m.power}%</Text>
+                  </Callout>
+              </MapView.Marker>
+          }
+
+          
+          markers.push(marker);
+      }.bind(this));
+      this.setState({markers:markers});
+    }
     setModalVisible(visible) {
         // if(global.page=="Map"){
         //     this.updateIndex (1);
@@ -370,18 +471,10 @@ export default class MapScreen extends React.Component {
     }
 
     render() {
-        const {selectedIndex,toSearch,clickMarker,geofence,changed} = this.state;
-        var scooter = this.state.scooter;
+        const {selectedIndex,toSearch,clickMarker,work_areas,markers,changed,setPolyPath,setMasker} = this.state;
+        // var scooter = this.state.scooter;
         var search = global.search;
-        var set_polygon = this.state.set_polygon;
-        var stop_time = 2000;
-        if (Platform.OS === 'ios') {
-          if(this.state.first_loadMarker){
-            this.setState({first_loadMarker:false});
-          }else{
-            stop_time = 1000;
-          }
-        }
+
         // if(toSearch){
         //     if(search == ""){
         //       scooter = this.state.scooter;
@@ -399,87 +492,7 @@ export default class MapScreen extends React.Component {
         
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
 
-        var markers = [];
-        scooter.map(function(m,i){
-            if(global.select_severe != undefined){
-                if(m.severe != global.select_severe){
-                    return;
-                }
-            }
-            var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
-
-            if(!clickMarker && changed && t == 0 && i === 0){
-              t++;
-              setTimeout(()=>{
-                this.getFirstLatLng(latlng);
-                this.setState({nearScooter:null});
-                t = 0;
-              },100);
-            }
-            var marker;
-
-            if(m.power <= 30){
-                var isActive = (this.state.selectMarker==m.id) ? true : false;
-
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
-                {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                    <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                      <Text>{m.plate}</Text>
-                      <Text>電量：{m.power}%</Text>
-                    </Callout>
-                </MapView.Marker>
-            }else{
-                var isActive = (this.state.selectMarker==m.id) ? true : false;
-
-                marker = <MapView.Marker key={`${m.id}-${isActive ? 'active' : 'inactive'}`}   coordinate={latlng}
-                {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();this.onMarkerClick(m.id,m.location.lat,m.location.lng)}} >
-                    <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                      <Text>{m.plate}</Text>
-                      <Text>電量：{m.power}%</Text>
-                    </Callout>
-                </MapView.Marker>
-            }
-
-            
-            markers.push(marker);
-        }.bind(this));
-        // if (Platform.OS === 'ios') {
-        //   if(this.state.tracksViewChanges){
-        //     setTimeout(()=>{this.stopRendering()},stop_time);
-        //   }
-        // }
-        var setPolyPath=[];
-        if(set_polygon){
-            var fence = [];
-            if(geofence != undefined){
-              geofence.map(function(value,index){
-                  fence[index] = [];
-                  value.zone.map(function(v,i){
-                    fence[index].push({latitude:parseFloat(v[1]),longitude: parseFloat(v[0])});
-                  });
-                  setPolyPath.push(fence[index]);
-              });
-            }
-            var work_area_color1 = ['rgba(255,255,119,0.6)','rgba(204,238,255,0.6)','rgba(255,204,204,0.6)','rgba(204,204,255,0.6)','rgba(119,255,204,0.6)','rgba(238,119,0,0.6)'];
-            var work_area_color2 = ['rgba(255,255,119,0.2)','rgba(204,238,255,0.2)','rgba(255,204,204,0.2)','rgba(204,204,255,0.2)','rgba(119,255,204,0.2)','rgba(238,119,0,0.2)'];
-            var work_areas = this.state.all_work_area.map(function(value,index){
-              // console.log(index);
-                var set_work_area = []
-                value.map(function(m,i){
-                    set_work_area.push({latitude:parseFloat(m.lat),longitude:parseFloat(m.lng)});
-                });
-                return <MapView.Polygon
-                  key={index}
-                  coordinates = {set_work_area}
-                  strokeColor = {work_area_color1[index]}
-                  fillColor={work_area_color2[index]}
-                  strokeWidth={3}
-                />
-            });
-            
-            
-            
-        }
+        
         
         var filter_option = {
             modalVisible:this.state.modalVisible,
@@ -524,13 +537,7 @@ export default class MapScreen extends React.Component {
                region={this.state.setCenter}
              >
              
-              <MapView.Polygon
-                coordinates={[{ latitude: -89, longitude: -179.99999999 },{ latitude: 0, longitude: -179.99999999 },{ latitude: 89, longitude: -179.99999999 },{ latitude: 89, longitude: 0 },{ latitude: 89, longitude: 179.99999999 },{ latitude: 0, longitude: 179.99999999 },{ latitude: -89, longitude: 179.99999999 },{ latitude: -89, longitude: 0 },{ latitude: -89, longitude: -179.99999999 }]}
-                strokeColor={'#ff0000'}
-                fillColor={'rgba(0,0,0,0.5)'}
-                strokeWidth={2}
-                holes={setPolyPath}
-              />
+              {setMasker}
              
               {work_areas}
               {markers}

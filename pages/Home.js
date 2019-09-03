@@ -32,7 +32,8 @@ export default class Home extends React.Component {
         toSearch:false,
         hit_sort:false,
         select_sort:null,
-        search_loading:false
+        search_loading:false,
+        items:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.selectSort=this.selectSort.bind(this);
@@ -45,21 +46,23 @@ export default class Home extends React.Component {
       this.getStorage=this.getStorage.bind(this);
       this.filter_scooter_by_search=this.filter_scooter_by_search.bind(this);
       this.SortType=this.SortType.bind(this);
+      this.show_scooter=this.show_scooter.bind(this);
     }
     componentWillMount() {
         global.page = 'Home';
         var select_severe = global.select_severe;
         this.setState({scooter:[],select_severe:select_severe, search:'',condition:[],avatar:global.avatar});
-        this.get_geofence();
-        this.get_work_area();
-        this.get_scooter_status();
+        
         if (Platform.OS === 'android') {  
             BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
         } 
     }
     componentDidMount(){
         this.getStorage();
-        setTimeout(()=>{this.get_scooter()},10);
+        this.get_geofence();
+        this.get_work_area();
+        this.get_scooter_status();
+        setTimeout(()=>{this.show_scooter();},10)
         if (Platform.OS === 'android') {
            BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
         }
@@ -171,14 +174,16 @@ export default class Home extends React.Component {
     }
     //取得電動車資訊
     get_scooter(){
-        var reload_time = this.get_timestamp();
-        this.setState({reload_time:reload_time});
-        global.reload_time = reload_time;
-        if (global.scooters == undefined) {
-            this.getScooterStorage();
-        }else{
-            this.setState({scooter:global.scooter,open:true});
-        }
+        // var reload_time = this.get_timestamp();
+        // this.setState({reload_time:reload_time});
+        // global.reload_time = reload_time;
+        // if (global.scooters == undefined) {
+        //     this.getScooterStorage();
+        // }else{
+        //     this.setState({scooter:global.scooter,open:true});
+        // }
+
+        // this.setState({open:true});
     }
     fetch_scooters(){
         var result = []
@@ -217,6 +222,43 @@ export default class Home extends React.Component {
             this.after_reload_scooter();
             this.setState({reload_now:false});
         });
+    }
+    show_scooter(){
+        var items = [];
+        items = global.scooter.map(function(m,i){
+            console.warn(i);
+            if(global.select_severe != undefined){
+                if(m.severe != global.select_severe){
+                    return;
+                }
+            }
+            var show_power = "";
+            var power = m.power;
+            switch(true){
+                case power >= 50:
+                    show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
+                break;
+                case power >= 20 && power < 50:
+                    show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
+                break;
+                case power < 20:
+                    show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
+                break;
+            }
+            return (
+                <ListItem
+                    key={"list_"+i}
+                    leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}
+                    title={m.plate}
+                    subtitle={show_power}
+                    onPress={() =>this.showDetail(m.id)}
+                    chevron
+                    bottomDivider={true}
+                />
+               
+            )
+        }.bind(this));
+        this.setState({items:items});
     }
     after_reload_scooter(){
         if(this.state.select_sort != null){
@@ -410,14 +452,13 @@ export default class Home extends React.Component {
         // var c4 = (this.state.selectedIndex2 === 3) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺狀態" : "🔻狀態") : "狀態" ;
         const buttons2 = [c1, c2];
         // const buttons2 = [{ element: c1 }, { element: c2 }, { element: c3 }, { element: c4 }]
-        const {selectedIndex,open,toSearch,selectedIndex2} = this.state;
-        var scooter = global.scooter;
+        const {selectedIndex,toSearch,selectedIndex2,items} = this.state;
+        var open = this.state.open;
         // if(global.scooter != this.state.scooter){
         //     scooter = global.scooter;
         //     this.setState({scooter:global.scooter});
         // }
         var search = global.search;
-        console.warn(search);
         if(search != undefined && this.state.search != search){
             this.updateSearch(search);
         }
@@ -430,39 +471,12 @@ export default class Home extends React.Component {
         if(!open){
             show_loading = true;
         }
+
         
-        var items = scooter.map(function(m,i){
-            if(global.select_severe != undefined){
-                if(m.severe != global.select_severe){
-                    return;
-                }
-            }
-            var show_power = "";
-            var power = m.power;
-            switch(true){
-                case power >= 50:
-                    show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
-                break;
-                case power >= 20 && power < 50:
-                    show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
-                break;
-                case power < 20:
-                    show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
-                break;
-            }
-            return (
-                <ListItem
-                    key={"list_"+i}
-                    leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}
-                    title={m.plate}
-                    subtitle={show_power}
-                    onPress={() =>this.showDetail(m.id)}
-                    chevron
-                    bottomDivider={true}
-                />
-               
-            )
-        }.bind(this));
+        if(items.length == global.scooter.length){
+            open = true;
+            show_loading=false;
+        }
         return (
         <SafeAreaView style={{flex: 1,justifyContent: 'center',
         alignItems: 'center',backgroundColor: '#ff5722'}}>

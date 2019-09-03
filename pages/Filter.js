@@ -31,7 +31,7 @@ export default class Filter extends React.Component {
         all_work_area:[],
         rangeSlide:false,
         powerSliderValue: [0, 100],
-        daysSliderValue:[0,100],
+        daysSliderValue:[0,10,100],
         task:"",
         sel_task:false,
         scooter:[]
@@ -537,7 +537,7 @@ export default class Filter extends React.Component {
                             min={0}
                             max={100}
                             step={1}
-                            allowOverlap
+                            allowOverlap={false}
                             snapped
                             onValuesChange={this.get_days_change}
                             onValuesChangeFinish={this.set_days_change}

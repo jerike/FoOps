@@ -10,14 +10,14 @@ export default class Login extends React.Component {
   
   constructor(props) {
     super(props);
-    this.state = { email: null,password:null,progress:0,timeout:true,show_loading:false,loading_title:'Loading...' };
+    this.state = { email: null,password:null,progress:0,timeout:true,show_loading:false,loading_title:'Loading...' ,show_loading2:false};
     this.close_msg = this.close_msg.bind(this);
     this.login=this.login.bind(this);
     this.ShowLogin=this.ShowLogin.bind(this);
   }
   componentWillMount() {
     // this.setState({show_login:false});
-        this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false});
+        this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false,show_loading2:true});
   }
   componentDidMount() {
     this.getStorage().done();
@@ -191,6 +191,9 @@ export default class Login extends React.Component {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' ,backgroundColor:'#2f3345' }}>
         <Image source={require('../img/gokube-logo.png')} style={{marginBottom:30}} />
+        {this.state.show_loading2 &&(
+          <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+        )}
         {this.state.show_loading &&(
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
