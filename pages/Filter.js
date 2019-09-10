@@ -226,13 +226,27 @@ export default class Filter extends React.Component {
             .then((response) => response.json())
             .then((json) => {
                 var zone = [];
-                zone.push(json);
                 this.state.scooter.map(function(m, i){
+                  if(Array.isArray(json[0])){
+                    json.map(function(d,k){
+                      var zone = [];
+                      zone.push(d);
+                      var istrue = this.checkzone('in',zone,m.location);
+                      if(istrue){
+                        result.push(m);
+                      }
+                    }.bind(this));
+                  }else{
+                    var zone = [];
+                    zone.push(json);
                     var istrue = this.checkzone('in',zone,m.location);
                     if(istrue){
                       result.push(m);
                     }
+                  }
+                    
                 }.bind(this));
+
                 this.setState({ scooter:result });
             });
         }

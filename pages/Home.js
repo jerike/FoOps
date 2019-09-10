@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity,BackHandler,Platform } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity,BackHandler,Platform,List,FlatList } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar,Badge } from 'react-native-elements'
@@ -47,6 +47,7 @@ export default class Home extends React.Component {
       this.filter_scooter_by_search=this.filter_scooter_by_search.bind(this);
       this.SortType=this.SortType.bind(this);
       this.show_scooter=this.show_scooter.bind(this);
+      this.doSomething=this.doSomething.bind(this);
     }
     componentWillMount() {
         global.page = 'Home';
@@ -122,7 +123,7 @@ export default class Home extends React.Component {
     filter_scooter(scooter){
         global.temp_scooter = scooter;
         global.scooter = scooter;
-        this.setState({scooter:scooter});
+        this.setState({scooter:scooter},()=>{this.show_scooter()});
     }
     get_work_area = () =>{
         //取得工作區域
@@ -224,41 +225,7 @@ export default class Home extends React.Component {
         });
     }
     show_scooter(){
-        var items = [];
-        items = global.scooter.map(function(m,i){
-            console.warn(i);
-            if(global.select_severe != undefined){
-                if(m.severe != global.select_severe){
-                    return;
-                }
-            }
-            var show_power = "";
-            var power = m.power;
-            switch(true){
-                case power >= 50:
-                    show_power = <Text style={{color:'#28a745'}}>電量：{power}%</Text>
-                break;
-                case power >= 20 && power < 50:
-                    show_power = <Text style={{color:'#FF8800'}}>電量：{power}%</Text>
-                break;
-                case power < 20:
-                    show_power = <Text style={{color:'#f00'}}>電量：{power}%</Text>
-                break;
-            }
-            return (
-                <ListItem
-                    key={"list_"+i}
-                    leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}
-                    title={m.plate}
-                    subtitle={show_power}
-                    onPress={() =>this.showDetail(m.id)}
-                    chevron
-                    bottomDivider={true}
-                />
-               
-            )
-        }.bind(this));
-        this.setState({items:items});
+        this.setState({items:global.scooter});
     }
     after_reload_scooter(){
         if(this.state.select_sort != null){
@@ -273,28 +240,34 @@ export default class Home extends React.Component {
       return create_date;
     }
     filter_scooter_by_search(){
+        const newData = global.scooter.filter(item => {      
+        const itemData = `${item.plate}`;
 
-        if(this.state.search !=""){
-            var result = [];
-            global.scooter.map(function(m, i){
-                if(m.plate.indexOf(this.state.search) != -1){
-                  result.push(m);
-                }
+         return itemData.indexOf(global.search) > -1;    
+        });
+        this.setState({ items: newData });
+
+        // if(this.state.search !=""){
+        //     var result = [];
+        //     global.scooter.map(function(m, i){
+        //         if(m.plate.indexOf(this.state.search) != -1){
+        //           result.push(m);
+        //         }
                 
-            }.bind(this));
-            global.scooter = result;
-            this.setState({ scooter:result });
-        }else{
-            if(global.temp_scooter != undefined){
-                global.scooter = global.temp_scooter;
-                delete global.temp_scooter;
-            }else{
-                global.scooter = global.scooters;
-            }
-            // this.setState({trigger_filter:true});
-            // setTimeout(()=>{this.after_reload_scooter()},10);
-            // this.setState({scooter : global.scooters},()=>{this.after_reload_scooter()});
-        }
+        //     }.bind(this));
+        //     global.scooter = result;
+        //     this.setState({ scooter:result });
+        // }else{
+        //     if(global.temp_scooter != undefined){
+        //         global.scooter = global.temp_scooter;
+        //         delete global.temp_scooter;
+        //     }else{
+        //         global.scooter = global.scooters;
+        //     }
+        //     // this.setState({trigger_filter:true});
+        //     // setTimeout(()=>{this.after_reload_scooter()},10);
+        //     // this.setState({scooter : global.scooters},()=>{this.after_reload_scooter()});
+        // }
         this.setState({show_loading:false,search_loading:false});
     }
     changeScreen(screen){
@@ -307,7 +280,12 @@ export default class Home extends React.Component {
             this.setModalVisible(true);
         }else{
             this.setState({screen:'Map'});
-            this.props.navigation.navigate("Map");
+            if(this.props.navigation.state.params != undefined){
+                this.props.navigation.state.params.send2Map();
+            }
+            this.props.navigation.navigate("Map",{
+                doSomething: this.doSomething,
+            });
             
         }
     }
@@ -318,12 +296,13 @@ export default class Home extends React.Component {
         }
     }
     SortType(selectedIndex){
-        var scooter = this.state.scooter;
+        var scooter = this.state.items;
         var sort = this.state.selectedIndex2_sort;
         if(parseInt(selectedIndex) === this.state.selectedIndex2){
             sort = (sort == "asc") ? "desc" : "asc";
             this.setState({selectedIndex2_sort:sort});
         }else{
+            sort = "asc";
             this.setState({selectedIndex2_sort:"asc"});
         }
         switch(selectedIndex){
@@ -345,42 +324,21 @@ export default class Home extends React.Component {
                     }
                 });
             break;
-            case 2:
-                scooter = scooter.sort(function (a, b) {
-                    if(sort == "asc"){
-                        return a.status > b.status ? 1 : -1;       
-                    }else{
-                        return a.status < b.status ? 1 : -1;
-                    }
-                });
-            break;
-            case 3:
-                scooter = scooter.sort(function (a, b) {
-                    if(sort == "asc"){
-                        return a.severe > b.severe ? 1 : -1;       
-                    }else{
-                        return a.severe < b.severe ? 1 : -1;
-                    }
-                });
-            break;
         }
         setTimeout(()=>{this.setState({show_loading:false,hit_sort:false})},100);
-        this.setState({scooter:scooter,selectedIndex2:selectedIndex});
+        this.setState({items:scooter,selectedIndex2:selectedIndex});
     }
 
     onClear(){
         global.search = "";
         this.setState({search:"",toSearch:false});
     }
-    updateSearch(search){  
-
-        this.setState({search:search,search_loading:true,toSearch:true});
-        setTimeout(()=>{
-            this.filter_scooter_by_search();
-        },10);
-        global.search = search;
-        
-
+    updateSearch = text => {    
+        global.search = text;
+        this.setState({search:text,search_loading:true,toSearch:true},()=>{this.filter_scooter_by_search()});
+        // setTimeout(()=>{
+        //     this.filter_scooter_by_search();
+        // },10);
     }
     setModalVisible(visible) {
         if(global.page=="Map"){
@@ -442,41 +400,32 @@ export default class Home extends React.Component {
     showDetail(sid){
         this.props.navigation.navigate('ScooterDetail',{scooter:sid});
     }
+    doSomething() {
+        console.warn("doSomething");
+        this.filter_scooter_by_search();
+        // if(search != undefined && this.state.search != search){
+        //     this.updateSearch(search);
+        // }
+    }
     render() {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
         var c1 = (this.state.selectedIndex2 === 0) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺車牌" : "🔻車牌") : "車牌" ;
         var c2 = (this.state.selectedIndex2 === 1) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺電量" : "🔻電量") : "電量" ;
-        // var c3 = (this.state.selectedIndex2 === 2) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺服務" : "🔻服務") : "服務" ;
-        // var c4 = (this.state.selectedIndex2 === 3) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺狀態" : "🔻狀態") : "狀態" ;
         const buttons2 = [c1, c2];
-        // const buttons2 = [{ element: c1 }, { element: c2 }, { element: c3 }, { element: c4 }]
         const {selectedIndex,toSearch,selectedIndex2,items} = this.state;
         var open = this.state.open;
-        // if(global.scooter != this.state.scooter){
-        //     scooter = global.scooter;
-        //     this.setState({scooter:global.scooter});
-        // }
+
         var search = global.search;
-        if(search != undefined && this.state.search != search){
-            this.updateSearch(search);
-        }
+        
         var filter_option = {
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
             filter_scooter:this.filter_scooter
         }
         var show_loading = this.state.show_loading;
-        if(!open){
-            show_loading = true;
-        }
 
-        
-        if(items.length == global.scooter.length){
-            open = true;
-            show_loading=false;
-        }
         return (
         <SafeAreaView style={{flex: 1,justifyContent: 'center',
         alignItems: 'center',backgroundColor: '#ff5722'}}>
@@ -493,7 +442,7 @@ export default class Home extends React.Component {
                                 inputContainerStyle={styles.search_input}
                                 inputStyle={styles.input}
                                 lightTheme={true}
-                                autoCorrect={true}  
+                                autoCorrect={false}  
                               />}
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={styles.header}
@@ -525,19 +474,30 @@ export default class Home extends React.Component {
                   selectedTextStyle={styles.btn2_selectedTextStyle}
                 />
                 
-
-
-
-                <ScrollView  refreshControl={
-                  <RefreshControl
-                    refreshing={this.state.refreshing}
+                  <FlatList          
+                    data={items}   
+                    extraData={this.state}     
+                    refreshing={this.state.refreshing}  
+                    renderItem={({ item }) => ( 
+                      <ListItem              
+                        leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}     
+                        title={item.plate}
+                        subtitle={<Text style={(item.power <=30)?{color:'#f00'}:{color:'#28a745'}}>電量：{item.power}%</Text>}     
+                        chevron   
+                        bottomDivider={true}    
+                        onPress={() =>this.showDetail(item.id)}               
+                       />          
+                     )}         
                     onRefresh={this._onRefresh}
-                  />
-                }>
-                    {open ? items : []
-                    }
-                </ScrollView>
-                <View style={{position:'absolute',bottom:0,right:0,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                    keyExtractor={item => item.plate}  
+                  />            
+
+
+
+                <View style={{position:'absolute',bottom:0,left:5,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                   <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
+                </View>
+                <View style={{position:'absolute',bottom:0,right:5,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
                    <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
                 </View>
             </View>

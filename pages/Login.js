@@ -191,9 +191,6 @@ export default class Login extends React.Component {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' ,backgroundColor:'#2f3345' }}>
         <Image source={require('../img/gokube-logo.png')} style={{marginBottom:30}} />
-        {this.state.show_loading2 &&(
-          <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-        )}
         {this.state.show_loading &&(
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />

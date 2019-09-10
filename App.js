@@ -55,9 +55,7 @@ const DrawerContent = (props) => (
 
 const HomeStack=createStackNavigator(
   {
-    Home: {screen:Home,path:'app/home'},
     Dashboard: {screen:Dashboard},
-    Map:{screen: MapScreen},
     ScooterDetail:{screen: ScooterDetail},
     ViolationRecord:{screen: ViolationRecord},
     TimeOut:{screen: TimeOut},
@@ -72,12 +70,14 @@ const HomeStack=createStackNavigator(
 
 const MenuScreen=createDrawerNavigator(
   {
+    Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
+    Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
     HomeStack:{screen:HomeStack,navigationOptions: {drawerLabel: <Hidden />}},
     Dashboard: {screen:Dashboard,navigationOptions: { title: '導航頁'}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}
 
   },{
-    initialRouteName: 'HomeStack',
+    initialRouteName: 'Home',
     headerMode:'none',
     drawerPosition: 'right',
     drawerLabel:'Menu',
