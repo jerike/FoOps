@@ -55,7 +55,7 @@ export default class Home extends React.Component {
         this.setState({scooter:[],select_severe:select_severe, search:'',condition:[],avatar:global.avatar});
         
         if (Platform.OS === 'android') {  
-            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
+            BackHandler.addEventListener('hardwareBackPress', this._onBackClicked);
         } 
     }
     componentDidMount(){
@@ -64,9 +64,6 @@ export default class Home extends React.Component {
         this.get_work_area();
         this.get_scooter_status();
         setTimeout(()=>{this.show_scooter();},10)
-        if (Platform.OS === 'android') {
-           BackHandler.addEventListener('hardwareBackPress',()=>{this.props.navigation.goBack()});
-        }
     }
     componentWillUnmount() {
         if (Platform.OS === 'android') {
@@ -240,35 +237,17 @@ export default class Home extends React.Component {
       return create_date;
     }
     filter_scooter_by_search(){
-        const newData = global.scooter.filter(item => {      
-        const itemData = `${item.plate}`;
+        if(this.state.search != undefined){
+            const newData = global.scooter.filter(item => {      
+            const itemData = `${item.plate}`;
 
-         return itemData.indexOf(global.search) > -1;    
-        });
-        this.setState({ items: newData });
-
-        // if(this.state.search !=""){
-        //     var result = [];
-        //     global.scooter.map(function(m, i){
-        //         if(m.plate.indexOf(this.state.search) != -1){
-        //           result.push(m);
-        //         }
-                
-        //     }.bind(this));
-        //     global.scooter = result;
-        //     this.setState({ scooter:result });
-        // }else{
-        //     if(global.temp_scooter != undefined){
-        //         global.scooter = global.temp_scooter;
-        //         delete global.temp_scooter;
-        //     }else{
-        //         global.scooter = global.scooters;
-        //     }
-        //     // this.setState({trigger_filter:true});
-        //     // setTimeout(()=>{this.after_reload_scooter()},10);
-        //     // this.setState({scooter : global.scooters},()=>{this.after_reload_scooter()});
-        // }
-        this.setState({show_loading:false,search_loading:false});
+             return itemData.indexOf(this.state.search) > -1;    
+            });
+            this.setState({ items: newData });
+            this.setState({show_loading:false,search_loading:false});
+        }else{
+            this.setState({ items: global.scooter });
+        }
     }
     changeScreen(screen){
         this.setState({screen:screen});
@@ -331,14 +310,11 @@ export default class Home extends React.Component {
 
     onClear(){
         global.search = "";
-        this.setState({search:"",toSearch:false});
     }
     updateSearch = text => {    
         global.search = text;
-        this.setState({search:text,search_loading:true,toSearch:true},()=>{this.filter_scooter_by_search()});
-        // setTimeout(()=>{
-        //     this.filter_scooter_by_search();
-        // },10);
+        this.setState({search:text,toSearch:true,search_loading:true});
+        setTimeout(()=>{this.filter_scooter_by_search()},50);
     }
     setModalVisible(visible) {
         if(global.page=="Map"){
@@ -402,10 +378,12 @@ export default class Home extends React.Component {
     }
     doSomething() {
         console.warn("doSomething");
-        this.filter_scooter_by_search();
-        // if(search != undefined && this.state.search != search){
-        //     this.updateSearch(search);
-        // }
+        var promise1 = new Promise((resolve,reject)=>{
+          this.setState({scooter:global.scooter});
+          resolve(0);
+        });
+        promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter(global.scooter);setTimeout(()=>{resolve(1);},100)}))
+                .then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
     }
     render() {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
@@ -491,16 +469,17 @@ export default class Home extends React.Component {
                     onRefresh={this._onRefresh}
                     keyExtractor={item => item.plate}  
                   />            
-
-
-
-                <View style={{position:'absolute',bottom:0,left:5,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
-                   <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
-                </View>
-                <View style={{position:'absolute',bottom:0,right:5,padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
-                   <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
-                </View>
             </View>
+            <View style={{position:'absolute',bottom:0,left:0,width:'100%',backgroundColor:'rgba(0,0,0,0.6)'}}>
+                    <View style={{flexDirection:'row',justifyContent:'space-between',padding:2}}>
+                        <View >
+                           <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
+                        </View>
+                        <View>
+                           <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+                        </View>
+                    </View>
+                </View>
         </SafeAreaView>
          
         );

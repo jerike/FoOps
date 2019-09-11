@@ -37,7 +37,9 @@ export default class MapScreen extends React.Component {
         changed:false,
         tracksViewChanges: true,
         first_loadMarker:true,
-        MyPosition:null
+        MyPosition:null,
+        load_position:false,
+        search_loading:false,
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -57,7 +59,10 @@ export default class MapScreen extends React.Component {
       this.getPosition=this.getPosition.bind(this);
     }
     componentWillMount() {
-        
+        var scooter = global.scooter;
+        var condition = global.condition;
+        // console.warn(search);
+        this.setState({scooter:scooter,condition:condition});
         
         this.setState({ 
           all_work_area:global.all_work_area,
@@ -73,10 +78,10 @@ export default class MapScreen extends React.Component {
         //     BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
         // }
         this.getPosition();
-        var scooter = global.scooter;
-        var condition = global.condition;
-        // console.warn(search);
-        this.setState({scooter:scooter,condition:condition});
+        // var scooter = global.scooter;
+        // var condition = global.condition;
+        // // console.warn(search);
+        // this.setState({scooter:scooter,condition:condition});
     }
     _onBackClicked(){
       return true;
@@ -85,19 +90,21 @@ export default class MapScreen extends React.Component {
         return shallowCompare(this, nextProps, nextState);
     }   
     componentWillUpdate(nextProps,nextState){
-       if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
-            this.setState({changed:true});
-        }
+       // if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
+       //      this.setState({changed:true});
+       //  }
     }
     
     getPosition(){
+      this.setState({load_position:true});
       Geolocation.getCurrentPosition(
         (position: any) => {
           const positionData: any = position.coords;
-          this.setState({MyPosition:positionData});
+          this.setState({MyPosition:positionData,load_position:false});
           this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         },
         (error: any) => {
+          this.setState({load_position:false});
           Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
         }, {
           enableHighAccuracy: true,
@@ -128,14 +135,13 @@ export default class MapScreen extends React.Component {
         }
     }
     updateSearch = search => {
-
       global.search = search;
-      this.setState({toSearch:true});
-      this.setState({search:search},()=>this.filter_scooter_by_search());
+      this.setState({search:search,toSearch:true,search_loading:true});
+      setTimeout(()=>{this.filter_scooter_by_search()},50);
     }
     onClear(){
       global.search = "";
-      this.setState({toSearch:false,scooter:global.scooter});
+      // this.setState({toSearch:false,search_loading:true,scooter:global.scooter});
     }
     reload_all_scooter(){
         this.setState({load_data:true});
@@ -292,13 +298,12 @@ export default class MapScreen extends React.Component {
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
             };
-            console.warn(r);
             this.setState({setCenter:r});
           }
-          this.setState({ scooter:result });
+          this.setState({ scooter:result,search_loading:false });
       }else{
           this.setState({ toSearch:false });
-          this.setState({ scooter:global.scooter });
+          this.setState({ search_loading:false,scooter:global.scooter });
       }
     }
     _renderDarkItem ({item, index}) {
@@ -345,12 +350,11 @@ export default class MapScreen extends React.Component {
         this.setState({ tracksViewChanges: true });
     }
     send2Map(){
-      console.warn('send2Map');
         var promise1 = new Promise((resolve,reject)=>{
           this.setState({scooter:global.scooter});
           resolve(0);
         });
-        promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter(global.scooter);setTimeout(()=>{resolve(1);},500)}))
+        promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter(global.scooter);setTimeout(()=>{resolve(1);},100)}))
                 .then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
       
     }
@@ -384,61 +388,20 @@ export default class MapScreen extends React.Component {
         
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
 
-        var markers = [];
-        scooter.map(function(m,i){
-            if(global.search != undefined){
-              if(m.plate.indexOf(global.search) == -1){
-                  return true;
-              }
-            }
-            if(global.select_severe != undefined){
-                if(m.severe != global.select_severe){
-                    return;
-                }
-            }
-            var latlng = {latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01};
+       
 
-            var marker;
-            var status = (m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>
-            if(m.power <= 30){
-              // if(this.state.selectMarker == null || this.state.selectMarker == m.id){
-                  marker = <MapView.Marker key={"marker_"+m.id}   coordinate={latlng}
-                  {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
-                      <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                        <Text>{m.plate}</Text>
-                        <Text>電量：{m.power}%</Text>
-                        {status}
-                      </Callout>
-                  </MapView.Marker>
-              // }
-            }else{
-              // if(this.state.selectMarker == null || this.state.selectMarker == m.id){
-                  marker = <MapView.Marker key={"marker_"+m.id}   coordinate={latlng}
-                  {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
-                      <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
-                        <View style={{padding:10}}>
-                          <Text>{m.plate}</Text>
-                          <Text>電量：{m.power}%</Text>
-                          {status}
-                        </View>
-                      </Callout>
-                  </MapView.Marker>
-              // }
-            }
-
-            
-            markers.push(marker);
-        }.bind(this));
-        // if (Platform.OS === 'ios') {
-        //   if(this.state.tracksViewChanges){
-        //     setTimeout(()=>{this.stopRendering()},stop_time);
-        //   }
+        // if(this.state.search_loading){
+        //   this.setState({search_loading:false});
         // }
+
         var setPolyPath=[];
         if(set_polygon){
             var fence = [];
             if(geofence != undefined){
               geofence.map(function(value,index){
+                  if(value.promotion > 0){
+                    return;
+                  }
                   fence[index] = [];
                   value.zone.map(function(v,i){
                     fence[index].push({latitude:parseFloat(v[1]),longitude: parseFloat(v[0])});
@@ -490,7 +453,7 @@ export default class MapScreen extends React.Component {
         if(this.state.MyPosition != null){
 
           var Mylatlng = {latitude:parseFloat(this.state.MyPosition.latitude),longitude:parseFloat(this.state.MyPosition.longitude),latitudeDelta: 0.01,longitudeDelta: 0.01};
-          Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} />
+          Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} title="你所在位置" description="點擊右下角可以重新定位！" />
         }
 
 
@@ -504,14 +467,17 @@ export default class MapScreen extends React.Component {
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
               centerComponent={<SearchBar
+                                showLoading={this.state.search_loading}
                                 placeholder="搜尋..."
-                                onChangeText={this.updateSearch}
+                                onChangeText={text => this.updateSearch(text)}
+                                onClear={this.onClear}
                                 value={search}
+                                round
                                 containerStyle={styles.search_container}
                                 inputContainerStyle={styles.search_input}
                                 inputStyle={styles.input}
                                 lightTheme={true}
-                                onClear={this.onClear}
+                                autoCorrect={false} 
                               />}
               rightComponent={<Avatar rounded source={{uri:this.state.avatar}} onPress={()=>this.props.navigation.toggleDrawer()} />}
               containerStyle={styles.header}
@@ -547,7 +513,32 @@ export default class MapScreen extends React.Component {
                   />
                 {Mymarker}
                 {work_areas}
-                {markers}
+                {scooter.map(m => (
+                  m.power > 30 ? (
+                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
+                        <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                          <View style={{padding:10}}>
+                            <Text>{m.plate}</Text>
+                            <Text>電量：{m.power}%</Text>
+                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                          </View>
+                        </Callout>
+                    </MapView.Marker>
+                  ):(
+                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                      {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
+                          <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                            <View style={{padding:10}}>
+                              <Text>{m.plate}</Text>
+                              <Text>電量：{m.power}%</Text>
+                              {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                            </View>
+                          </Callout>
+                      </MapView.Marker>
+                  )
+                  
+                ))}
                 
                </AnimatedMap>
              <View>
@@ -567,7 +558,12 @@ export default class MapScreen extends React.Component {
 
              <View style={styles.compass} >
                <TouchableWithoutFeedback onPress={()=>this.getPosition()}>
-                <Icon name="compass" size={20} />
+               { this.state.load_position ?(
+                  <ActivityIndicator  color="#000"  />
+                  ):
+                  (<Icon name="compass" size={20} />)
+                }
+                
                   
                </TouchableWithoutFeedback>
              </View>

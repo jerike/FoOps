@@ -24,14 +24,14 @@ export default class Filter extends React.Component {
         power_min:0,
         power_max:100,
         day_min:0,
-        day_max:100,
+        day_max:500,
         sel_work_area:null,
         sel_severe_data:null,
         sel_scooter_status:null,
         all_work_area:[],
         rangeSlide:false,
-        powerSliderValue: [0, 100],
-        daysSliderValue:[0,10,100],
+        powerSliderValue: null,
+        daysSliderValue:0,
         task:"",
         sel_task:false,
         scooter:[]
@@ -42,8 +42,6 @@ export default class Filter extends React.Component {
       this.onChangeTask=this.onChangeTask.bind(this);
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
       this.onChangeSevere=this.onChangeSevere.bind(this);
-      this.get_power_change=this.get_power_change.bind(this);
-      this.get_days_change=this.get_days_change.bind(this);
       this.set_power_change=this.set_power_change.bind(this);
       this.set_days_change=this.set_days_change.bind(this);
       this.get_scooter_in_work_area=this.get_scooter_in_work_area.bind(this);
@@ -136,22 +134,56 @@ export default class Filter extends React.Component {
             this.setState({scooter:scooter});
         }
     }
-    get_power_change(value){
-        global.powerSliderValue = value;
-        this.setState({powerSliderValue:value});
-        this.setState({power_min:value[0],power_max:value[1]});
-    }
+    
     set_power_change(value){
         this.show_loading();
-        global.powerSliderValue = value;
-        global.power_min = value[0];
-        global.power_max = value[1];
+        if(global.powerSliderValue !=null && global.powerSliderValue == value){
+          global.powerSliderValue = null;
+          value = null;
+        }else{
+          global.powerSliderValue = value;  
+        }
+        var min = 0;
+        var max = 100;
+        switch(value){
+          case 0:
+            min = 0;
+            max = 29;
+          break;
+          case 1:
+            min = 30;
+            max = 35;
+          break;
+          case 2:
+            min = 36;
+            max = 40;
+          break;
+          case 3:
+            min = 41;
+            max = 45;
+          break;
+          case 4:
+            min = 46;
+            max = 50;
+          break;
+          case 5:
+            min = 51;
+            max = 100;
+          break;
+          default:
+            min = 0;
+            max = 100;
+          break;
+        }
+        global.power_min = min;
+        global.power_max = max;
         this.setState({powerSliderValue:value});
-        this.setState({power_min:value[0],power_max:value[1]},()=>{
+        this.setState({power_min:min,power_max:max},()=>{
           this.after_reload_scooter();
         });
     }
     filter_scooter_by_power(){
+      console.warn(this.state.power_min);
         var result = new Array();
         this.state.scooter.map(function(m, i){
             var pushed = true;
@@ -167,18 +199,40 @@ export default class Filter extends React.Component {
         }.bind(this));
         this.setState({ scooter:result });
     }
-    get_days_change(value){
-      global.daysSliderValue = value;
-      // this.setState({daysSliderValue:value});
-      global.day_min = value[0];
-      global.day_max = value[1];
-    }
     set_days_change(value){
         this.show_loading();
         global.daysSliderValue = value;
-        global.day_min = value[0];
-        global.day_max = value[1];
-        this.setState({day_min:value[0],day_max:value[1]},()=>{
+        var min = 0;
+        var max = 500;
+        switch(value){
+          case 0:
+            min = 0;
+            max = 2;
+          break;
+          case 1:
+            min = 2;
+            max = 3;
+          break;
+          case 2:
+            min = 4;
+            max = 5;
+          break;
+          case 3:
+            min = 6;
+            max = 7;
+          break;
+          case 4:
+            min = 8;
+            max = 14;
+          break;
+          case 5:
+            min = 15;
+            max = 500;
+          break;
+        }
+        global.day_min = min;
+        global.day_max = max;
+        this.setState({day_min:min,day_max:max},()=>{
           this.after_reload_scooter();
         });
     }
@@ -186,24 +240,16 @@ export default class Filter extends React.Component {
         var result = new Array();
         this.state.scooter.map(function(m, i){
             var pushed = true;
-            if(global.day_max == 100){
-                if(m.range_days >= global.day_min){
-                  pushed = true;
-                }else{
-                  pushed = false;
-                }
+            if(m.range_days >= global.day_min && m.range_days <= global.day_max){
+                pushed = true;
             }else{
-                if(m.range_days >= global.day_min && m.range_days <= global.day_max){
-                    pushed = true;
-                }else{
-                  pushed = false;
-                }
+              pushed = false;
             }
             if(pushed){
               result.push(m);
             }
         }.bind(this));
-        this.setState({ scooter:result });
+        // this.setState({ scooter:result });
     }
     // 選擇工作區域
     onChangeWorkArea(area){
@@ -470,6 +516,53 @@ export default class Filter extends React.Component {
             scooter_status_btns.push(btn);
             
         }.bind(this));
+        var power_btns = [];
+        var power_types = ['<30%','~35%','~40%','~45%','~50%','>50%'];
+        power_types.map(function(m,i){
+            var btn = <Button
+              key={"power_btn"+i}
+              title={m}
+              type="outline"
+              buttonStyle={{ borderColor:'#00DD00'}}
+              titleStyle={styles.titleStyle}
+              onPress={()=>this.set_power_change(i)}
+            />
+            if(global.powerSliderValue == i){
+                btn = <Button
+                  key={"power_btn"+i}
+                  title={m}
+                  icon={<Icon name="check-circle" size={15}  color="white" />}
+                  buttonStyle={{ borderColor:'#00DD00',backgroundColor:'#00DD00',color:'#fff'}}
+                  titleStyle={styles.titleStyleActive}
+                  onPress={()=>this.set_power_change(i)}
+                />
+            }
+            power_btns.push(btn);
+        }.bind(this));
+        var days_btns = [];
+        var days_types = ['<2天','~3天','~5天','~7天','~14天','>14天'];
+        days_types.map(function(m,i){
+            var btn = <Button
+              key={"days_btn"+i}
+              title={m}
+              type="outline"
+              buttonStyle={{ borderColor:'#5500FF'}}
+              titleStyle={styles.titleStyle}
+              onPress={()=>this.set_days_change(i)}
+            />
+            if(global.daysSliderValue == i){
+                btn = <Button
+                  key={"days_btn"+i}
+                  title={m}
+                  icon={<Icon name="check-circle" size={15}  color="white" />}
+                  buttonStyle={{ borderColor:'#5500FF',backgroundColor:'#5500FF',color:'#fff'}}
+                  titleStyle={styles.titleStyleActive}
+                  onPress={()=>this.set_days_change(i)}
+                />
+            }
+            days_btns.push(btn);
+        }.bind(this));
+        
 
         return (
             <Modal
@@ -518,51 +611,11 @@ export default class Filter extends React.Component {
                     <View style={styles.row_view}>
                         {scooter_status_btns}
                     </View>
-                    <View style={styles.slider_view}>
-                      <View style={{width:'20%'}}><Text>電量</Text></View>
-                      <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
-                        <View style={{marginRight:30}}><Text>{global.power_min}</Text></View>
-                        <View>
-                          <MultiSlider
-                            values={global.powerSliderValue}
-                            min={0}
-                            max={100}
-                            step={1}
-                            allowOverlap
-                            snapped
-                            onValuesChange={this.get_power_change}
-                            onValuesChangeFinish={this.set_power_change}
-                            sliderLength={180}
-                            selectedStyle={{borderWidth:1,borderColor:'#00AA00'}}
-                          />
-                        </View>
-                        <View style={{marginLeft:30}}><Text>{global.power_max}</Text></View>
-                      </View>
-                     
-                   
+                    <View style={styles.row_view}>
+                      <View style={{width:'100%',marginBottom:10}}><Text>電量</Text></View>
+                      {power_btns}
                     </View>
-                    <View style={styles.slider_view}>
-                      <View style={{width:'20%'}}><Text>天數</Text></View>
-                      <View  style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',width:'80%'}}>
-                        <View style={{marginRight:30}}><Text>{global.day_min}</Text></View>
-                        <View>
-                          <MultiSlider
-                            values={global.daysSliderValue}
-                            min={0}
-                            max={100}
-                            step={1}
-                            allowOverlap={false}
-                            snapped
-                            onValuesChange={this.get_days_change}
-                            onValuesChangeFinish={this.set_days_change}
-                            sliderLength={180}
-                            selectedStyle={{borderWidth:1,borderColor:'#FF5511'}}
-                          />
-                        </View>
-                        <View style={{marginLeft:30}}><Text>{global.day_max}</Text></View>
-                      </View>
-
-                    </View>
+                    
                   </ScrollView>
                   <View style={styles.footer_view}>
                     {this.state.show_loading ? 
@@ -598,22 +651,22 @@ const styles = StyleSheet.create({
     
   },
   task_buttonStyle:{
-    borderColor:'#0000FF',
+    borderColor:'#5599FF',
 
   },
   task_buttonStyleActive:{
-    borderColor:'#0000FF',
-    backgroundColor:'#0000FF',
+    borderColor:'#5599FF',
+    backgroundColor:'#5599FF',
     color:'#ffffff'
 
   },
   Wa_buttonStyle:{
-    borderColor:'rgb(0, 221, 0)',
+    borderColor:'#AA0000',
 
   },
   Wa_buttonStyleActive:{
-    borderColor:'rgb(0, 221, 0)',
-    backgroundColor:'rgb(0, 221, 0)',
+    borderColor:'#AA0000',
+    backgroundColor:'#AA0000',
   },
   ss_buttonStyle:{
     borderColor:'rgb(255, 204, 34)',
