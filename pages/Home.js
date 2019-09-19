@@ -377,13 +377,10 @@ export default class Home extends React.Component {
         this.props.navigation.navigate('ScooterDetail',{scooter:sid});
     }
     doSomething() {
-        console.warn("doSomething");
         var promise1 = new Promise((resolve,reject)=>{
-          this.setState({scooter:global.scooter});
           resolve(0);
         });
-        promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter(global.scooter);setTimeout(()=>{resolve(1);},100)}))
-                .then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
+        promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
     }
     render() {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>

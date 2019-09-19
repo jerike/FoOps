@@ -183,7 +183,6 @@ export default class Filter extends React.Component {
         });
     }
     filter_scooter_by_power(){
-      console.warn(this.state.power_min);
         var result = new Array();
         this.state.scooter.map(function(m, i){
             var pushed = true;
@@ -255,7 +254,7 @@ export default class Filter extends React.Component {
     onChangeWorkArea(area){
         this.show_loading();
         // 帶入區域內經緯度資料
-        area = (this.state.sel_work_area == area) ? null : area;
+        area = (global.sel_work_area == area) ? null : area;
         global.sel_work_area = area;
         this.setState({sel_work_area:area}, () => {
             this.after_reload_scooter();
@@ -357,7 +356,7 @@ export default class Filter extends React.Component {
     // 選擇車輛狀況
     onChangeSevere(e){
         this.show_loading();
-        e = (this.state.sel_severe_data == e) ? null : e;
+        e = (global.sel_severe_data == e) ? null : e;
         global.select_severe = undefined;
         global.sel_severe_data = e;
         this.setState({sel_severe_data:e}, () => {
@@ -379,7 +378,7 @@ export default class Filter extends React.Component {
     // 選擇服務狀態
     onChangeScooterStatus(type){
         this.show_loading();
-        type = (this.state.sel_scooter_status == type) ? null : type;
+        type = (global.sel_scooter_status == type) ? null : type;
         global.sel_scooter_status = type;
         this.setState({sel_scooter_status:type}, () => {
             this.after_reload_scooter();
