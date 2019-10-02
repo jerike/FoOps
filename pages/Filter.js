@@ -248,7 +248,7 @@ export default class Filter extends React.Component {
               result.push(m);
             }
         }.bind(this));
-        // this.setState({ scooter:result });
+        this.setState({ scooter:result });
     }
     // 選擇工作區域
     onChangeWorkArea(area){
@@ -571,35 +571,15 @@ export default class Filter extends React.Component {
               presentationStyle="fullScreen"
               >
               <SafeAreaView style={{position:'relative',flex: 1,justifyContent: "center", alignItems: "center", backgroundColor: '#fff'}}>
-                  <View style={{width:'100%',justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
+                  <View style={{position:'absolute',top:5,right:5,zIndex:1001 }}>
                      <Icon name='close' size={30}  onPress={() => {
                         filter_option.setModalVisible(false);
                       }} />
                   </View>
                   
                   <ScrollView style={{flexDirection:'column', }}>
-                    <View style={{paddingBottom:10,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
-                        {global.sel_task ?(
-                          <Button
-                            title="我的任務清單"
-                            style={styles.work_area_btn}
-                            buttonStyle={styles.task_buttonStyleActive}
-                            titleStyle={styles.titleStyleActive}
-                            icon={<Icon name="check-circle" size={15}  color="white" />}
-                            onPress={()=>this.onChangeTask(false)}
-                          />
-                        ) : (
-                          <Button
-                            title="我的任務清單"
-                            type="outline"
-                            style={styles.work_area_btn}
-                            buttonStyle={styles.task_buttonStyle}
-                            titleStyle={styles.titleStyle}
-                            onPress={()=>this.onChangeTask(true)}
-                          />
-                        )}
-                        
-
+                    <View style={styles.row_view}>
+                        <Text h1>篩選</Text>
                     </View>
                     <View style={styles.row_view}>
                         {work_area_btns}
@@ -613,6 +593,10 @@ export default class Filter extends React.Component {
                     <View style={styles.row_view}>
                       <View style={{width:'100%',marginBottom:10}}><Text>電量</Text></View>
                       {power_btns}
+                    </View>
+                    <View style={styles.row_view}>
+                      <View style={{width:'100%',marginBottom:10}}><Text>未租用天數</Text></View>
+                      {days_btns}
                     </View>
                     
                   </ScrollView>

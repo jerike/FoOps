@@ -77,7 +77,7 @@ export default class Maintenance extends React.Component {
           scooter_conditions = SCooter_ticket.scooter_conditions;
         }
         var condition_list = condition.map(function(m,i){
-          if(m.id < 600 || m.status == 0){
+          if(m.id < 600 || m.status != 1){
             return true;
           }
           var description = m.description

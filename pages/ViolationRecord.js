@@ -29,7 +29,7 @@ export default class ViolationRecord extends React.Component {
     }
     componentDidMount(){
       if (Platform.OS === 'android') {  
-        BackHandler.addEventListener('hardwareBackPress', ()=>{return true;});
+        BackHandler.addEventListener('hardwareBackPress', ()=>{this.props.navigation.goBack();});
       } 
     }
     getRecord(){

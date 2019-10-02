@@ -16,6 +16,7 @@ const scootet_status = global.scootet_status;
 const API = global.API;
 const icon = (name: string) => <Icon key={name} name={name} size={24} />;
 var t = 0;
+var backpage = (global.page != undefined) ? global.page : "Home" ;
 export default class ScooterDetail extends React.Component {
     constructor () {
       super()
@@ -60,8 +61,17 @@ export default class ScooterDetail extends React.Component {
     componentDidMount(){
       this.getStorage().done();
       if (Platform.OS === 'android') {  
-            BackHandler.addEventListener('hardwareBackPress', ()=>{return true;});
+        BackHandler.addEventListener('hardwareBackPress', ()=>{this.back2page();});
       } 
+    }
+    componentWillUnmount() {
+        if (Platform.OS === 'android') {
+           BackHandler.removeEventListener('hardwareBackPress',()=>{});
+        }
+    }
+    back2page(){
+      var backpage = (global.page != undefined) ? global.page : "Home" ;
+      this.props.navigation.navigate(backpage);
     }
     getStorage = async () => {
         try {
@@ -490,6 +500,8 @@ export default class ScooterDetail extends React.Component {
         const {search,selectedIndex,toSearch,scooter} = this.state;
 
         var get_props_sid = this.props.navigation.getParam('scooter');
+        global.page = this.props.navigation.getParam('screen');
+        console.warn(global.page);
         if(this.state.sid != get_props_sid){
           this.newScooter(get_props_sid);
         }
@@ -592,13 +604,12 @@ export default class ScooterDetail extends React.Component {
               var show_power = <Text style={{color:'#900',marginLeft:10}}>{scooter.power+"%"}</Text>
             break;
         }
-        var backpage = (global.page != undefined) ? global.page : "Home" ;
-        console.warn(backpage);
+        
         return (
         <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
-              leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.props.navigation.navigate(backpage)}/></TouchableHighlight>}
+              leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.back2page()}/></TouchableHighlight>}
               containerStyle={styles.header}
             />
             {this.state.show_loading &&(
@@ -612,93 +623,98 @@ export default class ScooterDetail extends React.Component {
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
-            <ScrollView style={{backgroundColor: '#EFF1F4'}}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} style={{width:'100%',backgroundColor: '#EFF1F4'}}>
                 <Card key={"card0"} >
-                  <TouchableHighlight style={{width:40,height:25,position:'absolute',right:0,top:-5,paddingLeft:10,zIndex:101}} onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#f00" onPress={()=>this.showDirection()} /></TouchableHighlight>
-                  <View style={{justifyContent:'center',alignItems:'center'}}>
-                      <Text>車輛狀態</Text>
-                  </View>
-                  <Divider style={{marginTop:10,marginBottom:10}} />
-                  <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name="motorcycle" size={19} style={{width:24}} />
-                      <Text style={{marginLeft:10}}>車輛編號</Text>
-                      <Text style={{marginLeft:10}}>{scooter.id}</Text>
+                    <View style={{justifyContent:'center',alignItems:'center'}}>
+                        <Text>車輛狀態</Text>
                     </View>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name={power_icon} size={19} style={{width:24}} />
-                      <Text style={{marginLeft:10}}>電池電量</Text>
-                      {show_power}
-                    </View>
-                  </View>
-
-                  <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name="history" size={19} style={{width:24}} />
-                      <Text style={{marginLeft:10}}>未租用天數</Text>
-                      <Text style={{marginLeft:10}}>{scooter.range_days+"天"}</Text>
-                    </View>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name="info-circle" size={19} style={{width:24,paddingLeft:5}} />
-                      <Text style={{marginLeft:10}}>車輛狀態</Text>
-                      <Text style={{marginLeft:10}}>{severe_lvl}</Text>
-                    </View>
-                  </View>
-
-                  <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name="exclamation" size={19} style={{width:24}} />
-                      <Text style={{marginLeft:10}}>服務狀態</Text>
-                      <Text style={{marginLeft:10}}>{stats_type}</Text>
-                    </View>
-                    <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                      <Icon name={acc_icon} size={18} style={{width:24,paddingLeft:5}} />
-                      <Text style={{marginLeft:10}}>是否啟動</Text>
-                      <Text style={{marginLeft:10}}>{acc_status}</Text>
-                    </View>
-                  </View>
-                  {this.state.remark == null ?(
-                    <View style={{backgroundColor:'#fff',marginTop:10}}>
-                        <Input placeholder='輸入車輛備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0}} inputStyle={{marginLeft:10,height:50}} leftIcon={
-                        <Icon name='user-edit' color='black'  size={20}  /> } onChangeText={(text)=>this.setState({txt_remark:text})} rightIcon={<Button title="新增" buttonStyle={{height:30}} titleStyle={{fontSize:12}} onPress={()=>this.addRemark()}/>} />
-                    </View>
-                  ):(
-                    <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
-                      <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
-                        <Icon name='user-edit' color='black'  size={24} style={{width:24,marginLeft:12,marginRight:20}} />
-                        <Text>{this.state.remark}</Text>
+                    <Divider style={{marginTop:10,marginBottom:10}} />
+                    <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name="motorcycle" size={19} style={{width:24}} />
+                        <Text style={{marginLeft:10}}>車輛編號</Text>
+                        <Text style={{marginLeft:10}}>{scooter.id}</Text>
                       </View>
-                      <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name={power_icon} size={19} style={{width:24}} />
+                        <Text style={{marginLeft:10}}>電池電量</Text>
+                        {show_power}
+                      </View>
                     </View>
-                  )}
-                   <View style={{justifyContent:'center',marginTop:20}}>
-                    <View style={{justifyContent:'center'}}>
-                      <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} onPress={()=>{this.ViewViolationRecord()}} />
-                    </View>
-                  </View>
 
+                    <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name="history" size={19} style={{width:24}} />
+                        <Text style={{marginLeft:10}}>未租用天數</Text>
+                        <Text style={{marginLeft:10}}>{scooter.range_days+"天"}</Text>
+                      </View>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name="info-circle" size={19} style={{width:24,paddingLeft:5}} />
+                        <Text style={{marginLeft:10}}>車輛狀態</Text>
+                        <Text style={{marginLeft:10}}>{severe_lvl}</Text>
+                      </View>
+                    </View>
+
+                    <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name="exclamation" size={19} style={{width:24}} />
+                        <Text style={{marginLeft:10}}>服務狀態</Text>
+                        <Text style={{marginLeft:10}}>{stats_type}</Text>
+                      </View>
+                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
+                        <Icon name={acc_icon} size={18} style={{width:24,paddingLeft:5}} />
+                        <Text style={{marginLeft:10}}>是否啟動</Text>
+                        <Text style={{marginLeft:10}}>{acc_status}</Text>
+                      </View>
+                    </View>
+                    {this.state.remark == null ?(
+                      <View style={{backgroundColor:'#fff',marginTop:10}}>
+                          <Input placeholder='輸入車輛備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0}} inputStyle={{marginLeft:10,height:50}} leftIcon={
+                          <Icon name='user-edit' color='black'  size={20}  /> } onChangeText={(text)=>this.setState({txt_remark:text})} rightIcon={<Button title="新增" buttonStyle={{height:30}} titleStyle={{fontSize:12}} onPress={()=>this.addRemark()}/>} />
+                      </View>
+                    ):(
+                      <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                        <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
+                          <Icon name='user-edit' color='black'  size={24} style={{width:24,marginLeft:12,marginRight:20}} />
+                          <Text>{this.state.remark}</Text>
+                        </View>
+                        <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
+                      </View>
+                    )}
+                     <View style={{justifyContent:'center',marginTop:20}}>
+                      <View style={{justifyContent:'center'}}>
+                        <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} onPress={()=>{this.ViewViolationRecord()}} />
+                      </View>
+                    </View>
                 </Card>
-
                 {conditions &&(
-                    <FlatList  
-                      style={{marginTop:10}}
-                      data={conditions}
-                      renderItem={({item, index}) => <ListItem key={"fl_"+index} leftAvatar={<Icon name="wrench" />} title={item}  style={styles.listItem} />}
-                      ListHeaderComponent={this.ListHeaderComponent}
-                      
-                    />
+                  <Card key={"card1"} >
+                    <View style={{justifyContent:'center',alignItems:'center'}}>
+                        <Text>車輛狀況</Text>
+                    </View>
+                    <Divider style={{marginTop:10,marginBottom:10}} />
+                    {
+                      conditions.map((item, index) => (
+                        <ListItem
+                          key={"fl_"+index}
+                          leftAvatar={<Icon name="wrench" />}
+                          title={item}
+                          style={styles.listItem}
+                          bottomDivider
+                        />
+                      ))
+                    }
+                   
+                  </Card>
                 )}
+                
+                
+                
                 
             </ScrollView>
               <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
-                {sel_task ? (
-                  <View>
-                  <Button key={"btn_0"}  icon={<Icon name="tasks" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.onPressTask(scooter.id)} />
-                  <Badge status="error" containerStyle={{position:'absolute',top:0,right:0}} />
-                  </View>
-                ):(
-                  <Button  key={"btn_0"} icon={<Icon name="tasks" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.onPressTask(scooter.id)} />
-                )}
+
+                <Button  key={"btn_0"} icon={<Icon name="directions" size={25} color="#6A7684" />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.showDirection()}/>
                 <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
                 <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
                 <Button  key={"btn_4"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()} />

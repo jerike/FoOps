@@ -496,7 +496,7 @@ export default class MapScreen extends React.Component {
                   m.power > 30 ? (
                     <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                        <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id,screen:'Map'}); }}>
                           <View style={{padding:10}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>

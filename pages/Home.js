@@ -93,6 +93,7 @@ export default class Home extends React.Component {
         // }
     }
     _onBackClicked(){
+        console.warn('back');
         return true;
     }
     getScooterStorage = async () => {
@@ -258,6 +259,7 @@ export default class Home extends React.Component {
             global.page = "Home";
             this.setModalVisible(true);
         }else{
+            // global.page = "Map";
             this.setState({screen:'Map'});
             if(this.props.navigation.state.params != undefined){
                 this.props.navigation.state.params.send2Map();
@@ -374,7 +376,7 @@ export default class Home extends React.Component {
         });
     }
     showDetail(sid){
-        this.props.navigation.navigate('ScooterDetail',{scooter:sid});
+        this.props.navigation.navigate('ScooterDetail',{scooter:sid,screen:'Home'});
     }
     doSomething() {
         var promise1 = new Promise((resolve,reject)=>{
