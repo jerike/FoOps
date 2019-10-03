@@ -41,6 +41,7 @@ export default class MapScreen extends React.Component {
         MyPosition:null,
         load_position:false,
         search_loading:false,
+        highAccuracy:true
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -68,14 +69,18 @@ export default class MapScreen extends React.Component {
           geofence:global.geofence,
           set_polygon:true
         });
-        
+        this.chk_location_permission();
     }
     componentDidMount() {
-      this.chk_location_permission();
-        // this.getPosition();
-        // home_timer = setInterval(()=>{ 
-        //   this.getPosition();
-        // },60000);
+      
+      home_timer = setInterval(()=>{ 
+        Geolocation.watchPosition((position) => {
+          var lastPosition = JSON.stringify(position);
+          const positionData: any = position.coords;
+          this.setState({MyPosition:positionData,load_position:false});
+          this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+        });
+      },30000);
 
     }
     async chk_location_permission(){
@@ -96,37 +101,73 @@ export default class MapScreen extends React.Component {
     _onBackClicked(){
       return true;
     } 
-    shouldComponentUpdate(nextProps, nextState){
-        return shallowCompare(this, nextProps, nextState);
-    }   
-    componentWillUpdate(nextProps,nextState){
-       // if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
-       //      this.setState({changed:true});
-       //  }
-    }
+    // shouldComponentUpdate(nextProps, nextState){
+    //     return shallowCompare(this, nextProps, nextState);
+    // }   
+    // componentWillUpdate(nextProps,nextState){
+    //    // if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
+    //    //      this.setState({changed:true});
+    //    //  }
+    // }
     
     getPosition(){
       this.setState({load_position:true});
-      Geolocation.getCurrentPosition(
-        (position: any) => {
-          const positionData: any = position.coords;
-          this.setState({MyPosition:positionData,load_position:false});
-          this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
-        },
-        (error: any) => {
-          this.setState({load_position:false});
-          Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
-        }, {
-          enableHighAccuracy: true,
-          timeout: 20000
-        }
-      );
-      watchID = Geolocation.watchPosition((position) => {
-        var lastPosition = JSON.stringify(position);
-        const positionData: any = position.coords;
-        this.setState({MyPosition:positionData,load_position:false});
-        this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
-      });
+      const GeoHightAccuracy = () => {
+        return new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (locHightAccuracy)=>{
+              resolve(locHightAccuracy)
+            },
+            (error)=>{
+              GeoLowAccuracy()
+              .then((locLowAccuracy)=>{resolve(locLowAccuracy)})
+              .catch((err)=>{reject(err)});
+            },
+            {enableHighAccuracy: true, timeout: 3000}
+          )
+        });
+      };
+      const GeoLowAccuracy = () => {
+        return new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (locLowAccuracy)=>{
+              this.setState({highAccuracy:false});
+              resolve(locLowAccuracy)
+            },
+            (error)=>{
+              reject(error)
+            },
+            {enableHighAccuracy: false, timeout: 5000}
+          )
+        });
+      };
+      if(this.state.highAccuracy){
+        GeoHightAccuracy().then(locationData => {
+            const positionData: any = locationData.coords;
+            this.setState({MyPosition:positionData,load_position:false});
+            this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+        })
+        .catch(error => console.warn(error));
+      }else{
+        GeoLowAccuracy().then(locationData => {
+            const positionData: any = locationData.coords;
+            this.setState({MyPosition:positionData,load_position:false});
+            this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+        })
+        .catch(error => console.warn(error));
+      }
+      // Geolocation.getCurrentPosition(
+      //   (position: any) => {
+      //     const positionData: any = position.coords;
+      //     this.setState({MyPosition:positionData,load_position:false});
+      //     this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+      //   },
+      //   (error: any) => {
+      //     this.setState({load_position:false});
+      //     Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
+      //   }
+      // );
+      
 
     }
     
@@ -432,7 +473,7 @@ export default class MapScreen extends React.Component {
         if(this.state.MyPosition != null){
 
           var Mylatlng = {latitude:parseFloat(this.state.MyPosition.latitude),longitude:parseFloat(this.state.MyPosition.longitude),latitudeDelta: 0.01,longitudeDelta: 0.01};
-          Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} title="你所在位置" description="點擊右下角可以重新定位！" />
+          Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} style={{ width: 40, height: 40 }} title="你所在位置" description="點擊右下角可以重新定位！" />
         }
 
 
@@ -547,8 +588,11 @@ export default class MapScreen extends React.Component {
                </TouchableWithoutFeedback>
              </View>
 
-             <View style={{position:'absolute',bottom:0,paddingLeft:'30%',width:'100%',padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
-               <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+             <View style={{position:'absolute',left:0,bottom:0,width:'100%',padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                <View style={{flexDirection: 'column',justifyContent:'center',alignItems:'center'}}>
+                  <Text style={{fontSize:11,color:'#fff'}}>{this.state.setCenter.latitude+":"+this.state.setCenter.longitude}</Text>
+                  <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+                </View>
              </View>
         </SafeAreaView>
          

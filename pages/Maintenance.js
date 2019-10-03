@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBox } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -15,12 +15,16 @@ export default class Maintenance extends React.Component {
         this.state = {
             scooter:{},
             condition:[],
-            sel_condition:[]
-
+            sel_condition:[],
+            show_loading:false
         }
+        this.updateCondition=this.updateCondition.bind(this);
+        this.onClickCondition=this.onClickCondition.bind(this);
+        this.onChangeOther=this.onChangeOther.bind(this);
     }
     componentWillMount() {
         this.setState({condition:global.condition});
+
     }
     
     pad(number){ return (number < 10 ? '0' : '') + number }
@@ -29,7 +33,57 @@ export default class Maintenance extends React.Component {
       var create_date = this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
       return create_date;
     }
-    
+    onChangeOther(key,value){
+      var other_summaries = this.state.other_summaries;
+      other_summaries[key] = value;
+      this.setState({other_summaries:other_summaries});
+    }
+    updateCondition(id){
+        this.setState({show_loading:true});
+        var formData  = new FormData();
+        formData.append("scooter_id", id);
+        formData.append("ticket_status_id", 0);
+        formData.append("operator", global.user_givenName);
+        formData.append("operator_id", global.user_id);
+        formData.append("zendesk", "");
+
+        var sel_condition = this.props.maintain_option.sel_condition;
+        console.log(sel_condition);
+
+        // if(sel_condition.indexOf(700) != -1 && sel_condition.length == 1){
+        //   Alert.alert('⚠️ Warning',"車輛下限需要勾選車況原因！",[{text: '好的！'}]);
+        //   return false;
+        // }
+        // sel_condition && sel_condition.map(function(m,i){
+        //     formData.append("scooter_status[]", m);
+        // });
+        // var other_summaries = this.state.other_summaries;
+        // other_summaries && other_summaries.map(function(m,i){
+        //     if(m != null){
+        //       formData.append("other_summary_id[]", i);
+        //       formData.append("other_summary_value[]", m);
+        //     }
+        // });
+        console.log(formData);
+
+        // fetch(API+'/ticket',{
+        //     method: 'POST',
+        //     mode: 'cors',
+        //     body: formData,
+        //     credentials: 'include'
+        // })
+        // .then((response) => response.json())
+        // .then((json) => {
+        //   console.log(json);
+        //   if(json.code == 1){
+        //     this.props.maintain_option.onClose('maintain_modal');
+        //     // this.props.maintain_option.newScooter(id);
+        //     this.setState({show_loading:false});
+        //   }else{
+        //     Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
+        //   }
+        // });
+    }
     
     
     get_status_type(type){
@@ -55,17 +109,23 @@ export default class Maintenance extends React.Component {
         return result;
     }
 
-    getConditions(id){
-        var result = "";
-        this.state.condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
-            }
-        });
-        return result;
-    }
     
+    onClickCondition(id){
+        var sel_condition = [];
+        if(this.props.maintain_option.sel_condition != undefined){
+            sel_condition = this.props.maintain_option.sel_condition;
+        }
+        var index = sel_condition.indexOf(id);
+        if (index == -1) {
+            sel_condition.push(id);
+            this.setState({sel_condition: sel_condition});
+        }else{
+            sel_condition.splice(index, 1);
+            this.setState({sel_condition: sel_condition});
+        }
+        
+        
+    }
     render() {
         const {maintain_option} = this.props;
         const {condition} = this.state;
@@ -92,11 +152,11 @@ export default class Maintenance extends React.Component {
                   }
               });
             }
-            other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => maintain_option.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
+            other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => this.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
           }
           var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
 
-          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>maintain_option.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
+          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>this.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
         });
         return (
             <Modal
@@ -106,6 +166,12 @@ export default class Maintenance extends React.Component {
               presentationStyle="fullScreen"
             >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+                  {this.state.show_loading &&(
+                    <View style={styles.loading}>
+                      <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                      <Text style={{color:'#fff'}}>Loading...</Text>
+                    </View>
+                  )}
                   <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
                      <Icon name='close' size={30}  onPress={() => {
                         maintain_option.onClose('maintain_modal');
@@ -118,7 +184,7 @@ export default class Maintenance extends React.Component {
                       title="送出"
                       titleStyle={styles.view_titleStyle}
                       onPress={() => {
-                        maintain_option.updateCondition(maintain_option.scooter.id);
+                        this.updateCondition(maintain_option.scooter.id);
                       }}
                     />
                 </SafeAreaView>
@@ -129,6 +195,20 @@ export default class Maintenance extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  loading:{
+    position:'absolute',
+    zIndex:10001,
+    top:'40%',
+    left:'40%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:'rgba(1,1,1,0.8)',
+    padding:20,
+    borderBottomLeftRadius:5,
+    borderBottomRightRadius:5,
+    borderTopLeftRadius:5,
+    borderTopRightRadius:5
+  },
   input: {
     width:'60%',
     backgroundColor:'#fff',

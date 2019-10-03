@@ -44,10 +44,7 @@ export default class ScooterDetail extends React.Component {
       this.updateIndex = this.updateIndex.bind(this);
       this.showModal=this.showModal.bind(this);
       this.onClose=this.onClose.bind(this);
-      this.onClickCondition=this.onClickCondition.bind(this);
-      this.onChangeOther=this.onChangeOther.bind(this);
       this.getStorage=this.getStorage.bind(this);
-      this.updateCondition=this.updateCondition.bind(this);
       this.onPressTask=this.onPressTask.bind(this);
       this.removeRemark=this.removeRemark.bind(this);
       this.confirm_controller=this.confirm_controller.bind(this);
@@ -193,71 +190,12 @@ export default class ScooterDetail extends React.Component {
          </View>
       );
     }
-    onChangeOther(key,value){
-      var other_summaries = this.state.other_summaries;
-      other_summaries[key] = value;
-      this.setState({other_summaries:other_summaries});
-    }
-    updateCondition(id){
-        var formData  = new FormData();
-        formData.append("scooter_id", id);
-        formData.append("ticket_status_id", 0);
-        formData.append("operator", global.user_givenName);
-        formData.append("operator_id", global.user_id);
-        formData.append("zendesk", "");
 
-        var sel_condition = this.state.sel_condition;
-        if(sel_condition.indexOf(700) != -1 && sel_condition.length == 1){
-          Alert.alert('⚠️ Warning',"車輛下限需要勾選車況原因！",[{text: '好的！'}]);
-          return false;
-        }
-        sel_condition && sel_condition.map(function(m,i){
-            formData.append("scooter_status[]", m);
-        });
-        var other_summaries = this.state.other_summaries;
-        other_summaries && other_summaries.map(function(m,i){
-            if(m != null){
-              formData.append("other_summary_id[]", i);
-              formData.append("other_summary_value[]", m);
-            }
-        });
 
-        fetch(API+'/ticket',{
-            method: 'POST',
-            mode: 'cors',
-            body: formData,
-            credentials: 'include'
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          if(data.code == 1){
-            this.onClose('maintain_modal');
-            this.newScooter(id);
-
-          }else{
-            Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
-          }
-        });
-    }
     updateIndex (selectedIndex) {
       this.setState({selectedIndex})
     }
-    onClickCondition(id){
-        var sel_condition = [];
-        if(this.state.sel_condition != undefined){
-            sel_condition = this.state.sel_condition;
-        }
-        var index = sel_condition.indexOf(id);
-        if (index == -1) {
-            sel_condition.push(id);
-            this.setState({sel_condition: sel_condition});
-        }else{
-            sel_condition.splice(index, 1);
-            this.setState({sel_condition: sel_condition});
-        }
-        
-        
-    }
+    
     showModal(key){
         this.setState({
           [key]: true,
@@ -550,10 +488,8 @@ export default class ScooterDetail extends React.Component {
           onClose:this.onClose,
           maintain_modal:this.state.maintain_modal,
           scooter:this.state.scooter,
-          onClickCondition:this.onClickCondition,
           sel_condition:this.state.sel_condition,
-          onChangeOther:this.onChangeOther,
-          updateCondition:this.updateCondition
+          newScooter:this.newScooter
         }
         const fastrecord_option={
           onClose:this.onClose,
@@ -745,7 +681,7 @@ const styles = StyleSheet.create({
   },
   loading:{
     position:'absolute',
-    zIndex:101,
+    zIndex:10001,
     top:'40%',
     left:'40%',
     justifyContent: 'center',
