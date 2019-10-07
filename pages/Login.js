@@ -92,6 +92,7 @@ export default class Login extends React.Component {
         credentials: 'include'
     })
     .then((response) => {
+      console.warn(response);
       if(response.status == 200){
         return response.json();
       }else if(response.status == 403){

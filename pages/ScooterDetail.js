@@ -69,6 +69,9 @@ export default class ScooterDetail extends React.Component {
     back2page(){
       var backpage = (global.page != undefined) ? global.page : "Home" ;
       this.props.navigation.navigate(backpage);
+      this.props.navigation.navigate(backpage,{
+          newScooter: this.newScooter,
+      });
     }
     getStorage = async () => {
         try {
@@ -88,6 +91,7 @@ export default class ScooterDetail extends React.Component {
       return create_date;
     }
     newScooter(sid){
+        console.warn(sid);
         this.setState({sid:sid});
         fetch(global.API+'/scooter/'+sid,{
           method: 'GET',
@@ -204,7 +208,7 @@ export default class ScooterDetail extends React.Component {
     onClose(key){
         this.setState({
           [key]: false,
-        });
+        },()=>{this.newScooter(this.state.sid)});
     }
     showMaintain(){
       if(this.state.scooter.ticket != undefined){
@@ -439,10 +443,9 @@ export default class ScooterDetail extends React.Component {
 
         var get_props_sid = this.props.navigation.getParam('scooter');
         global.page = this.props.navigation.getParam('screen');
-        console.warn(global.page);
-        if(this.state.sid != get_props_sid){
-          this.newScooter(get_props_sid);
-        }
+        // if(this.state.sid != get_props_sid){
+        //   this.newScooter(get_props_sid);
+        // }
 
         var conditions = [];
         var other_conditions = [];

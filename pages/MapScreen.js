@@ -72,15 +72,11 @@ export default class MapScreen extends React.Component {
         this.chk_location_permission();
     }
     componentDidMount() {
-      
       home_timer = setInterval(()=>{ 
         Geolocation.watchPosition((position) => {
-          var lastPosition = JSON.stringify(position);
-          const positionData: any = position.coords;
-          this.setState({MyPosition:positionData,load_position:false});
-          this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+          this.setState({MyPosition:position.coords});
         });
-      },30000);
+      },60000);
 
     }
     async chk_location_permission(){

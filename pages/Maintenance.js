@@ -48,41 +48,41 @@ export default class Maintenance extends React.Component {
         formData.append("zendesk", "");
 
         var sel_condition = this.props.maintain_option.sel_condition;
-        console.log(sel_condition);
+        // console.log(sel_condition);
 
-        // if(sel_condition.indexOf(700) != -1 && sel_condition.length == 1){
-        //   Alert.alert('⚠️ Warning',"車輛下限需要勾選車況原因！",[{text: '好的！'}]);
-        //   return false;
-        // }
-        // sel_condition && sel_condition.map(function(m,i){
-        //     formData.append("scooter_status[]", m);
-        // });
-        // var other_summaries = this.state.other_summaries;
-        // other_summaries && other_summaries.map(function(m,i){
-        //     if(m != null){
-        //       formData.append("other_summary_id[]", i);
-        //       formData.append("other_summary_value[]", m);
-        //     }
-        // });
-        console.log(formData);
+        if(sel_condition.indexOf(700) != -1 && sel_condition.length == 1){
+          Alert.alert('⚠️ Warning',"車輛下限需要勾選車況原因！",[{text: '好的！'}]);
+          return false;
+        }
+        sel_condition && sel_condition.map(function(m,i){
+            formData.append("scooter_status[]", m);
+        });
+        var other_summaries = this.state.other_summaries;
+        other_summaries && other_summaries.map(function(m,i){
+            if(m != null){
+              formData.append("other_summary_id[]", i);
+              formData.append("other_summary_value[]", m);
+            }
+        });
+        // console.log(formData);
 
-        // fetch(API+'/ticket',{
-        //     method: 'POST',
-        //     mode: 'cors',
-        //     body: formData,
-        //     credentials: 'include'
-        // })
-        // .then((response) => response.json())
-        // .then((json) => {
-        //   console.log(json);
-        //   if(json.code == 1){
-        //     this.props.maintain_option.onClose('maintain_modal');
-        //     // this.props.maintain_option.newScooter(id);
-        //     this.setState({show_loading:false});
-        //   }else{
-        //     Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
-        //   }
-        // });
+        fetch(API+'/ticket',{
+            method: 'POST',
+            mode: 'cors',
+            body: formData,
+            credentials: 'include'
+        })
+        .then((response) => response.json())
+        .then((json) => {
+          console.log(json);
+          if(json.code == 1){
+            this.props.maintain_option.onClose('maintain_modal');
+            // this.props.maintain_option.newScooter(id);
+            this.setState({show_loading:false});
+          }else{
+            Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
+          }
+        });
     }
     
     
@@ -111,6 +111,7 @@ export default class Maintenance extends React.Component {
 
     
     onClickCondition(id){
+      // console.warn(id);
         var sel_condition = [];
         if(this.props.maintain_option.sel_condition != undefined){
             sel_condition = this.props.maintain_option.sel_condition;
@@ -129,6 +130,7 @@ export default class Maintenance extends React.Component {
     render() {
         const {maintain_option} = this.props;
         const {condition} = this.state;
+        const {onClickCondition,updateCondition} = this;
         var other_conditions = [];
         var scooter_conditions = [];
         SCooter_ticket = maintain_option.scooter.ticket;
@@ -154,9 +156,9 @@ export default class Maintenance extends React.Component {
             }
             other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => this.onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
           }
-          var checked = (maintain_option.sel_condition != undefined && maintain_option.sel_condition.indexOf(m.id) != -1) ? true : false;
+          var checked = (this.state.sel_condition != undefined && this.state.sel_condition.indexOf(m.id) != -1) ? true : false;
 
-          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>this.onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
+          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
         });
         return (
             <Modal
@@ -184,7 +186,7 @@ export default class Maintenance extends React.Component {
                       title="送出"
                       titleStyle={styles.view_titleStyle}
                       onPress={() => {
-                        this.updateCondition(maintain_option.scooter.id);
+                        updateCondition(maintain_option.scooter.id);
                       }}
                     />
                 </SafeAreaView>

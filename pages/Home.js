@@ -367,15 +367,18 @@ export default class Home extends React.Component {
     
     _onRefresh = () => {
         this.setState({refreshing: true});
-        fetch(global.API+'/tools/clear_cache_key/all_scooter',{
-            method: 'GET',
-            credentials: 'include'
-        }).then((response) => {
+        // fetch(global.API+'/tools/clear_cache_key/all_scooter',{
+        //     method: 'GET',
+        //     credentials: 'include'
+        // }).then((response) => {
           this.setState({all: []});
           this.fetch_scooters();
-        });
+        // });
     }
     showDetail(sid){
+        if(this.props.navigation.state.params != undefined){
+            this.props.navigation.state.params.newScooter(sid);
+        }
         this.props.navigation.navigate('ScooterDetail',{scooter:sid,screen:'Home'});
     }
     doSomething() {
