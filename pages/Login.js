@@ -134,7 +134,7 @@ export default class Login extends React.Component {
   }
   fetch_scooters(){
       var result = []
-      fetch(global.API+'/scooter',{
+      fetch(global.API+'/scooter/lite',{
         method: 'GET',
         credentials: 'include'
       })

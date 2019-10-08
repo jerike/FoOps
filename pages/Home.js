@@ -186,7 +186,7 @@ export default class Home extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter',{
+        fetch(global.API+'/scooter/lite',{
           method: 'GET',
           credentials: 'include'
         })
@@ -261,12 +261,14 @@ export default class Home extends React.Component {
         }else{
             // global.page = "Map";
             this.setState({screen:'Map'});
-            if(this.props.navigation.state.params != undefined){
-                this.props.navigation.state.params.send2Map();
-            }
             this.props.navigation.navigate("Map",{
                 doSomething: this.doSomething,
             });
+            // console.warn(this.props.navigation.state.params);
+            if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.send2Map != undefined){
+                this.props.navigation.state.params.send2Map();
+            }
+            
             
         }
     }
@@ -376,10 +378,11 @@ export default class Home extends React.Component {
         // });
     }
     showDetail(sid){
-        if(this.props.navigation.state.params != undefined){
+        this.props.navigation.navigate('ScooterDetail',{scooter:sid,screen:'Home'});
+        if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.newScooter != undefined){
             this.props.navigation.state.params.newScooter(sid);
         }
-        this.props.navigation.navigate('ScooterDetail',{scooter:sid,screen:'Home'});
+        
     }
     doSomething() {
         var promise1 = new Promise((resolve,reject)=>{

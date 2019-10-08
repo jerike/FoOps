@@ -202,16 +202,16 @@ export default class MapScreen extends React.Component {
     }
     reload_all_scooter(){
         this.setState({load_data:true});
-        fetch(global.API+'/tools/clear_cache_key/all_scooter',{
-            method: 'GET',
-            credentials: 'include'
-        }).then((response) => {
+        // fetch(global.API+'/tools/clear_cache_key/all_scooter',{
+        //     method: 'GET',
+        //     credentials: 'include'
+        // }).then((response) => {
           this.fetch_scooters();
-        });
+        // });
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter',{
+        fetch(global.API+'/scooter/lite',{
           method: 'GET',
           credentials: 'include'
         })
@@ -393,6 +393,12 @@ export default class MapScreen extends React.Component {
         promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
       
     }
+    openDetail(id){
+      this.props.navigation.navigate('ScooterDetail',{scooter:id,screen:'Map'});
+      if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.newScooter != undefined){
+          this.props.navigation.state.params.newScooter(id);
+      }
+    }
     render() {
         const {selectedIndex,toSearch,clickMarker,geofence,changed,scooter} = this.state;
         // var scooter = this.state.scooter;
@@ -533,7 +539,7 @@ export default class MapScreen extends React.Component {
                   m.power > 30 ? (
                     <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id,screen:'Map'}); }}>
+                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
                           <View style={{padding:10}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
@@ -544,7 +550,7 @@ export default class MapScreen extends React.Component {
                   ):(
                     <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                       {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
-                          <Callout onPress={() => {global.page = "Map";this.props.navigation.navigate('ScooterDetail',{scooter:m.id}); }}>
+                          <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
                             <View style={{padding:10}}>
                               <Text>{m.plate}</Text>
                               <Text>電量：{m.power}%</Text>

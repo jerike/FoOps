@@ -66,6 +66,9 @@ export default class ScooterDetail extends React.Component {
            BackHandler.removeEventListener('hardwareBackPress',()=>{});
         }
     }
+    onRef1 = (e) => {
+      this.modal1 = e
+    }
     back2page(){
       var backpage = (global.page != undefined) ? global.page : "Home" ;
       this.props.navigation.navigate(backpage);
@@ -213,8 +216,9 @@ export default class ScooterDetail extends React.Component {
     showMaintain(){
       if(this.state.scooter.ticket != undefined){
           const scooter_conditions = this.state.scooter.ticket.scooter_conditions;
-          this.setState({sel_condition:scooter_conditions});
+          // this.setState({sel_condition:scooter_conditions});
       }
+      this.modal1.get_data();
       this.showModal('maintain_modal');
     }
     showFastRecord(){
@@ -491,7 +495,6 @@ export default class ScooterDetail extends React.Component {
           onClose:this.onClose,
           maintain_modal:this.state.maintain_modal,
           scooter:this.state.scooter,
-          sel_condition:this.state.sel_condition,
           newScooter:this.newScooter
         }
         const fastrecord_option={
@@ -557,7 +560,7 @@ export default class ScooterDetail extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
-            <Maintenance  maintain_option={maintain_option}/>
+            <Maintenance  maintain_option={maintain_option} onRef1={this.onRef1}/>
             <FastRecord fastrecord_option={fastrecord_option} />
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
