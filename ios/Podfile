@@ -45,6 +45,7 @@ target 'FoOps' do
   #pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
 
 
+
 end
 post_install do |installer|
   installer.pods_project.targets.each do |target|

@@ -4,7 +4,6 @@ import {Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import '../global.js';
 import { WebView } from 'react-native-webview';
-import Geolocation from '@react-native-community/geolocation';
 
 var t = 0;
 
@@ -17,19 +16,19 @@ export default class Direction extends React.Component {
 
     }
     componentWillMount(){
-      Geolocation.getCurrentPosition(
-        (position: any) => {
-          const positionData: any = position.coords;
-          this.setState({positionData:positionData});
-        },
-        (error: any) => {
-          console.warn(error.message);
-          // console.warn('失敗：' + JSON.stringify(error.message))
-        }, {
-          enableHighAccuracy: true,
-          timeout: 20000
-        }
-      );
+      // Geolocation.getCurrentPosition(
+      //   (position: any) => {
+      //     const positionData: any = position.coords;
+      //     this.setState({positionData:positionData});
+      //   },
+      //   (error: any) => {
+      //     console.warn(error.message);
+      //     // console.warn('失敗：' + JSON.stringify(error.message))
+      //   }, {
+      //     enableHighAccuracy: true,
+      //     timeout: 20000
+      //   }
+      // );
     }
     componentDidMount() {
       

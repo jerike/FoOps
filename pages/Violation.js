@@ -6,7 +6,6 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ActionSheet from 'react-native-action-sheet';
 import ImagePicker from 'react-native-image-crop-picker';
-import Geolocation from '@react-native-community/geolocation';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 

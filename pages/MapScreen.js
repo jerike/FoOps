@@ -10,7 +10,6 @@ import Carousel from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import slideStyle, { colors } from '../styles/index.style';
 import SliderEntry from '../component/SliderEntry';
-import Geolocation from '@react-native-community/geolocation';
 import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
 import isEqual from 'lodash.isequal'
@@ -43,7 +42,8 @@ export default class MapScreen extends React.Component {
         search_loading:false,
         highAccuracy:true,
         OldLocation:null,
-        no_change_center:false
+        no_change_center:false,
+        marginBottom:1
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -64,6 +64,7 @@ export default class MapScreen extends React.Component {
       this.chk_location_permission=this.chk_location_permission.bind(this);
       this.update_user_location=this.update_user_location.bind(this);
       this.change_center=this.change_center.bind(this);
+      this._onMapReady=this._onMapReady.bind(this);
     }
     componentWillMount() {
         this.setState({scooter:global.scooter,condition:global.condition});
@@ -91,7 +92,9 @@ export default class MapScreen extends React.Component {
             ]
             const granteds = await PermissionsAndroid.requestMultiple(permissions);
             if (granteds["android.permission.ACCESS_FINE_LOCATION"] === "granted") {
-               // this.getPosition();
+               navigator.geolocation.watchPosition((position) => {
+                
+              },error => console.warn(error));
             } else {
               Alert.alert('⚠️ 定位失敗',"定位權限被禁止",[{text: 'OK'}]);
             }
@@ -100,14 +103,16 @@ export default class MapScreen extends React.Component {
     change_center(){
       this.setState({no_change_center:true});
     }
+    _onMapReady(){
+      this.setState({marginBottom: 0});
+    }
     update_user_location(event){
-      if(this.state.no_change_center){
+      console.warn(event);
+      if(this.state.OldLocation == null){
         const positionData = event.nativeEvent.coordinate;
         var location = positionData.latitude+","+positionData.longitude;
-        if(location != this.state.OldLocation){
-          this.setState({OldLocation:location});
-          this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
-        }
+        this.setState({OldLocation:location});
+        this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
       }
     }
 
@@ -125,21 +130,7 @@ export default class MapScreen extends React.Component {
     
     getPosition(){
       this.setState({load_position:true});
-      const GeoHightAccuracy = () => {
-        return new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            (locHightAccuracy)=>{
-              resolve(locHightAccuracy)
-            },
-            (error)=>{
-              GeoLowAccuracy()
-              .then((locLowAccuracy)=>{resolve(locLowAccuracy)})
-              .catch((err)=>{reject(err)});
-            },
-            {enableHighAccuracy: true, timeout: 3000}
-          )
-        });
-      };
+     
       const GeoLowAccuracy = () => {
         return new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
@@ -150,25 +141,18 @@ export default class MapScreen extends React.Component {
             (error)=>{
               reject(error)
             },
-            {enableHighAccuracy: false, timeout: 5000}
+            {enableHighAccuracy: false, timeout: 1000}
           )
         });
       };
-      if(this.state.highAccuracy){
-        GeoHightAccuracy().then(locationData => {
-            const positionData: any = locationData.coords;
-            this.setState({MyPosition:positionData,load_position:false});
-            this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
-        })
-        .catch(error => console.warn(error));
-      }else{
+
         GeoLowAccuracy().then(locationData => {
-            const positionData: any = locationData.coords;
-            this.setState({MyPosition:positionData,load_position:false});
-            this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+            // const positionData: any = locationData.coords;
+            // this.setState({MyPosition:positionData,load_position:false});
+            // this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         })
-        .catch(error => console.warn(error));
-      }
+        .catch(error => Alert.alert('⚠️ 定位失敗',error.message,[{text: 'OK'}]));
+      
       // Geolocation.getCurrentPosition(
       //   (position: any) => {
       //     const positionData: any = position.coords;
@@ -542,10 +526,10 @@ export default class MapScreen extends React.Component {
               />
            
             
-               <AnimatedMap
+               <MapView
                  ref = {(ref)=>this.mapView=ref}
                  provider={PROVIDER_GOOGLE}
-                 style={styles.map}
+                 style={{flex: 1, marginBottom: this.state.marginBottom}}
                  customMapStyle={mapStyle}
                  mapType="standard"
                  region={this.state.setCenter}
@@ -555,6 +539,7 @@ export default class MapScreen extends React.Component {
                  showsPointsOfInterest={false}
                  showsCompass={true}
                  toolbarEnabled={false}
+                 onMapReady={this._onMapReady}
                  onUserLocationChange={event => this.update_user_location(event)}
                >
                
@@ -594,7 +579,7 @@ export default class MapScreen extends React.Component {
                   
                 ))}
                 
-               </AnimatedMap>
+               </MapView>
              <View>
                
              </View>
