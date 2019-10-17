@@ -186,7 +186,7 @@ export default class Home extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter/lite',{
+        fetch(global.API+'/scooter',{
           method: 'GET',
           credentials: 'include'
         })

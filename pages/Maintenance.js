@@ -39,10 +39,11 @@ export default class Maintenance extends React.Component {
     }
     get_data(){
         SCooter_ticket = this.props.maintain_option.scooter.ticket;
-        console.warn(this.props.maintain_option.scooter);
+        // console.warn(this.props.maintain_option.scooter);
         if(SCooter_ticket != undefined){
           other_conditions = SCooter_ticket.other_conditions;
           sel_condition = SCooter_ticket.scooter_conditions;
+
           this.setState({sel_condition:sel_condition,other_conditions:other_conditions})
         }
     }
@@ -124,12 +125,13 @@ export default class Maintenance extends React.Component {
 
     
     onClickCondition(id){
-      // console.warn(id);
-        var sel_condition = [];
-        if(this.state.sel_condition != undefined){
-            sel_condition = this.state.sel_condition;
+        var sel_condition =  this.state.sel_condition;
+        var index = -1;
+        if(sel_condition != undefined){
+          index = sel_condition.indexOf(id);
+        }else{
+          sel_condition = [];
         }
-        var index = sel_condition.indexOf(id);
         if (index == -1) {
             sel_condition.push(id);
             this.setState({sel_condition: sel_condition});
@@ -144,7 +146,6 @@ export default class Maintenance extends React.Component {
         const {maintain_option} = this.props;
         const {condition,sel_condition,other_conditions} = this.state;
         const {onClickCondition,updateCondition,onChangeOther} = this;
-
         var condition_list = condition.map(function(m,i){
           if(m.id < 600 || m.status != 1){
             return true;
@@ -163,7 +164,11 @@ export default class Maintenance extends React.Component {
             }
             other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
           }
-          var checked = (sel_condition.length > 0 && sel_condition.indexOf(m.id) != -1) ? true : false;
+          var checked = false;
+          if(sel_condition != undefined){
+              checked = (sel_condition.length > 0 && sel_condition.indexOf(m.id) != -1) ? true : false;
+          }
+          
 
           return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
         });

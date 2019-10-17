@@ -94,7 +94,7 @@ export default class ScooterDetail extends React.Component {
       return create_date;
     }
     newScooter(sid){
-        console.warn(sid);
+        // console.warn(sid);
         this.setState({sid:sid});
         fetch(global.API+'/scooter/'+sid,{
           method: 'GET',
@@ -473,19 +473,16 @@ export default class ScooterDetail extends React.Component {
           if(scooter.ticket.scooter_conditions){
             scooter.ticket.scooter_conditions.map(function(d,k){
               var description = this.getConditions(d);
-                if(description == "其他"){
-                    var other_summary = "";
-                    other_summary += description;
-                    scooter.ticket.other_conditions.map(function(s,i){
-                        if(s.id == d){
-                            other_summary += ":"+s.summary;
-                            
-                        }
-                    });
-                    conditions.push(other_summary);
-                }else{
-                    conditions.push(description);
-                }
+              var other_summary = "";
+              other_summary += description;
+              scooter.ticket.other_conditions.map(function(s,i){
+                  if(s.id == d){
+                      other_summary += ":"+s.summary;
+                      
+                  }
+              });
+              conditions.push(other_summary);
+
             }.bind(this));
             
           }
@@ -623,11 +620,7 @@ export default class ScooterDetail extends React.Component {
                         <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
                       </View>
                     )}
-                     <View style={{justifyContent:'center',marginTop:20}}>
-                      <View style={{justifyContent:'center'}}>
-                        <Button title="顯示違規紀錄" buttonStyle={{backgroundColor:'#FF8C00'}} titleStyle={{fontSize:12}} onPress={()=>{this.ViewViolationRecord()}} />
-                      </View>
-                    </View>
+                    
                 </Card>
                 {conditions &&(
                   <Card key={"card1"} >
@@ -656,7 +649,7 @@ export default class ScooterDetail extends React.Component {
             </ScrollView>
               <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
 
-                <Button  key={"btn_0"} icon={<Icon name="directions" size={25} color="#6A7684" />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.showDirection()}/>
+                <Button  key={"btn_0"} icon={<Icon name="exclamation-triangle" size={25} color="#6A7684" />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.ViewViolationRecord()}/>
                 <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
                 <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
                 <Button  key={"btn_4"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()} />

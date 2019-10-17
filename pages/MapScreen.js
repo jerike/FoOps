@@ -41,7 +41,9 @@ export default class MapScreen extends React.Component {
         MyPosition:null,
         load_position:false,
         search_loading:false,
-        highAccuracy:true
+        highAccuracy:true,
+        OldLocation:null,
+        no_change_center:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -60,6 +62,8 @@ export default class MapScreen extends React.Component {
       this.send2Map=this.send2Map.bind(this);
       this.getPosition=this.getPosition.bind(this);
       this.chk_location_permission=this.chk_location_permission.bind(this);
+      this.update_user_location=this.update_user_location.bind(this);
+      this.change_center=this.change_center.bind(this);
     }
     componentWillMount() {
         this.setState({scooter:global.scooter,condition:global.condition});
@@ -72,28 +76,41 @@ export default class MapScreen extends React.Component {
         this.chk_location_permission();
     }
     componentDidMount() {
-      home_timer = setInterval(()=>{ 
-        Geolocation.watchPosition((position) => {
-          this.setState({MyPosition:position.coords});
-        });
-      },60000);
+      // home_timer = setInterval(()=>{ 
+      //   this.chk_location_permission();
+      //   // Geolocation.watchPosition((position) => {
+      //   //   this.setState({MyPosition:position.coords});
+      //   // });
+      // },10000);
 
     }
     async chk_location_permission(){
-      if(Platform.OS == 'ios'){
-            this.getPosition();
-      }else{
+      if(Platform.OS == 'android'){
             const permissions = [
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
             ]
             const granteds = await PermissionsAndroid.requestMultiple(permissions);
             if (granteds["android.permission.ACCESS_FINE_LOCATION"] === "granted") {
-               this.getPosition();
+               // this.getPosition();
             } else {
               Alert.alert('⚠️ 定位失敗',"定位權限被禁止",[{text: 'OK'}]);
             }
       }
     }
+    change_center(){
+      this.setState({no_change_center:true});
+    }
+    update_user_location(event){
+      if(this.state.no_change_center){
+        const positionData = event.nativeEvent.coordinate;
+        var location = positionData.latitude+","+positionData.longitude;
+        if(location != this.state.OldLocation){
+          this.setState({OldLocation:location});
+          this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+        }
+      }
+    }
+
     _onBackClicked(){
       return true;
     } 
@@ -200,6 +217,9 @@ export default class MapScreen extends React.Component {
       global.search = "";
       // this.setState({toSearch:false,search_loading:true,scooter:global.scooter});
     }
+    show_location(coordinate){
+        console.warn(coordinate);
+    }
     reload_all_scooter(){
         this.setState({load_data:true});
         // fetch(global.API+'/tools/clear_cache_key/all_scooter',{
@@ -211,7 +231,7 @@ export default class MapScreen extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter/lite',{
+        fetch(global.API+'/scooter',{
           method: 'GET',
           credentials: 'include'
         })
@@ -401,10 +421,10 @@ export default class MapScreen extends React.Component {
     }
     render() {
         const {selectedIndex,toSearch,clickMarker,geofence,changed,scooter} = this.state;
-        // var scooter = this.state.scooter;
+        // var scooter = [];
         var search = global.search;
         var set_polygon = this.state.set_polygon;
-       
+        
 
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
@@ -472,11 +492,18 @@ export default class MapScreen extends React.Component {
         }
         var Mymarker;
 
-        if(this.state.MyPosition != null){
+        // if(this.state.MyPosition != null){
 
-          var Mylatlng = {latitude:parseFloat(this.state.MyPosition.latitude),longitude:parseFloat(this.state.MyPosition.longitude),latitudeDelta: 0.01,longitudeDelta: 0.01};
-          Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} style={{ width: 40, height: 40 }} title="你所在位置" description="點擊右下角可以重新定位！" />
-        }
+        //   var Mylatlng = {latitude:parseFloat(this.state.MyPosition.latitude),longitude:parseFloat(this.state.MyPosition.longitude),latitudeDelta: 0.01,longitudeDelta: 0.01};
+        //   // Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} style={{ width: 40, height: 40 }} title="你所在位置" description="點擊右下角可以重新定位！" />
+        //   Mymarker = <MapView.Marker key={"mylocation"} coordinate={Mylatlng}>
+        //     <Animated.View style={[styles.markerWrap]}>
+        //       <Animated.View style={[styles.ring]} />
+        //       <View style={styles.marker} />
+        //     </Animated.View>
+        //   </MapView.Marker>
+
+        // }
 
 
         var filter_option = {
@@ -523,7 +550,12 @@ export default class MapScreen extends React.Component {
                  mapType="standard"
                  region={this.state.setCenter}
                  showsMyLocationButton={true}
-                 onPress={()=>{this.CloseCard()}}
+                 onPress={()=>{this.change_center()}}
+                 showsUserLocation={true}
+                 showsPointsOfInterest={false}
+                 showsCompass={true}
+                 toolbarEnabled={false}
+                 onUserLocationChange={event => this.update_user_location(event)}
                >
                
                   <MapView.Polygon
@@ -578,17 +610,7 @@ export default class MapScreen extends React.Component {
                </TouchableWithoutFeedback>
              </View>
 
-             <View style={styles.compass} >
-               <TouchableWithoutFeedback onPress={()=>this.chk_location_permission()}>
-               { this.state.load_position ?(
-                  <ActivityIndicator  color="#5896E4"  />
-                  ):
-                  (<Icon name="location-arrow" size={20} color="#5896E4" />)
-                }
-                
-                  
-               </TouchableWithoutFeedback>
-             </View>
+            
 
              <View style={{position:'absolute',left:0,bottom:0,width:'100%',padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
                 <View style={{flexDirection: 'column',justifyContent:'center',alignItems:'center'}}>
@@ -706,7 +728,7 @@ const styles = StyleSheet.create({
     justifyContent:'center',
     width: 50,
     height:50,
-    backgroundColor:'#F5F5F5',
+    backgroundColor:'#fff',
     borderColor:'#666',
     borderStyle:'solid',
     borderRadius:25,

@@ -134,7 +134,6 @@ export default class Filter extends React.Component {
             this.setState({scooter:scooter});
         }
     }
-    
     set_power_change(value){
         this.show_loading();
         if(global.powerSliderValue !=null && global.powerSliderValue == value){
@@ -148,10 +147,10 @@ export default class Filter extends React.Component {
         switch(value){
           case 0:
             min = 0;
-            max = 29;
+            max = 15;
           break;
           case 1:
-            min = 30;
+            min = 16;
             max = 35;
           break;
           case 2:
@@ -165,10 +164,6 @@ export default class Filter extends React.Component {
           case 4:
             min = 46;
             max = 50;
-          break;
-          case 5:
-            min = 51;
-            max = 100;
           break;
           default:
             min = 0;
@@ -200,32 +195,29 @@ export default class Filter extends React.Component {
     }
     set_days_change(value){
         this.show_loading();
-        global.daysSliderValue = value;
+        if(global.daysSliderValue !=null && global.daysSliderValue == value){
+          global.daysSliderValue = null;
+          value = null;
+        }else{
+          global.daysSliderValue = value;  
+        }
         var min = 0;
         var max = 500;
         switch(value){
           case 0:
             min = 0;
-            max = 2;
-          break;
-          case 1:
-            min = 2;
             max = 3;
           break;
-          case 2:
+          case 1:
             min = 4;
             max = 5;
           break;
-          case 3:
+          case 2:
             min = 6;
-            max = 7;
+            max = 10;
           break;
-          case 4:
-            min = 8;
-            max = 14;
-          break;
-          case 5:
-            min = 15;
+          case 3:
+            min = 11;
             max = 500;
           break;
         }
@@ -248,6 +240,8 @@ export default class Filter extends React.Component {
               result.push(m);
             }
         }.bind(this));
+
+
         this.setState({ scooter:result });
     }
     // 選擇工作區域
@@ -291,7 +285,6 @@ export default class Filter extends React.Component {
                   }
                     
                 }.bind(this));
-
                 this.setState({ scooter:result });
             });
         }
@@ -412,8 +405,7 @@ export default class Filter extends React.Component {
         this.setState({scooter:global.scooters});
         resolve(0);
       });
-      promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_task();setTimeout(()=>{resolve(1);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(2);},50)}))
+      promise1.then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(2);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(3);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
               .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
@@ -516,7 +508,7 @@ export default class Filter extends React.Component {
             
         }.bind(this));
         var power_btns = [];
-        var power_types = ['<30%','~35%','~40%','~45%','~50%','>50%'];
+        var power_types = ['<15%','~35%','~40%','~45%','~50%'];
         power_types.map(function(m,i){
             var btn = <Button
               key={"power_btn"+i}
@@ -539,7 +531,7 @@ export default class Filter extends React.Component {
             power_btns.push(btn);
         }.bind(this));
         var days_btns = [];
-        var days_types = ['<2天','~3天','~5天','~7天','~14天','>14天'];
+        var days_types = ['~3天','~5天','~10天','Long Time'];
         days_types.map(function(m,i){
             var btn = <Button
               key={"days_btn"+i}

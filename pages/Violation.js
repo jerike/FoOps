@@ -36,7 +36,21 @@ export default class Violation extends React.Component {
     componentWillMount(){
       // this.getPosition();
     }
-    
+    async chk_location_permission(){
+      if(Platform.OS == 'ios'){
+            this.getPosition();
+      }else{
+            const permissions = [
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            ]
+            const granteds = await PermissionsAndroid.requestMultiple(permissions);
+            if (granteds["android.permission.ACCESS_FINE_LOCATION"] === "granted") {
+               this.getPosition();
+            } else {
+              Alert.alert('⚠️ 定位失敗',"定位權限被禁止",[{text: 'OK'}]);
+            }
+      }
+    }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -181,33 +195,76 @@ export default class Violation extends React.Component {
         this.setState({select_subtype: itemValue});
     }
     getPosition(){
-      // Geolocation.getCurrentPosition(info => console.log(info));
-      Geolocation.getCurrentPosition(
-        (position: any) => {
-          const positionData: any = position.coords;
-          var latlng = positionData.latitude+","+positionData.longitude;
-          fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latlng+"&language=zh-TW&key="+global.key,{
-             method: 'GET',
-          })
-          .then((response) => response.json())
-          .then((json)=> {
-            this.setState({hit_position:true});
-            if(json.results.length > 0){
-              if(json.results.length == 1){
-                this.setState({location:json.results[0].formatted_address});  
-              }else{
-                this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
+      const GeoHightAccuracy = () => {
+        return new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (locHightAccuracy)=>{
+              resolve(locHightAccuracy)
+            },
+            (error)=>{
+              GeoLowAccuracy()
+              .then((locLowAccuracy)=>{resolve(locLowAccuracy)})
+              .catch((err)=>{reject(err)});
+            },
+            {enableHighAccuracy: true, timeout: 3000}
+          )
+        });
+      };
+      const GeoLowAccuracy = () => {
+        return new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (locLowAccuracy)=>{
+              this.setState({highAccuracy:false});
+              resolve(locLowAccuracy)
+            },
+            (error)=>{
+              reject(error)
+            },
+            {enableHighAccuracy: false, timeout: 5000}
+          )
+        });
+      };
+      if(this.state.highAccuracy){
+        GeoHightAccuracy().then(locationData => {
+            const positionData: any = locationData.coords;
+            var latlng = positionData.latitude+","+positionData.longitude;
+            fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latlng+"&language=zh-TW&key="+global.key,{
+               method: 'GET',
+            })
+            .then((response) => response.json())
+            .then((json)=> {
+              this.setState({hit_position:true});
+              if(json.results.length > 0){
+                if(json.results.length == 1){
+                  this.setState({location:json.results[0].formatted_address});  
+                }else{
+                  this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
+                }
               }
-            }
-          });
-        },
-        (error: any) => {
-          Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
-        }, {
-          enableHighAccuracy: true,
-          timeout: 20000
-        }
-      );
+            });
+        })
+        .catch(error => console.warn(error));
+      }else{
+        GeoLowAccuracy().then(locationData => {
+            const positionData: any = locationData.coords;
+            var latlng = positionData.latitude+","+positionData.longitude;
+            fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latlng+"&language=zh-TW&key="+global.key,{
+               method: 'GET',
+            })
+            .then((response) => response.json())
+            .then((json)=> {
+              this.setState({hit_position:true});
+              if(json.results.length > 0){
+                if(json.results.length == 1){
+                  this.setState({location:json.results[0].formatted_address});  
+                }else{
+                  this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
+                }
+              }
+            });
+        })
+        .catch(error => console.warn(error));
+      }
 
     }
     render() {
