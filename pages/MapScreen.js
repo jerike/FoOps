@@ -3,7 +3,9 @@ import { Text,Alert, View,ScrollView,SafeAreaView,StyleSheet,Image,Modal,BackHan
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
-import MapView, { Marker,PROVIDER_GOOGLE,Polygon,Polyline,Callout,Animated as AnimatedMap,AnimatedRegion } from 'react-native-maps';
+import MapView from 'react-native-map-clustering';
+import  { Marker,PROVIDER_GOOGLE,Polygon,Polyline,Callout,Animated as AnimatedMap,AnimatedRegion } from 'react-native-maps';
+
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Filter from './Filter';
 import Carousel from 'react-native-snap-carousel';
@@ -13,6 +15,7 @@ import SliderEntry from '../component/SliderEntry';
 import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
 import isEqual from 'lodash.isequal'
+import AndroidOpenSettings from 'react-native-android-open-settings'
 
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
@@ -38,12 +41,12 @@ export default class MapScreen extends React.Component {
         tracksViewChanges: true,
         first_loadMarker:true,
         MyPosition:null,
-        load_position:false,
         search_loading:false,
         highAccuracy:true,
         OldLocation:null,
         no_change_center:false,
-        marginBottom:1
+        marginBottom:1,
+        show_user_location:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.onMarkerClick = this.onMarkerClick.bind(this);
@@ -74,15 +77,10 @@ export default class MapScreen extends React.Component {
           geofence:global.geofence,
           set_polygon:true
         });
-        this.chk_location_permission();
+        
     }
     componentDidMount() {
-      // home_timer = setInterval(()=>{ 
-      //   this.chk_location_permission();
-      //   // Geolocation.watchPosition((position) => {
-      //   //   this.setState({MyPosition:position.coords});
-      //   // });
-      // },10000);
+      this.chk_location_permission();
 
     }
     async chk_location_permission(){
@@ -92,9 +90,7 @@ export default class MapScreen extends React.Component {
             ]
             const granteds = await PermissionsAndroid.requestMultiple(permissions);
             if (granteds["android.permission.ACCESS_FINE_LOCATION"] === "granted") {
-               navigator.geolocation.watchPosition((position) => {
-                
-              },error => console.warn(error));
+             this.getPosition();
             } else {
               Alert.alert('⚠️ 定位失敗',"定位權限被禁止",[{text: 'OK'}]);
             }
@@ -107,10 +103,9 @@ export default class MapScreen extends React.Component {
       this.setState({marginBottom: 0});
     }
     update_user_location(event){
-      console.warn(event);
+      const positionData = event.nativeEvent.coordinate;
+      var location = positionData.latitude+","+positionData.longitude;
       if(this.state.OldLocation == null){
-        const positionData = event.nativeEvent.coordinate;
-        var location = positionData.latitude+","+positionData.longitude;
         this.setState({OldLocation:location});
         this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
       }
@@ -119,17 +114,9 @@ export default class MapScreen extends React.Component {
     _onBackClicked(){
       return true;
     } 
-    // shouldComponentUpdate(nextProps, nextState){
-    //     return shallowCompare(this, nextProps, nextState);
-    // }   
-    // componentWillUpdate(nextProps,nextState){
-    //    // if(this.state.scooter.length > 0 && nextState.scooter != this.state.scooter){
-    //    //      this.setState({changed:true});
-    //    //  }
-    // }
+
     
     getPosition(){
-      this.setState({load_position:true});
      
       const GeoLowAccuracy = () => {
         return new Promise((resolve, reject) => {
@@ -141,29 +128,18 @@ export default class MapScreen extends React.Component {
             (error)=>{
               reject(error)
             },
-            {enableHighAccuracy: false, timeout: 1000}
+            {enableHighAccuracy: false, timeout: 2000}
           )
         });
       };
 
         GeoLowAccuracy().then(locationData => {
-            // const positionData: any = locationData.coords;
-            // this.setState({MyPosition:positionData,load_position:false});
-            // this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
+            const positionData: any = locationData.coords;
+            this.setState({MyPosition:positionData});
+            this.setState({show_user_location:true});
+            this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
         })
-        .catch(error => Alert.alert('⚠️ 定位失敗',error.message,[{text: 'OK'}]));
-      
-      // Geolocation.getCurrentPosition(
-      //   (position: any) => {
-      //     const positionData: any = position.coords;
-      //     this.setState({MyPosition:positionData,load_position:false});
-      //     this.setState({setCenter:{latitude:positionData.latitude,longitude:positionData.longitude,latitudeDelta: 0.01,longitudeDelta: 0.01}});
-      //   },
-      //   (error: any) => {
-      //     this.setState({load_position:false});
-      //     Alert.alert('⚠️ 定位失敗',JSON.stringify(error.message),[{text: 'OK'}]);
-      //   }
-      // );
+        .catch(error => Alert.alert('⚠️ 定位失敗',"無法取得您所在位置，請開啟定位服務",[{text: '不要！'},{text: '去設定', onPress: () => AndroidOpenSettings.locationSourceSettings()}]));
       
 
     }
@@ -404,7 +380,7 @@ export default class MapScreen extends React.Component {
       }
     }
     render() {
-        const {selectedIndex,toSearch,clickMarker,geofence,changed,scooter} = this.state;
+        const {selectedIndex,toSearch,clickMarker,geofence,changed,scooter,show_user_location} = this.state;
         // var scooter = [];
         var search = global.search;
         var set_polygon = this.state.set_polygon;
@@ -413,7 +389,7 @@ export default class MapScreen extends React.Component {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        
+        console.warn(this.state.setCenter);
 
         
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
@@ -445,7 +421,7 @@ export default class MapScreen extends React.Component {
                     m.map(function(d,k){
                       setArea.push({latitude:parseFloat(d.lat),longitude:parseFloat(d.lng)});
                     });
-                    return <MapView.Polygon
+                    return <Polygon
                       key={"polygon:Ary:"+index+":"+i}
                       coordinates = {setArea}
                       strokeColor = {work_area_color1[index]}
@@ -458,7 +434,7 @@ export default class MapScreen extends React.Component {
                 value.map(function(m,i){
                   set_work_area.push({latitude:parseFloat(m.lat),longitude:parseFloat(m.lng)});
                 });
-                return <MapView.Polygon
+                return <Polygon
                   key={"polygon::"+index}
                   coordinates = {set_work_area}
                   strokeColor = {work_area_color1[index]}
@@ -474,20 +450,6 @@ export default class MapScreen extends React.Component {
             
             
         }
-        var Mymarker;
-
-        // if(this.state.MyPosition != null){
-
-        //   var Mylatlng = {latitude:parseFloat(this.state.MyPosition.latitude),longitude:parseFloat(this.state.MyPosition.longitude),latitudeDelta: 0.01,longitudeDelta: 0.01};
-        //   // Mymarker = <MapView.Marker key={"mylocation"}   coordinate={Mylatlng}  image={require('../img/here.png')} style={{ width: 40, height: 40 }} title="你所在位置" description="點擊右下角可以重新定位！" />
-        //   Mymarker = <MapView.Marker key={"mylocation"} coordinate={Mylatlng}>
-        //     <Animated.View style={[styles.markerWrap]}>
-        //       <Animated.View style={[styles.ring]} />
-        //       <View style={styles.marker} />
-        //     </Animated.View>
-        //   </MapView.Marker>
-
-        // }
 
 
         var filter_option = {
@@ -529,32 +491,28 @@ export default class MapScreen extends React.Component {
                <MapView
                  ref = {(ref)=>this.mapView=ref}
                  provider={PROVIDER_GOOGLE}
-                 style={{flex: 1, marginBottom: this.state.marginBottom}}
+                 style={{flex: 1,width: '100%',height: '100%', marginBottom: this.state.marginBottom}}
                  customMapStyle={mapStyle}
                  mapType="standard"
                  region={this.state.setCenter}
                  showsMyLocationButton={true}
-                 onPress={()=>{this.change_center()}}
                  showsUserLocation={true}
-                 showsPointsOfInterest={false}
                  showsCompass={true}
-                 toolbarEnabled={false}
                  onMapReady={this._onMapReady}
                  onUserLocationChange={event => this.update_user_location(event)}
                >
                
-                  <MapView.Polygon
+                  <Polygon
                     coordinates={[{ latitude: -89, longitude: -179.99999999 },{ latitude: 0, longitude: -179.99999999 },{ latitude: 89, longitude: -179.99999999 },{ latitude: 89, longitude: 0 },{ latitude: 89, longitude: 179.99999999 },{ latitude: 0, longitude: 179.99999999 },{ latitude: -89, longitude: 179.99999999 },{ latitude: -89, longitude: 0 },{ latitude: -89, longitude: -179.99999999 }]}
                     strokeColor={'#ff0000'}
                     fillColor={'rgba(0,0,0,0.5)'}
                     strokeWidth={2}
                     holes={setPolyPath}
                   />
-                {Mymarker}
                 {work_areas}
                 {scooter.map(m => (
                   m.power > 30 ? (
-                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    <Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
                         <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
                           <View style={{padding:10}}>
@@ -563,9 +521,9 @@ export default class MapScreen extends React.Component {
                             {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
                           </View>
                         </Callout>
-                    </MapView.Marker>
+                    </Marker>
                   ):(
-                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    <Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                       {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
                           <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
                             <View style={{padding:10}}>
@@ -574,7 +532,7 @@ export default class MapScreen extends React.Component {
                               {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
                             </View>
                           </Callout>
-                      </MapView.Marker>
+                      </Marker>
                   )
                   
                 ))}
@@ -599,7 +557,6 @@ export default class MapScreen extends React.Component {
 
              <View style={{position:'absolute',left:0,bottom:0,width:'100%',padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
                 <View style={{flexDirection: 'column',justifyContent:'center',alignItems:'center'}}>
-                  <Text style={{fontSize:11,color:'#fff'}}>{this.state.setCenter.latitude+":"+this.state.setCenter.longitude}</Text>
                   <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
                 </View>
              </View>
