@@ -181,8 +181,8 @@ export default class MapScreen extends React.Component {
     }
     updateSearch = search => {
       global.search = search;
-      this.setState({search:search,toSearch:true,search_loading:true});
-      setTimeout(()=>{this.filter_scooter_by_search()},50);
+      var promise1 = new Promise((resolve,reject)=>{this.setState({search:search,toSearch:true,search_loading:true});resolve(0);});
+      promise1.then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_search();}));
     }
     onClear(){
       global.search = "";

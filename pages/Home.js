@@ -231,7 +231,6 @@ export default class Home extends React.Component {
         global.scooter = all_scooters;
         this.setState({ 
             scooter:all_scooters,
-            save_scooter:all_scooters,
             open:true
         },()=>{
             this.setStorage();
@@ -298,20 +297,24 @@ export default class Home extends React.Component {
     }
     selectSort(selectedIndex){
         if(!this.state.hit_sort){
-            this.setState({show_loading:true,hit_sort:true,select_sort:selectedIndex});
-            setTimeout(()=>{this.SortType(selectedIndex)},10);
+            if(parseInt(selectedIndex) === this.state.selectedIndex2){
+                sort = (sort == "asc") ? "desc" : "asc";
+                this.setState({selectedIndex2_sort:sort});
+            }else{
+                sort = "asc";
+                this.setState({selectedIndex2_sort:"asc"});
+            }
+            
+            var promise1 = new Promise((resolve,reject)=>{this.setState({show_loading:true,hit_sort:true,select_sort:selectedIndex,selectedIndex2:selectedIndex});resolve(0);});
+            promise1.then(value=>new Promise((resolve,reject)=>{setTimeout(()=>{this.SortType(selectedIndex)},10);}));
+
+            
         }
     }
     SortType(selectedIndex){
         var scooter = this.state.items;
         var sort = this.state.selectedIndex2_sort;
-        if(parseInt(selectedIndex) === this.state.selectedIndex2){
-            sort = (sort == "asc") ? "desc" : "asc";
-            this.setState({selectedIndex2_sort:sort});
-        }else{
-            sort = "asc";
-            this.setState({selectedIndex2_sort:"asc"});
-        }
+        
         switch(selectedIndex){
             case 0:
                 scooter = scooter.sort(function (a, b) {
@@ -333,7 +336,7 @@ export default class Home extends React.Component {
             break;
         }
         setTimeout(()=>{this.setState({show_loading:false,hit_sort:false})},100);
-        this.setState({items:scooter,selectedIndex2:selectedIndex});
+        this.setState({items:scooter});
     }
 
     onClear(){
