@@ -187,7 +187,7 @@ export default class Violation extends React.Component {
         if(itemIndex == 1 || itemIndex == 2){
           this.setState({showSubpick:true});
         }else{
-          this.setState({select_subtype:"",showSubpick:false});
+          this.setState({select_subtype:this.state.SubCate[0],showSubpick:false});
         }
     }
     PickerSub(itemValue){

@@ -59,7 +59,7 @@ export default class Home extends React.Component {
         } 
     }
     componentDidMount(){
-        this.getStorage();
+        this.getScooterStorage();
         this.get_geofence();
         this.get_work_area();
         this.get_scooter_status();
@@ -92,6 +92,9 @@ export default class Home extends React.Component {
         //     }
         // }
     }
+    onRefilter = (e) => {
+      this.modalFilter = e
+    }
     _onBackClicked(){
         console.warn('back');
         return true;
@@ -103,7 +106,18 @@ export default class Home extends React.Component {
                 global.scooters = JSON.parse(value);
                 this.setState({scooter:global.scooters,open:true});
             }
+            global.last_get_time =  await AsyncStorage.getItem('@FoOps:last_get_time');
            
+        } catch (error) {
+          console.warn(error);
+        }
+    }
+    setStorage = async () => {
+        try {
+          await AsyncStorage.multiSet([
+            ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
+            ['@FoOps:last_get_time',this.state.last_get_time]
+          ]);
         } catch (error) {
           console.warn(error);
         }
@@ -118,6 +132,7 @@ export default class Home extends React.Component {
           console.warn(error);
         }
     }
+
     filter_scooter(scooter){
         global.temp_scooter = scooter;
         global.scooter = scooter;
@@ -201,6 +216,7 @@ export default class Home extends React.Component {
           if(json.data.length == 0){
             this.props.navigation.navigate('TimeOut');
           }else{
+            global.last_get_time =  json.data[0]['last_get_time'];
             this.set_scooter_data(json.data);            
           }
         }).then(() => {
@@ -218,6 +234,7 @@ export default class Home extends React.Component {
             save_scooter:all_scooters,
             open:true
         },()=>{
+            this.setStorage();
             this.after_reload_scooter();
             this.setState({reload_now:false});
         });
@@ -226,10 +243,17 @@ export default class Home extends React.Component {
         this.setState({items:global.scooter});
     }
     after_reload_scooter(){
-        if(this.state.select_sort != null){
-            this.setState({selectedIndex2:null},()=>{this.SortType(this.state.select_sort)});
-        }
-        this.filter_scooter_by_search();
+        // 使用 promise 進行異步控制
+        var runFunctions = new Promise(function (resolve, reject) {
+          this.modalFilter.after_reload_scooter();
+        }.bind(this));
+        runFunctions
+        .then(()=>{
+            if(this.state.select_sort != null){
+                this.setState({selectedIndex2:null},()=>{this.SortType(this.state.select_sort)});
+            }
+            this.filter_scooter_by_search();
+        });
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -437,7 +461,7 @@ export default class Home extends React.Component {
               </View>
             )}
             <View style={{flex: 1,backgroundColor:'#F5F5F5'}}>
-                <Filter filter_option={filter_option}/>
+                <Filter filter_option={filter_option} onRefilter={this.onRefilter}/>
                 <ButtonGroup
                   onPress={this.updateIndex}
                   selectedIndex={selectedIndex}
@@ -481,7 +505,7 @@ export default class Home extends React.Component {
                            <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
                         </View>
                         <View>
-                           <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.reload_time}</Text>
+                           <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.last_get_time}</Text>
                         </View>
                     </View>
                 </View>

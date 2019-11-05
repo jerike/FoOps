@@ -148,7 +148,9 @@ export default class Login extends React.Component {
       .then((json) => {
           global.scooters = json.data;
           global.scooter = json.data;
-          this.setState({scooter:json.data,show_loading:false},()=>{this.setStorage()});
+          var last_get_time = json.data[0]['last_get_time'];
+          global.last_get_time = last_get_time;
+          this.setState({scooter:json.data,show_loading:false,last_get_time:last_get_time},()=>{this.setStorage()});
           Vibration.vibrate(500);
           this.props.navigation.navigate('Home');
           this.setState({show_loading:false});           
@@ -167,8 +169,8 @@ export default class Login extends React.Component {
         ['@FoOps:user_givenName', this.state.user_givenName],
         ['@FoOps:avatar', this.state.avatar],
         ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
-        ['@FoOps:reload_time', global.reload_time]
-
+        ['@FoOps:reload_time', global.reload_time],
+        ['@FoOps:last_get_time',this.state.last_get_time]
       ]);
       if(this.state.save_login){
         await AsyncStorage.multiSet([
@@ -224,7 +226,7 @@ export default class Login extends React.Component {
                   secureTextEntry={true}
                   placeholder='密碼'
                 />
-                <CheckBox title='紀錄登入資訊' checked={this.state.save_login} onPress={()=>this.setState({save_login:true})} containerStyle={{marginTop:10,marginBottom:10,backgroundColor:'transparent',borderWidth:0,}} textStyle={{color:'#fff'}}  />
+                <CheckBox title='紀錄登入資訊' checked={this.state.save_login} onPress={()=>this.setState({save_login:!this.state.save_login})} containerStyle={{marginTop:10,marginBottom:10,backgroundColor:'transparent',borderWidth:0,}} textStyle={{color:'#fff'}}  />
                 
                 <TouchableOpacity style={styles.login_btn} onPress={this.login.bind(this)} >
                    <Text style={{color:'#fff'}}> 登入 </Text>
