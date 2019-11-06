@@ -72,13 +72,13 @@ export default class ViolationRecord extends React.Component {
 
     
     render() {
-        const {scooter,list} = this.state;
+        const {scooter,list,select_data,violation_modal} = this.state;
         var header_title = scooter.plate+" 違規紀錄";
         var violation_option={
           onClose:this.onClose,
-          violation_modal:this.state.violation_modal,
-          scooter:this.state.scooter,
-          data:this.state.select_data
+          violation_modal:violation_modal,
+          scooter:scooter,
+          data:select_data
         }
         return (
         <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>

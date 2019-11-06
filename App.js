@@ -35,7 +35,7 @@ const DrawerContent = (props) => (
     <View style={{alignItems: 'center',justifyContent: 'center',}}>
       <DrawerItems {...props} />
     </View>
-    <View style={{marginTop:20}}><Text>V1.22</Text></View>
+    <View style={{marginTop:20}}><Text style={{textAlign:'center'}}>V1.22</Text></View>
     <View style={{position:'absolute',bottom:0,left:0,width:'100%'}}>
       <Button
         title="回收視窗"

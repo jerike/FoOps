@@ -124,9 +124,11 @@ export default class ScooterDetail extends React.Component {
       })
       .then((response) => response.json())
       .then((json)=>{
+        if(json.code == 1){
           this.setState({
               acc:json.data['acc']
           });
+        }
       });
     }
     getRemark(sid){
@@ -456,12 +458,17 @@ export default class ScooterDetail extends React.Component {
         var scooter_conditions = [];
         var severe_lvl = this.get_severe_lvl(scooter.severe);
         var stats_type = this.get_status_type(scooter.status);
-        var acc = (this.state.acc == undefined) ? false : this.state.acc;
-        var acc_icon = "lock";
-        if(acc){
-          var acc_status = <Text style={{color:'#f00'}}>啟動</Text>;
-        }else{
-          var acc_status = <Text style={{color:'#ccc'}}>熄火</Text>;
+        var acc = (this.state.acc == undefined) ? "-" : this.state.acc;
+        switch(acc){
+          case true:
+            var acc_status = <Text style={{color:'#f00'}}>啟動</Text>;
+          break;
+          case false:
+            var acc_status = <Text style={{color:'#ccc'}}>熄火</Text>;
+          break;
+          default:
+            var acc_status = <Text style={{color:'#66009D'}}>無法取得狀態</Text>;
+          break;
         }
 
         SCooter_ticket = scooter.ticket;
@@ -525,25 +532,31 @@ export default class ScooterDetail extends React.Component {
         if(task.indexOf(scooter.id) != -1){
           sel_task = true;
         }
+        var scooter_power = 0;
+        if(scooter.power != undefined){
+            scooter_power = scooter.power;
+        }
         switch(true){
-            case scooter.power >= 50:
+            case scooter_power >= 50:
               var power_icon = "battery-full";
-              var show_power = <Text style={{color:'#28a745',marginLeft:10}}>{scooter.power+"%"}</Text>
+              var show_power = <Text style={{color:'#28a745',marginLeft:10}}>{scooter_power+"%"}</Text>
             break;
-            case scooter.power >= 20 && scooter.power < 50:
+            case scooter_power >= 20 && scooter_power < 50:
               var power_icon = "battery-half";
-              var show_power = <Text style={{color:'#FF8800',marginLeft:10}}>{scooter.power+"%"}</Text>
+              var show_power = <Text style={{color:'#FF8800',marginLeft:10}}>{scooter_power+"%"}</Text>
             break;
-            case scooter.power > 0 && scooter.power < 20:
+            case scooter_power > 0 && scooter_power < 20:
               var power_icon = "battery-quarter";
-              var show_power = <Text style={{color:'#f00',marginLeft:10}}>{scooter.power+"%"}</Text>
+              var show_power = <Text style={{color:'#f00',marginLeft:10}}>{scooter_power+"%"}</Text>
             break;
             default:
               var power_icon = "battery-empty";
-              var show_power = <Text style={{color:'#900',marginLeft:10}}>{scooter.power+"%"}</Text>
+              var show_power = <Text style={{color:'#900',marginLeft:10}}>{scooter_power+"%"}</Text>
             break;
         }
-        
+
+        var no_rental_days = (scooter.range_days != undefined) ? scooter.range_days+"天" : "...";
+        var labels = (scooter.labels != undefined) ? scooter.labels.join(",") : "";
         return (
         <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header
@@ -563,85 +576,108 @@ export default class ScooterDetail extends React.Component {
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }} style={{width:'100%',backgroundColor: '#EFF1F4'}}>
-                <Card key={"card0"} >
-                    <View style={{justifyContent:'center',alignItems:'center'}}>
-                        <Text>車輛狀態</Text>
-                    </View>
-                    <Divider style={{marginTop:10,marginBottom:10}} />
-                    <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name="motorcycle" size={19} style={{width:24}} />
-                        <Text style={{marginLeft:10}}>車輛編號</Text>
-                        <Text style={{marginLeft:10}}>{scooter.id}</Text>
-                      </View>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name={power_icon} size={19} style={{width:24}} />
-                        <Text style={{marginLeft:10}}>電池電量</Text>
-                        {show_power}
-                      </View>
-                    </View>
-
-                    <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name="history" size={19} style={{width:24}} />
-                        <Text style={{marginLeft:10}}>未租用天數</Text>
-                        <Text style={{marginLeft:10}}>{scooter.range_days+"天"}</Text>
-                      </View>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name="info-circle" size={19} style={{width:24,paddingLeft:5}} />
-                        <Text style={{marginLeft:10}}>車輛狀態</Text>
-                        <Text style={{marginLeft:10}}>{severe_lvl}</Text>
-                      </View>
-                    </View>
-
-                    <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:20}}>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name="exclamation" size={19} style={{width:24}} />
-                        <Text style={{marginLeft:10}}>服務狀態</Text>
-                        <Text style={{marginLeft:10}}>{stats_type}</Text>
-                      </View>
-                      <View style={{flexDirection:'row',justifyContent:'space-around'}}>
-                        <Icon name={acc_icon} size={18} style={{width:24,paddingLeft:5}} />
-                        <Text style={{marginLeft:10}}>是否啟動</Text>
-                        <Text style={{marginLeft:10}}>{acc_status}</Text>
-                      </View>
-                    </View>
-                    {this.state.remark == null ?(
-                      <View style={{backgroundColor:'#fff',marginTop:10}}>
-                          <Input placeholder='輸入車輛備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0}} inputStyle={{marginLeft:10,height:50}} leftIcon={
-                          <Icon name='user-edit' color='black'  size={20}  /> } onChangeText={(text)=>this.setState({txt_remark:text})} rightIcon={<Button title="新增" buttonStyle={{height:30}} titleStyle={{fontSize:12}} onPress={()=>this.addRemark()}/>} />
-                      </View>
-                    ):(
-                      <View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
-                        <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
-                          <Icon name='user-edit' color='black'  size={24} style={{width:24,marginLeft:12,marginRight:20}} />
-                          <Text>{this.state.remark}</Text>
-                        </View>
-                        <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:35,borderRadius:0}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/>
-                      </View>
-                    )}
-                    
-                </Card>
+                <ListItem
+                  key={"list_0"}
+                  title="車輛編號"
+                  leftIcon={<Icon name="motorcycle"  size={20} style={{marginRight:10}}/>}     
+                  badge={{ value: scooter.id, textStyle: { color: '#900',fontSize:17 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                <ListItem
+                  key={"list_1"}
+                  title="電池電量"
+                  leftIcon={<Icon name={power_icon}  size={20} style={{marginRight:10}}/>}     
+                  badge={{ value: show_power, textStyle: { color: '#fff',fontSize:15 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                <ListItem
+                  key={"list_3"}
+                  title="未租用天數"
+                  leftIcon={<Icon name="history"  size={20} style={{marginRight:10}}/>}     
+                  badge={{ value: no_rental_days, textStyle: { color: '#333',fontSize:15 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                <ListItem
+                  key={"list_4"}
+                  title="車輛狀態"
+                  leftIcon={<Icon name="info-circle"  size={20} style={{marginRight:10}}/>}     
+                  badge={{ value: severe_lvl, textStyle: { color: '#fff',fontSize:15 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                <ListItem
+                  key={"list_5"}
+                  title="服務狀態"
+                  leftIcon={<Icon name="exclamation"  size={20} style={{paddingLeft:7,marginRight:10}}/>}     
+                  badge={{ value: stats_type, textStyle: { color: '#fff',fontSize:15 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                <ListItem
+                  key={"list_6"}
+                  title="是否啟動"
+                  leftIcon={<Icon name="lock"  size={20} style={{marginRight:10}}/>}     
+                  badge={{ value: acc_status, textStyle: { color: '#fff',fontSize:15 },badgeStyle:{backgroundColor:'#fff'}, containerStyle: { marginTop: 0 } }}
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                />
+                {this.state.remark == null ?(
+                    <ListItem
+                      key={"list_7"}
+                      title={<View style={{backgroundColor:'#fff'}}>
+                              <Input placeholder='輸入車輛備註...' containerStyle={{backgroundColor:'#fff',paddingLeft:0}} inputStyle={{marginLeft:10,fontSize:15}}  onChangeText={(text)=>this.setState({txt_remark:text})} rightIcon={<Button title="新增" buttonStyle={{height:25}} titleStyle={{fontSize:12}} onPress={()=>this.addRemark()}/>} />
+                             </View>}
+                      leftIcon={<Icon name="user-edit"  size={20} style={{marginRight:10}}/>}     
+                      bottomDivider={true}
+                      titleStyle={{fontSize:13}}
+                    />
+                ):(
+                    <ListItem
+                      key={"list_7"}
+                      title={<View style={{backgroundColor:'#fff',flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+                              <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
+                              <Text>{this.state.remark}</Text>
+                            </View>
+                            <Button title="清除" buttonStyle={{backgroundColor:'#ff0000',height:30,borderRadius:5}} titleStyle={{fontSize:13}}  onPress={()=>this.removeAlert()}/></View>}
+                      leftIcon={<Icon name="user-edit"  size={20} style={{marginRight:10}}/>}     
+                      bottomDivider={true}
+                      titleStyle={{fontSize:13}}
+                    />
+                )}
+                <ListItem
+                  key={"list_8"}
+                  title="標籤"
+                  subtitle={labels}
+                  leftIcon={<Icon name="tags"  size={20} style={{marginRight:10}}/>}     
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13}}
+                  subtitleStyle={{fontSize:12,color:'#900'}}
+                />
+                <ListItem
+                  key={"list_9"}
+                  title="車況紀錄"
+                  bottomDivider={true}
+                  titleStyle={{fontSize:13,textAlign:'center'}}
+                />
                 {conditions &&(
-                  <Card key={"card1"} >
-                    <View style={{justifyContent:'center',alignItems:'center'}}>
-                        <Text>車輛狀況</Text>
-                    </View>
-                    <Divider style={{marginTop:10,marginBottom:10}} />
-                    {
+                   
                       conditions.map((item, index) => (
                         <ListItem
                           key={"fl_"+index}
-                          leftAvatar={<Icon name="wrench" />}
+                          leftAvatar={<Icon name="wrench"  size={20} style={{marginRight:10}} />}
                           title={item}
                           style={styles.listItem}
                           bottomDivider
                         />
                       ))
-                    }
-                   
-                  </Card>
+                      
                 )}
+
+               
+               
                 
                 
                 

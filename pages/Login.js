@@ -121,7 +121,6 @@ export default class Login extends React.Component {
           Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
           this.setState({show_loading:false});
         }
-
     });
   }
   //取得電動車資訊

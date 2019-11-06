@@ -13,7 +13,11 @@ for(var i=0 ; i<6 ; i++){
 const severe_title=["優先處理",null,"處理中"];
 
 const scootet_status = [{"type":"FREE","title":"尚未服務"},{"type":"RESERVED","title":"預約中"},{"type":"RIDING","title":"使用中"},{"type":"MAINTENANCE","title":"暫停服務"}];
-
+const delay = (s) => {
+  return new Promise(function(resolve){ 
+    setTimeout(resolve,s);               
+  });
+};
 export default class Filter extends React.Component {
     constructor () {
       super()
@@ -202,6 +206,9 @@ export default class Filter extends React.Component {
     }
     filter_scooter_by_power(){
         var result = new Array();
+        if(this.state.power_min == 0 && this.state.power_max == 100){
+          return true;
+        }
         this.state.scooter.map(function(m, i){
             var pushed = true;
             //判斷狀態
@@ -215,6 +222,7 @@ export default class Filter extends React.Component {
             }
         }.bind(this));
         this.setState({ scooter:result });
+        
     }
     set_days_change(value){
         this.show_loading();
@@ -251,6 +259,9 @@ export default class Filter extends React.Component {
     }
     filter_scooter_by_rent_days(){
         var result = new Array();
+        if(this.state.day_min == 0 && this.state.day_max == 500){
+          return true;
+        }
         this.state.scooter.map(function(m, i){
             var pushed = true;
             if(m.range_days >= global.day_min && m.range_days <= global.day_max){
@@ -421,7 +432,7 @@ export default class Filter extends React.Component {
         var result = [];
         if(label != undefined && label != null){
             this.state.scooter.map(function(m, i){
-                if(m.labels.indexOf(label) != -1){
+                if(m.labels != undefined && m.labels.indexOf(label) != -1){
                   result.push(m);
                 }
             }.bind(this));
@@ -440,23 +451,51 @@ export default class Filter extends React.Component {
             this.after_reload_scooter();
         });
     }
-    after_reload_scooter(){
-      var promise1 = new Promise((resolve,reject)=>{
-        this.setState({scooter:global.scooters});
-        resolve(0);
-        console.warn('filter 0');
-      });
-      promise1.then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(2);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(3);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(6);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_labels();setTimeout(()=>{resolve(7);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_for_only_change_power();setTimeout(()=>{resolve(8);},50)}))
-              .then(value=>new Promise((resolve,reject)=>{console.warn('filter 9');this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
+    after_reload_scooter = async () => {
+        try {
+            await this.setState({scooter:global.scooters});
+            await this.get_scooter_in_work_area();
+            await delay(5);
+            await this.get_scooter_by_severe();
+            await delay(5);
+            await this.get_scooter_by_status();
+            await delay(5);
+            await this.filter_scooter_by_power();
+            await delay(5);
+            await this.filter_scooter_by_rent_days();
+            await delay(5);
+            await this.get_scooter_by_labels();
+            await delay(5);
+            await this.filter_scooter_for_only_change_power();
+            await delay(5);
+            await new Promise((resolve,reject)=>{
+                console.warn('filter End');
+                this.setState({show_loading:false});
+                this.props.filter_option.filter_scooter(this.state.scooter);
+            });
+           
+           
+        } catch (error) {
+          console.warn(error);
+        }
+    }
+    // after_reload_scooter(){
+    //   var promise1 = new Promise((resolve,reject)=>{
+    //     this.setState({scooter:global.scooters});
+    //     resolve(0);
+    //     console.warn('filter 0');
+    //   });
+    //   promise1.then(value=>new Promise((resolve,reject)=>{this.get_scooter_in_work_area();setTimeout(()=>{resolve(2);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_severe();setTimeout(()=>{resolve(3);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_status();setTimeout(()=>{resolve(4);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_power();setTimeout(()=>{resolve(5);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_by_rent_days();setTimeout(()=>{resolve(6);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.get_scooter_by_labels();setTimeout(()=>{resolve(7);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{this.filter_scooter_for_only_change_power();setTimeout(()=>{resolve(8);},50)}))
+    //           .then(value=>new Promise((resolve,reject)=>{console.warn('filter 9');this.setState({show_loading:false});this.props.filter_option.filter_scooter(this.state.scooter);resolve(7);}));
         
 
-    }
+    // }
     
     // get_scooter(){
     //   var all_scooters = global.scooters;
