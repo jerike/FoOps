@@ -38,9 +38,6 @@ export default class Dashboard extends React.Component {
     } 
     componentDidMount() {
         this.get_scooter();
-        this.get_scooter_status();
-        this.get_geofence();
-        this.get_work_area();
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
@@ -50,11 +47,6 @@ export default class Dashboard extends React.Component {
     }
     //取得電動車資訊
     get_scooter(){
-        var theTime = new Date();
-        var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
-        this.setState({reload_time:reload_time});
-        global.reload_time = reload_time;
-
         if (global.scooters == undefined) {
             this.fetch_scooters();
         }else{
@@ -78,38 +70,11 @@ export default class Dashboard extends React.Component {
         .then((json) => {
             global.scooters = json.data;
             global.scooter = json.data;
-            global.reload_time = reload_time;
-            this.setState({reload_time:reload_time});
             this.setState({scooter:json.data,show_loading:false,load_data:false},()=>{this.setStorage()});
                        
         });
     }
-    get_work_area = () =>{
-      //取得工作區域
-      fetch(global.API+'/scooter/get_all_work_zone',{
-          method: 'GET',
-        credentials: 'include'
-      })
-      .then((response) => {
-          return response.json();
-      })
-      .then((json) => {
-          if(json.code == 1){
-            global.all_work_area = json.data;
-          }
-      });
-    }
-    get_geofence =()=>{
-      //取得電子柵欄
-      fetch(global.API+'/tools/get_geofence',{
-         method: 'GET',
-         credentials: 'include'
-      })
-      .then((response) => response.json())
-      .then((json)=> {
-        global.geofence = json.data;
-      });
-    }
+   
     getStorage = async () => {
       try {
         const value = await AsyncStorage.getItem('@FoOps:scooters');
@@ -127,23 +92,7 @@ export default class Dashboard extends React.Component {
           console.warn(error);
         }
     }
-    //取得車況
-    get_scooter_status =()=>{
-        fetch(global.API+'/scooter/status',{
-          method: 'GET'
-        })
-        .then((response) => {
-          return response.json();
-        })
-        .then((json) => {
-          if(json.code == 1){
-            global.condition = json.data;
-            this.setState({ condition:json.data });
-          }else{
-            alert(json.reason);
-          }
-        });
-    }
+
     linkSevere(index){
         global.select_severe = index;
         this.props.navigation.navigate('Home');
@@ -260,9 +209,6 @@ export default class Dashboard extends React.Component {
                         
                        </TouchableOpacity>
                        
-                    </View>
-                    <View>
-                        <Text>{this.state.reload_time}</Text>
                     </View>
                 </View>
             </SafeAreaView>

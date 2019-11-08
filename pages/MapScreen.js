@@ -18,6 +18,10 @@ import AndroidOpenSettings from 'react-native-android-open-settings'
 
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
+const IconR = <Icon name="map-marker-alt" size={40} color={'#f00'} style={{shadowColor: '#000',shadowOffset: {width: 2, height: 2},shadowOpacity: 0.8,shadowRadius: 2}}/>;
+const IconW = <Icon name="map-marker-alt" size={40} color={'#fff'} style={{shadowColor: '#000',shadowOffset: {width: 2, height: 2},shadowOpacity: 0.8,shadowRadius: 2}}/>;
+const IconO = <Icon name="map-marker-alt" size={40} color={'#FF5511'} style={{shadowColor: '#000',shadowOffset: {width: 2, height: 2},shadowOpacity: 0.8,shadowRadius: 2}}/>;
+const IconG = <Icon name="map-marker-alt" size={40} color={'#008800'} style={{shadowColor: '#000',shadowOffset: {width: 2, height: 2},shadowOpacity: 0.8,shadowRadius: 2}}/>;
 var t = 0;
 let home_timer = null;
 export default class MapScreen extends React.Component {
@@ -41,17 +45,17 @@ export default class MapScreen extends React.Component {
         first_loadMarker:true,
         MyPosition:null,
         search_loading:false,
+        show_loading:false,
         highAccuracy:true,
         OldLocation:null,
         no_change_center:false,
         marginBottom:1,
-        show_user_location:false
+        show_user_location:false,
+        geofence:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
-      this.CloseCard=this.CloseCard.bind(this);
       this.onClear=this.onClear.bind(this);
-      this._renderDarkItem=this._renderDarkItem.bind(this);
       this.reload_all_scooter=this.reload_all_scooter.bind(this);
       this.fetch_scooters=this.fetch_scooters.bind(this);
       this.filter_scooter=this.filter_scooter.bind(this);
@@ -66,21 +70,50 @@ export default class MapScreen extends React.Component {
       this.change_center=this.change_center.bind(this);
       this._onMapReady=this._onMapReady.bind(this);
       this.after_reload_scooter=this.after_reload_scooter.bind(this);
+      this.get_work_area=this.get_work_area.bind(this);
+      this.get_geofence=this.get_geofence.bind(this);
     }
     componentWillMount() {
-        this.setState({scooter:global.scooter,condition:global.condition});
-        
-        this.setState({ 
-          all_work_area:global.all_work_area,
-          geofence:global.geofence,
+        this.setState({
+          condition:global.condition,
+          show_loading:true,
           set_polygon:true
         });
+        
         
     }
     componentDidMount() {
       this.chk_location_permission();
-
+      this.get_work_area();
+      this.get_geofence();
     }
+    get_work_area = () =>{
+        //取得工作區域
+        fetch(global.API+'/scooter/get_all_work_zone',{
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((json) => {
+            if(json.code == 1){
+              this.setState({all_work_area:json.data});
+            }
+        });
+    }
+    get_geofence =()=>{
+        //取得電子柵欄
+        fetch(global.API+'/tools/get_geofence',{
+           method: 'GET',
+           credentials: 'include'
+        })
+        .then((response) => response.json())
+        .then((json)=> {
+          this.setState({geofence:json.data});
+        });
+    }
+    
     async chk_location_permission(){
       if(Platform.OS == 'android'){
             const permissions = [
@@ -167,7 +200,6 @@ export default class MapScreen extends React.Component {
         if(selectedIndex == 0){
           global.page = "Map"; 
           this.setModalVisible(true);
-          // this.CloseCard();
         }else{
             if(selectedIndex == 1){
                 global.page = "Home"; 
@@ -188,9 +220,7 @@ export default class MapScreen extends React.Component {
       global.search = "";
       // this.setState({toSearch:false,search_loading:true,scooter:global.scooter});
     }
-    show_location(coordinate){
-        console.warn(coordinate);
-    }
+
     reload_all_scooter(){
         this.setState({load_data:true});
         // fetch(global.API+'/tools/clear_cache_key/all_scooter',{
@@ -226,7 +256,6 @@ export default class MapScreen extends React.Component {
         });
     }
     after_reload_scooter(data){
-      console.warn(data);
       // 使用 promise 進行異步控制
       var runFunctions = new Promise(function (resolve, reject) {
        
@@ -238,43 +267,8 @@ export default class MapScreen extends React.Component {
           this.setState({load_data:false},()=>{this.filter_scooter_by_search()});  
       });
     }
-    get_status_type(type){
-        var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
-        scootet_status.map(function(m,i){
-            if(m.type == type){
-                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
-            }
-        })
-        return result;
-    }
-    get_severe_lvl(severe,output){
-        var result = "";
-        var color=['#FF3333','#ff5722','#f5a623','#7ed321'];
 
-        if(output == "text"){
-            result = severe_title[severe-1];
-        }else{
-            result = <Text style={{color:color[severe-1]}}>{severe_title[severe-1]}</Text>;
-        }
 
-        return result;
-    }
-    getConditions(id){
-        var result = "";
-        var condition = this.state.condition;
-        condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-                var description = m.description;
-                if(m.name.indexOf('(option)') != -1){
-                    description = m.description + "_option";
-                }
-              
-                result = description;
-            }
-        });
-        return result;
-    }
     GetDistance = ( lat1,  lng1,  lat2,  lng2)=>{
       var radLat1 = lat1*Math.PI / 180.0;
       var radLat2 = lat2*Math.PI / 180.0;
@@ -286,42 +280,9 @@ export default class MapScreen extends React.Component {
       s = Math.round(s * 10000) / 10000;
       return s;
     }
-    get_status_type(type){
-        var result = "";
-        var scooter_color = ['#c2c0c2','#8cb162','#4a90e2','#d63246'];
-        scootet_status.map(function(m,i){
-            if(m.type == type){
-                result = <Text style={{color:scooter_color[i]}} key={i}>{m.title}</Text>;
-            }
-        })
-        return result;
-    }
-    get_severe_lvl(severe,output){
-        var result = "";
-        var color=['#FF3333','#ff5722','#f5a623','#7ed321'];
 
-        if(output == "text"){
-            result = severe_title[severe-1];
-        }else{
-            result = <Text style={{color:color[severe-1]}}>{severe_title[severe-1]}</Text>;
-        }
 
-        return result;
-    }
-    getConditions(id){
-        var result = "";
-        this.state.condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-              var description = m.description;
-              result = description;
-            }
-        });
-        return result;
-    }
 
-    CloseCard(){
-      this.setState({clickMarker:false,selectMarker:null});
-    }
 
     filter_scooter_by_search(){
       if(this.state.search != undefined){
@@ -344,19 +305,16 @@ export default class MapScreen extends React.Component {
             this.setState({setCenter:r});
           }
           this.setState({ scooter:result,search_loading:false });
-      }else{
-          this.setState({ toSearch:false });
-          this.setState({ search_loading:false,scooter:global.scooter });
       }
+      // else{
+      //     this.setState({ toSearch:false });
+      //     this.setState({ search_loading:false,scooter:global.scooter });
+      // }
     }
-    _renderDarkItem ({item, index}) {
-        global.page = 'Map';
-        return <SliderEntry data={item} even={true} CloseCard={this.CloseCard} navigation={this.props.navigation} sid={item.id}/>;
-    }
-    
+
     filter_scooter(scooter){
       global.scooter = scooter;
-      this.setState({scooter:scooter});
+      this.setState({scooter:scooter,show_loading:false});
     }
     setModalVisible(visible) {
         // if(global.page=="Map"){
@@ -373,6 +331,7 @@ export default class MapScreen extends React.Component {
         this.setState({ tracksViewChanges: true });
     }
     send2Map(){
+
         var promise1 = new Promise((resolve,reject)=>{
           setTimeout(()=>{resolve(0);},100);
         });
@@ -386,7 +345,7 @@ export default class MapScreen extends React.Component {
       }
     }
     render() {
-        const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location} = this.state;
+        const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location,show_loading,all_work_area} = this.state;
         // var scooter = [];
         var search = global.search;
         var set_polygon = this.state.set_polygon;
@@ -418,7 +377,7 @@ export default class MapScreen extends React.Component {
             }
             var work_area_color1 = ['rgba(255,255,119,0.6)','rgba(204,238,255,0.6)','rgba(255,204,204,0.6)','rgba(204,204,255,0.6)','rgba(119,255,204,0.6)','rgba(238,119,0,0.6)'];
             var work_area_color2 = ['rgba(255,255,119,0.2)','rgba(204,238,255,0.2)','rgba(255,204,204,0.2)','rgba(204,204,255,0.2)','rgba(119,255,204,0.2)','rgba(238,119,0,0.2)'];
-            var work_areas = this.state.all_work_area.map(function(value,index){
+            var work_areas = all_work_area.map(function(value,index){
               // console.log(index);
               if(Array.isArray(value[0])){
                 return value.map(function(m,i){
@@ -447,10 +406,8 @@ export default class MapScreen extends React.Component {
                   fillColor = {work_area_color2[index]}
                 />
               }
-
-
-                
             });
+            
             
             
             
@@ -462,8 +419,25 @@ export default class MapScreen extends React.Component {
             setModalVisible:this.setModalVisible,
             filter_scooter:this.filter_scooter
         }
+        var scooterG = [];
+        var scooterW = [];
+        var scooterO = [];
+        var scooterR = [];
+        scooter.map(function(m,i){
+            if(m.status == "RIDING"){
+              scooterG.push(m);
+            }
+            else if(m.status == "MAINTAINCE"){
+              scooterW.push(m);
+            }
+            else{
+              scooterO.push(m);
+            }
+            
+        });
+
         return (
-        <SafeAreaView style={{flex: 1, backgroundColor: '#ff5722'}}>
+        <SafeAreaView style={{flex: 1,justifyContent:'center', backgroundColor: '#ff5722'}}>
             <Header
               leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
               centerComponent={<SearchBar
@@ -491,7 +465,12 @@ export default class MapScreen extends React.Component {
                 buttonStyle={styles.btn_buttonStyle}
                 selectedButtonStyle={styles.btn_selectedButtonStyle}
               />
-           
+              {show_loading &&(
+                <View style={styles.loading}>
+                  <ActivityIndicator size="small" color="#ffffff" style={{marginRight:5}} />
+                  <Text style={{color:'#fff'}}>車輛佈點中...</Text>
+                </View>
+              )}
             
                <MapView
                  ref = {(ref)=>this.mapView=ref}
@@ -504,6 +483,7 @@ export default class MapScreen extends React.Component {
                  showsUserLocation={true}
                  showsCompass={true}
                  onMapReady={this._onMapReady}
+                 tracksViewChanges={false}
                  onUserLocationChange={event => this.update_user_location(event)}
                >
                
@@ -515,31 +495,41 @@ export default class MapScreen extends React.Component {
                     holes={setPolyPath}
                   />
                 {work_areas}
-                {scooter.map(m => (
-                  m.power > 30 ? (
-                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
-                    {...this.props} pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
+                {scooterG.map(m => (
+                    <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    {...this.props}  pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
                         <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
-                          <View style={{padding:10}}>
+                          <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
                             {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
                           </View>
                         </Callout>
                     </MapView.Marker>
-                  ):(
-                    <MapView.Marker key={"marker_"+m.id}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
-                      {...this.props} pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
-                          <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
-                            <View style={{padding:10}}>
-                              <Text>{m.plate}</Text>
-                              <Text>電量：{m.power}%</Text>
-                              {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
-                            </View>
-                          </Callout>
-                      </MapView.Marker>
-                  )
-                  
+                ))}
+                {scooterO.map(m => (
+                    <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    {...this.props}   pinColor="orange"  onPress={(e) => {e.stopPropagation();}} >
+                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
+                          <View style={{padding:10,width:120}}>
+                            <Text>{m.plate}</Text>
+                            <Text>電量：{m.power}%</Text>
+                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                          </View>
+                        </Callout>
+                    </MapView.Marker>
+                ))}
+                {scooterW.map(m => (
+                    <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
+                    {...this.props}  pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
+                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
+                          <View style={{padding:10,width:120}}>
+                            <Text>{m.plate}</Text>
+                            <Text>電量：{m.power}%</Text>
+                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                          </View>
+                        </Callout>
+                    </MapView.Marker>
                 ))}
                 
                </MapView>
@@ -579,6 +569,21 @@ const styles = StyleSheet.create({
     width: 400,
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  loading:{
+      position:'absolute',
+      zIndex:101,
+      top:100,
+      left:'30%',
+      flexDirection:'row',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      backgroundColor:'rgba(1,1,1,0.6)',
+      padding:20,
+      borderBottomLeftRadius:5,
+      borderBottomRightRadius:5,
+      borderTopLeftRadius:5,
+      borderTopRightRadius:5
   },
   map: {
     flex: 1,
@@ -696,10 +701,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   marker: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(130,4,150, 0.9)",
+    shadowColor: '#000',
+    shadowOffset: {width: 2, height: 2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
   ring: {
     width: 24,
@@ -710,5 +715,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(130,4,150, 0.5)",
   },
+
 });
 

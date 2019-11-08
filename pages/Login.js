@@ -55,6 +55,7 @@ export default class Login extends React.Component {
           var scooters =  await AsyncStorage.getItem('@FoOps:scooters');
           global.scooter = global.scooters = JSON.parse(scooters);
           global.reload_time = await AsyncStorage.getItem('@FoOps:reload_time');
+          global.last_get_time = await AsyncStorage.getItem('@FoOps:last_get_time');
           // console.warn(global.scooter);
           if(global.scooter ==undefined){
             this.props.navigation.navigate('TimeOut');

@@ -561,7 +561,7 @@ export default class ScooterDetail extends React.Component {
         <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
-              leftComponent={<TouchableHighlight style={{width:40}}><Icon name="angle-left" color='#fff' size={25} onPress={()=>this.back2page()}/></TouchableHighlight>}
+              leftComponent={<TouchableHighlight onPress={()=>this.back2page()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>返回</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
             />
             {this.state.show_loading &&(

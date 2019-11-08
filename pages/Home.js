@@ -59,9 +59,8 @@ export default class Home extends React.Component {
         } 
     }
     componentDidMount(){
-        this.getScooterStorage();
-        this.get_geofence();
-        this.get_work_area();
+        // this.getScooterStorage();
+        
         this.get_scooter_status();
         setTimeout(()=>{this.show_scooter();},10)
     }
@@ -116,7 +115,7 @@ export default class Home extends React.Component {
         try {
           await AsyncStorage.multiSet([
             ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
-            ['@FoOps:last_get_time',this.state.last_get_time]
+            ['@FoOps:last_get_time',this.state.scooter[0].last_get_time]
           ]);
         } catch (error) {
           console.warn(error);
@@ -138,32 +137,8 @@ export default class Home extends React.Component {
         global.scooter = scooter;
         this.setState({scooter:scooter},()=>{this.show_scooter()});
     }
-    get_work_area = () =>{
-        //取得工作區域
-        fetch(global.API+'/scooter/get_all_work_zone',{
-            method: 'GET',
-          credentials: 'include'
-        })
-        .then((response) => {
-            return response.json();
-        })
-        .then((json) => {
-            if(json.code == 1){
-              global.all_work_area = json.data;
-            }
-        });
-    }
-    get_geofence =()=>{
-        //取得電子柵欄
-        fetch(global.API+'/tools/get_geofence',{
-           method: 'GET',
-           credentials: 'include'
-        })
-        .then((response) => response.json())
-        .then((json)=> {
-          global.geofence = json.data;
-        });
-    }
+    
+    
     //取得車況
     get_scooter_status =()=>{
         fetch(global.API+'/scooter/status',{
@@ -234,7 +209,7 @@ export default class Home extends React.Component {
             open:true
         },()=>{
             this.setStorage();
-            this.after_reload_scooter();
+            // this.after_reload_scooter();
             this.setState({reload_now:false});
         });
     }
@@ -277,23 +252,22 @@ export default class Home extends React.Component {
         this.setState({screen:screen});
     }
     updateIndex (selectedIndex) {
-
-        if(selectedIndex == 0){
-            global.page = "Home";
-            this.setModalVisible(true);
-        }else{
-            // global.page = "Map";
-            this.setState({screen:'Map'});
-            this.props.navigation.navigate("Map",{
-                doSomething: this.doSomething,
-            });
-            // console.warn(this.props.navigation.state.params);
-            if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.send2Map != undefined){
-                this.props.navigation.state.params.send2Map();
+        requestAnimationFrame(() => {
+            if(selectedIndex == 0){
+                global.page = "Home";
+                this.setModalVisible(true);
+            }else{
+                // global.page = "Map";
+                this.setState({screen:'Map'});
+                this.props.navigation.navigate("Map",{
+                    doSomething: this.doSomething,
+                });
+                // console.warn(this.props.navigation.state.params);
+                if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.send2Map != undefined){
+                    this.props.navigation.state.params.send2Map();
+                }
             }
-            
-            
-        }
+        });
     }
     selectSort(selectedIndex){
         if(!this.state.hit_sort){
@@ -400,7 +374,6 @@ export default class Home extends React.Component {
         //     method: 'GET',
         //     credentials: 'include'
         // }).then((response) => {
-          this.setState({all: []});
           this.fetch_scooters();
         // });
     }

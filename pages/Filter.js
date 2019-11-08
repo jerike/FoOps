@@ -236,7 +236,7 @@ export default class Filter extends React.Component {
         var max = 500;
         switch(value){
           case 0:
-            min = 0;
+            min = 1;
             max = 3;
           break;
           case 1:
