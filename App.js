@@ -7,10 +7,14 @@ import MapScreen from './pages/MapScreen';
 import ScooterDetail from './pages/ScooterDetail';
 import Logout from './pages/Logout';
 import Dashboard from './pages/Dashboard';
+import ChargingBattery from './pages/ChargingBattery';
+import MoveScooter from './pages/MoveScooter';
 import ViolationRecord from './pages/ViolationRecord';
 import TimeOut from './pages/timeout';
 import { Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DeviceInfo from 'react-native-device-info';
+
 
 // console.disableYellowBox = true;
 const { width, height } = Dimensions.get('screen');
@@ -35,7 +39,7 @@ const DrawerContent = (props) => (
     <View style={{alignItems: 'center',justifyContent: 'center',}}>
       <DrawerItems {...props} />
     </View>
-    <View style={{marginTop:20}}><Text style={{textAlign:'center'}}>V1.22</Text></View>
+    <View style={{marginTop:20}}><Text style={{textAlign:'center'}}>V {DeviceInfo.getVersion()}</Text></View>
     <View style={{position:'absolute',bottom:0,left:0,width:'100%'}}>
       <Button
         title="回收視窗"
@@ -60,6 +64,8 @@ const HomeStack=createStackNavigator(
     ScooterDetail:{screen: ScooterDetail},
     ViolationRecord:{screen: ViolationRecord},
     TimeOut:{screen: TimeOut},
+    ChargingBattery:{screen:ChargingBattery},
+    MoveScooter:{screen:MoveScooter}
 
   },{
     headerMode:'none',

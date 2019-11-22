@@ -109,7 +109,7 @@ export default StyleSheet.create({
     },
 
     circle:{
-       
+        elevation: 2,
         marginRight:10,
         alignItems:'center',
         justifyContent:'center',
@@ -117,6 +117,23 @@ export default StyleSheet.create({
         height:50,
         backgroundColor:'#f76260',
         borderColor:'green',
+        borderStyle:'solid',
+        borderRadius:25,
+        paddingBottom:2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,  
+    },
+    circle_grey:{
+        elevation: 2,
+        marginRight:10,
+        alignItems:'center',
+        justifyContent:'center',
+        width: 50,
+        height:50,
+        backgroundColor:'mediumseagreen',
+        borderColor:'#999',
         borderStyle:'solid',
         borderRadius:25,
         paddingBottom:2,

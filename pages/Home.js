@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,ActivityIndicator,TouchableOpacity,BackHandler,Platform,List,FlatList } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,RefreshControl,TouchableWithoutFeedback,ActivityIndicator,TouchableOpacity,BackHandler,Platform,List,FlatList } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Avatar,Badge } from 'react-native-elements'
@@ -8,6 +8,7 @@ import Filter from './Filter';
 import '../global.js';
 import styles from '../styles/home.style';
 import shallowCompare from 'react-addons-shallow-compare';
+import ScanScooter from './ScanScooter';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 
@@ -33,7 +34,8 @@ export default class Home extends React.Component {
         hit_sort:false,
         select_sort:null,
         search_loading:false,
-        items:[]
+        items:[],
+        ss_modal:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.selectSort=this.selectSort.bind(this);
@@ -48,6 +50,8 @@ export default class Home extends React.Component {
       this.SortType=this.SortType.bind(this);
       this.show_scooter=this.show_scooter.bind(this);
       this.doSomething=this.doSomething.bind(this);
+      this.onClose=this.onClose.bind(this);
+      this.selectWork=this.selectWork.bind(this);
     }
     componentWillMount() {
         global.page = 'Home';
@@ -390,6 +394,27 @@ export default class Home extends React.Component {
         });
         promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
     }
+    showModal(key){
+        this.setState({
+          [key]: true,
+        });
+    }
+    onClose(key){
+        this.setState({
+          [key]: false,
+        });
+    }
+    showSSModal(){
+      this.showModal('ss_modal');
+    }
+    selectWork(selectedIndex,scooter){
+        this.onClose('ss_modal');
+        if(selectedIndex == 1){
+            this.props.navigation.navigate("ChargingBattery",{scooter:scooter});
+        }else{
+            this.props.navigation.navigate("MoveScooter",{scooter:scooter});
+        }
+    }
     render() {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
@@ -406,6 +431,11 @@ export default class Home extends React.Component {
             modalVisible:this.state.modalVisible,
             setModalVisible:this.setModalVisible,
             filter_scooter:this.filter_scooter
+        }
+        var ss_option={
+          onClose:this.onClose,
+          ss_modal:this.state.ss_modal,
+          selectWork:this.selectWork
         }
         var show_loading = this.state.show_loading;
 
@@ -438,6 +468,7 @@ export default class Home extends React.Component {
             )}
             <View style={{flex: 1,backgroundColor:'#F5F5F5'}}>
                 <Filter filter_option={filter_option} onRefilter={this.onRefilter}/>
+                <ScanScooter ss_option={ss_option} />
                 <ButtonGroup
                   onPress={this.updateIndex}
                   selectedIndex={selectedIndex}
@@ -476,15 +507,22 @@ export default class Home extends React.Component {
                   />            
             </View>
             <View style={{position:'absolute',bottom:0,left:0,width:'100%',backgroundColor:'rgba(0,0,0,0.6)'}}>
-                    <View style={{flexDirection:'row',justifyContent:'space-between',padding:2}}>
-                        <View >
-                           <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
-                        </View>
-                        <View>
-                           <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.last_get_time}</Text>
-                        </View>
+                <View style={{flexDirection:'row',justifyContent:'space-between',padding:2}}>
+                    <View >
+                       <Text style={{fontSize:11,color:'#fff'}}>數量：{items.length}</Text>
+                    </View>
+                    <View>
+                       <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.last_get_time}</Text>
                     </View>
                 </View>
+            </View>
+            <View style={{position:'absolute',bottom:25,right:2}} >
+                <View style={styles.circle_grey} >
+                   <TouchableWithoutFeedback onPress={()=>this.showSSModal()}>
+                      <Icon name="qrcode" size={20} color={'#ffffff'}/>
+                   </TouchableWithoutFeedback>
+                 </View>
+            </View>
         </SafeAreaView>
          
         );

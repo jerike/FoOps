@@ -344,6 +344,9 @@ export default class MapScreen extends React.Component {
           this.props.navigation.state.params.newScooter(id);
       }
     }
+    chg_location(){
+      this.setState({setCenter:{latitude: 22.622673,longitude: 120.300267,latitudeDelta:0.005,longitudeDelta: 0.005}});
+    }
     render() {
         const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location,show_loading,all_work_area} = this.state;
         // var scooter = [];
@@ -471,7 +474,18 @@ export default class MapScreen extends React.Component {
                   <Text style={{color:'#fff'}}>車輛佈點中...</Text>
                 </View>
               )}
-            
+              <View style={styles.dokodemo_door}>
+                    <Button
+                      icon={
+                        <Icon
+                          name="door-open"
+                          size={15}
+                          color="white"
+                        />
+                      }
+                      onPress={()=>this.chg_location()}
+                    />
+                </View>
                <MapView
                  ref = {(ref)=>this.mapView=ref}
                  provider={PROVIDER_GOOGLE}
@@ -486,7 +500,7 @@ export default class MapScreen extends React.Component {
                  tracksViewChanges={false}
                  onUserLocationChange={event => this.update_user_location(event)}
                >
-               
+                  
                   <MapView.Polygon
                     coordinates={[{ latitude: -89, longitude: -179.99999999 },{ latitude: 0, longitude: -179.99999999 },{ latitude: 89, longitude: -179.99999999 },{ latitude: 89, longitude: 0 },{ latitude: 89, longitude: 179.99999999 },{ latitude: 0, longitude: 179.99999999 },{ latitude: -89, longitude: 179.99999999 },{ latitude: -89, longitude: 0 },{ latitude: -89, longitude: -179.99999999 }]}
                     strokeColor={'#ff0000'}
@@ -502,7 +516,7 @@ export default class MapScreen extends React.Component {
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
-                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                            <Text style={{color:'#227700'}}>使用中</Text>
                           </View>
                         </Callout>
                     </MapView.Marker>
@@ -514,7 +528,7 @@ export default class MapScreen extends React.Component {
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
-                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                            <Text style={{color:'#EE7700'}}>未租用</Text>
                           </View>
                         </Callout>
                     </MapView.Marker>
@@ -526,7 +540,7 @@ export default class MapScreen extends React.Component {
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
-                            {(m.status == "MAINTAINCES") ? <Text style={{color:'#ccc'}}>🚫 Offline</Text> : <Text style={{color:'#00FF00'}}>📶 Online</Text>}
+                            <Text style={{color:'#900'}}>下線中</Text>
                           </View>
                         </Callout>
                     </MapView.Marker>
@@ -715,6 +729,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(130,4,150, 0.5)",
   },
+  dokodemo_door:{
+    position:"absolute",
+    top:100,
+    left:10,
+    zIndex:151,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.9,
+    shadowRadius: 4,
+  }
 
 });
 
