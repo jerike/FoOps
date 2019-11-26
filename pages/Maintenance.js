@@ -186,12 +186,17 @@ export default class Maintenance extends React.Component {
                       <Text style={{color:'#fff'}}>Loading...</Text>
                     </View>
                   )}
-                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
-                     <Icon name='close' size={30}  onPress={() => {
-                        maintain_option.onClose('maintain_modal');
-                      }} />
+                  <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                    <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
+                      <Text style={{ color: '#333',fontSize:18,textAlign:'center' }}>維護清單</Text>
+                    </View>
+                    <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                       <Icon name='times-circle' size={30}  onPress={() => {
+                          maintain_option.onClose('maintain_modal');
+                        }} />
+                    </View>
                   </View>
-                  <ScrollView style={{flexDirection:'column' }}>
+                  <ScrollView style={{flexDirection:'column',marginTop:10 }}>
                     {condition_list}
                   </ScrollView>
                     <Button

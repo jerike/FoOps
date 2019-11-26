@@ -10,6 +10,7 @@ import FastRecord from './FastRecord'
 import Violation from './Violation'
 import Direction from './Direction'
 import Controller from './Controller'
+import ActionTools from './ActionTools'
 import ActionSheet from 'react-native-action-sheet';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
@@ -29,6 +30,7 @@ export default class ScooterDetail extends React.Component {
         direction_modal:false,
         controller_modal:false,
         fastrecord_modal:false,
+        action_tools_modal:false,
         sel_condition:[],
         top_other:"",
         medium_other:"",
@@ -49,6 +51,7 @@ export default class ScooterDetail extends React.Component {
       this.removeRemark=this.removeRemark.bind(this);
       this.confirm_controller=this.confirm_controller.bind(this);
       this.ViewViolationRecord=this.ViewViolationRecord.bind(this);
+      this.selectWork=this.selectWork.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -232,6 +235,9 @@ export default class ScooterDetail extends React.Component {
     showDirection(){
       // console.warn('open direction');
       this.showModal('direction_modal');
+    }
+    showActionTools(){
+      this.showModal('action_tools_modal');
     }
     showController(){
       var Status = "車輛下線(維護)";
@@ -443,6 +449,15 @@ export default class ScooterDetail extends React.Component {
     }
     ViewViolationRecord(){
       this.props.navigation.navigate("ViolationRecord",{scooter:this.state.scooter});
+      this.onClose('action_tools_modal');
+    }
+    selectWork(selectedIndex){
+        if(selectedIndex == 1){
+            this.props.navigation.navigate("ChargingBattery",{scooter:this.state.scooter});
+        }else{
+            this.props.navigation.navigate("MoveScooter",{scooter:this.state.scooter});
+        }
+        this.onClose('action_tools_modal');
     }
     render() {
         const {search,selectedIndex,toSearch,scooter} = this.state;
@@ -521,6 +536,14 @@ export default class ScooterDetail extends React.Component {
           controller_modal:this.state.controller_modal,
           scooter:this.state.scooter,
         }
+        const action_tools_option={
+          onClose:this.onClose,
+          action_tools_modal:this.state.action_tools_modal,
+          ViewViolationRecord:this.ViewViolationRecord,
+          showMaintain:this.showMaintain,
+          selectWork:this.selectWork
+
+        }
         var tasks = this.state.task.split(',');
         var task = [];
         if(tasks.length > 0){
@@ -575,6 +598,7 @@ export default class ScooterDetail extends React.Component {
             <Violation  violation_option={violation_option}/>
             <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
+            <ActionTools action_tools_option={action_tools_option} />
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }} style={{width:'100%',backgroundColor: '#EFF1F4'}}>
                 <ListItem
                   key={"list_0"}
@@ -676,20 +700,18 @@ export default class ScooterDetail extends React.Component {
                       
                 )}
 
-               
-               
-                
-                
-                
-                
             </ScrollView>
               <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
 
-                <Button  key={"btn_0"} icon={<Icon name="exclamation-triangle" size={25} color="#6A7684" />}  type="outline" buttonStyle={{borderWidth:0}}  onPress={()=>this.ViewViolationRecord()}/>
-                <Button  key={"btn_3"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
-                <Button  key={"btn_2"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
-                <Button  key={"btn_4"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()} />
-                <Button  key={"btn_5"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                
+                <Button  key={"btn_1"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
+                <Button  key={"btn_2"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()}/>
+                
+                <Button  key={"btn_3"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
+                <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                <Button  key={"btn_5"} icon={<Icon name="bars" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showActionTools()} />
+                
+
               </View>
         </SafeAreaView>
          

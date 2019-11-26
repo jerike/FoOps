@@ -39,7 +39,7 @@ export default class ChargingBattery extends React.Component {
       this.props.navigation.navigate('Home');
     }
     OpenTrunk(){
-      // this.setState({show_loading:true,show_msg:"開啟車廂中..."});
+      this.setState({show_loading:true,show_msg:"開啟車廂中..."});
       this.Control_scooter('trunk');
       // setTimeout(()=>{Alert.alert('車輛訊息',"車廂已開啟",[{text: '好的！'}]);this.setState({show_loading:false})},3000)
     }
@@ -203,7 +203,7 @@ export default class ChargingBattery extends React.Component {
                   centerComponent={<View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#16B354',borderBottomWidth:1}}>
                                     <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車輛換電</Text>
                                   </View>}
-                  leftComponent={<TouchableHighlight onPress={()=>this.back2page()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>返回</Text></View></TouchableHighlight>}
+                  leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
                   rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
                   containerStyle={styles.header}
                 />
@@ -320,8 +320,6 @@ const styles = StyleSheet.create({
   loading:{
     position:'absolute',
     zIndex:10001,
-    top:'40%',
-    left:'40%',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor:'rgba(1,1,1,0.8)',

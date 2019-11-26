@@ -5,6 +5,7 @@ import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input }
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 const API = global.API;
+import MoveView from './MoveView';
 
 export default class MoveRecord extends React.Component {
     constructor () {
@@ -12,7 +13,7 @@ export default class MoveRecord extends React.Component {
       this.state = {
         show_loading:true,
         list:[],
-        violation_modal:false,
+        moveview_modal:false,
         select_data:{}
       }
       this.onClose=this.onClose.bind(this);
@@ -28,16 +29,17 @@ export default class MoveRecord extends React.Component {
       } 
     }
     getRecord(){
+      this.setState({show_loading:true});
       var uid = global.user_id;
       fetch(global.API+'/operator/'+uid+'/getMoveScooter_record/',{
         method: 'GET',
         credentials: 'include'
       })
       .then((response) => {
+        console.warn(response);
             return response.json();
       })
       .then((json) => {
-
           if(json.data.length == 0){
             this.setState({list:[],show_loading:false});
           }else{
@@ -63,15 +65,15 @@ export default class MoveRecord extends React.Component {
     }
 
     showDetail(data){
-      // this.setState({select_data:data},()=>{setTimeout(()=>{this.showModal('violation_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.showModal('moveview_modal')},100)});
     }
 
     
     render() {
-        const {scooter,list,select_data,violation_modal} = this.state;
-        var violation_option={
+        const {scooter,list,select_data,moveview_modal} = this.state;
+        var moveview_option={
           onClose:this.onClose,
-          violation_modal:violation_modal,
+          moveview_modal:moveview_modal,
           scooter:scooter,
           data:select_data
         }
@@ -81,6 +83,7 @@ export default class MoveRecord extends React.Component {
               centerComponent={{ text: "違規移車記錄", style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.navigate('Home')}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回列表頁</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
+              rightComponent={<TouchableHighlight onPress={()=>this.getRecord()}><Icon name="sync-alt" size={20} color="#ffffff"  /></TouchableHighlight>}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>
@@ -88,6 +91,7 @@ export default class MoveRecord extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
+            <MoveView  moveview_option={moveview_option}/>
             <ScrollView>
               {
                 list.length == 0 ?(

@@ -29,17 +29,22 @@ export default class WorkRecord extends React.Component {
       } 
     }
     getRecord(){
+      this.setState({show_loading:true});
       var uid = global.user_id;
       fetch(global.API+'/operator/'+uid+'/getChgBettery_record/',{
         method: 'GET',
         credentials: 'include'
       })
       .then((response) => {
+        console.warn(response);
             return response.json();
       })
       .then((json) => {
-        console.warn(json.data);
-          this.setState({list:json.data,show_loading:false});
+          if(json.data.length == 0){
+            this.setState({list:[],show_loading:false});
+          }else{
+            this.setState({list:json.data,show_loading:false});
+          }
       });
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
@@ -78,6 +83,7 @@ export default class WorkRecord extends React.Component {
               centerComponent={{ text: "換電記錄", style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.navigate('Home')}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回列表頁</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
+              rightComponent={<TouchableHighlight onPress={()=>this.getRecord()}><Icon name="sync-alt" size={20} color="#ffffff"  /></TouchableHighlight>}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>
@@ -107,7 +113,7 @@ export default class WorkRecord extends React.Component {
                       chevron
                       bottomDivider={true}
                       titleStyle={{fontSize:13}}
-                      subtitleStyle={{fontSize:10,color:'#ccc'}}
+                      subtitleStyle={{fontSize:12,color:'#666'}}
                       onPress={()=>{this.showDetail(l)}}
                     />
                   ))

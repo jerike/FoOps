@@ -516,13 +516,6 @@ export default class Home extends React.Component {
                     </View>
                 </View>
             </View>
-            <View style={{position:'absolute',bottom:25,right:2}} >
-                <View style={styles.circle_grey} >
-                   <TouchableWithoutFeedback onPress={()=>this.showSSModal()}>
-                      <Icon name="qrcode" size={20} color={'#ffffff'}/>
-                   </TouchableWithoutFeedback>
-                 </View>
-            </View>
         </SafeAreaView>
          
         );

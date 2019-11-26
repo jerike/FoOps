@@ -81,11 +81,17 @@ export default class ChBView extends React.Component {
                         </View>
                     </View>
                   )}
-                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
-                     <Icon name='times-circle' size={30}  onPress={() => {
-                        this.clearData();
-                      }} />
+                  <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                    <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
+                      <Text style={{ color: '#333',fontSize:18,textAlign:'center' }}>{chbview_option.data.plate}</Text>
+                    </View>
+                    <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                       <Icon name='times-circle' size={30}  onPress={() => {
+                          this.clearData();
+                        }} />
+                    </View>
                   </View>
+                  
                     <Card title="📷 拍照">
                       <View style={{flexDirection:'row',justifyContent: "space-around",alignItems: "center"}}>
                         {photos}    

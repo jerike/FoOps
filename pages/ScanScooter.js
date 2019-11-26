@@ -13,7 +13,6 @@ export default class ScanScooter extends React.Component {
           select_type:"KH",
           show_picker:false,
           select_bike:"選擇車號",
-          reactivate:false,
           select_scooter:null,
           select_sid:null,
           selectedIndex: null,
@@ -60,6 +59,7 @@ export default class ScanScooter extends React.Component {
             }
         })
         .then((json) => {
+          console.warn(json);
           if(json.code == 1){
             this.setState({data:json.data,select_scooter:scooter,show_loading:false});
           }
@@ -83,18 +83,18 @@ export default class ScanScooter extends React.Component {
       if(select_sid){
           this.setState({select_sid:select_sid},()=>{this.selectScooter(select_sid,scooter)});
       }else{
-          Alert.alert('系統訊息',"找不到車輛，請重新輸入",[{text: '我知道了', onPress: () => {this.setState({show_loading:false});this.scanner.reactivate()}}]);
+          Alert.alert('系統訊息',"找不到車輛，請重新輸入",[{text: '我知道了', onPress: () => {this.setState({show_loading:false})}}]);
       }
     }
     ShowPicker(){
       this.setState({show_picker:true});
     }
     CloseModel(){
-      this.setState({select_bike:"選擇車號",reactivate:false,select_scooter:null,select_sid:null,plate_no:""});
+      this.setState({select_bike:"選擇車號",select_scooter:null,select_sid:null,plate_no:""});
       this.props.ss_option.onClose('ss_modal');
     }
     selectWork(id,data){
-      this.setState({select_bike:"選擇車號",reactivate:false,select_scooter:null,select_sid:null,plate_no:""});
+      this.setState({select_bike:"選擇車號",select_scooter:null,select_sid:null,plate_no:""});
       this.props.ss_option.selectWork(id,data);
     }
     PickerMain(itemIndex,itemValue){
@@ -125,7 +125,7 @@ export default class ScanScooter extends React.Component {
               pickerFontSize:21,
               onPickerConfirm: data => {
                 var plate = data[0]+data[1]+data[2];
-                this.setState({select_bike:plate,show_picker:false,reactivate:true},()=>{this.jump2ScooterInfo(plate)});
+                this.setState({select_bike:plate,show_picker:false},()=>{this.jump2ScooterInfo(plate)});
               },
               onPickerCancel: data => {
                 this.setState({show_picker:false});
@@ -186,54 +186,35 @@ export default class ScanScooter extends React.Component {
                         <ScrollView style={{width:'100%' }}>
                           <View style={{justifyContent:'center',alignItems:'center'}}>
                             <View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#FF5722',borderBottomWidth:1}}>
-                              <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>掃描車輛</Text>
+                              <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>選擇車輛</Text>
                             </View>
-                            <View style={{position:'relative',width:'60%',marginBottom:5,marginTop:20,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
-                              <Picker
-                                selectedValue={this.state.select_type}
-                                style={{height: 20, width: 80,color:'#fff'}}
-                                itemStyle={{fontSize:12,color:'#fff'}}
-                                onValueChange={(itemValue, itemIndex) =>
-                                  this.PickerMain(itemIndex,itemValue)
-                                }>
-                                <Picker.Item key={"p1"} style={{color:'#fff'}} label="KH"  value="KH"  />
-                                <Picker.Item key={"p2"} style={{color:'#fff'}} label="TPA" value="TPA"  />
-                              </Picker>
-                              <Input placeholder="請輸入號碼" placeholderTextColor={'#FFFACD'} onChangeText={(text) => this.onChangeText(text)} containerStyle={{height: 27, width: 130}} inputContainerStyle={{height: 27}} inputStyle={{height: 27,fontSize:15,color:'#fff'}}/>
-                              <Button
-                                title="確定"
-                                onPress={()=>{this.Sure()}}
-                                buttonStyle={{width:50}}
-                                titleStyle={{color:'#fff',fontSize:15}}
+                            <View style={{position:'relative',flex:1,width:'80%',marginBottom:5,marginTop:40,justifyContent:'center'}}>
+                              <View style={{marginBottom:20}}>
+                                <Picker
+                                  selectedValue={this.state.select_type}
+                                  style={{height: 20, width: 80,color:'#fff',borderWidth:1,borderColor:'#fff'}}
+                                  itemStyle={{fontSize:12,color:'#fff'}}
+                                  onValueChange={(itemValue, itemIndex) =>
+                                    this.PickerMain(itemIndex,itemValue)
+                                  }>
+                                  <Picker.Item key={"p1"} style={{color:'#fff'}} label="KH"  value="KH"  />
+                                  <Picker.Item key={"p2"} style={{color:'#fff'}} label="TPA" value="TPA"  />
+                                </Picker>
+                              </View>
+                              <View style={{marginBottom:30}}>
+                                <Input placeholder="請輸入號碼" placeholderTextColor={'#FFFACD'}  onSubmitEditing={() => this.Sure()} onChangeText={(text) => this.onChangeText(text)}  inputStyle={{fontSize:21,color:'#fff'}}/>
+                              </View>
+                              <View style={{flex:1,justifyContent:'center'}}>
+                                <Button
+                                  title="確定"
+                                  onPress={()=>{this.Sure()}}
+                                  titleStyle={{color:'#fff',fontSize:15}}
 
-                              />
+                                />
+                              </View>
 
-                            </View>
-                            <View>
-                              <Text style={{color:'#00FF00'}}>_______________ 或 _______________</Text>
                             </View>
                             
-                            <View style={{position:'relative',width:'100%',flex:1,flexDirection:'column',justifyContent:'center'}}>
-                              <View style={{marginTop:5,marginBottom:20}}><Text style={{color:'#fff',fontSize:18,textAlign:'center'}}>掃描 QRCode</Text></View>
-                              <QRCodeScanner
-                                ref={(node) => { this.scanner = node }}
-                                onRead={this.onSuccess}
-                                topViewStyle={{ flex: 0, height: 0, width: 0 }}
-                                bottomViewStyle={{ flex: 0, height: 0, width: 0 }}
-                                reactivate={false}
-                                containerStyle={{
-                                    width:'90%',
-                                    marginLeft:'10%'
-                                }}
-                                cameraStyle={{
-                                    width:'90%',
-                                }}
-                                
-                                fadeIn={false}
-                                reactivateTimeout={10}
-                                showMarker={true}
-                              />
-                            </View>
                           </View>
                         </ScrollView>
                   )}
