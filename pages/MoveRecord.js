@@ -65,9 +65,11 @@ export default class MoveRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.showModal('moveview_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('moveview_modal')},100)});
     }
-
+    onRef = (e) => {
+      this.modal = e
+    }
     
     render() {
         const {scooter,list,select_data,moveview_modal} = this.state;
@@ -91,7 +93,7 @@ export default class MoveRecord extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
-            <MoveView  moveview_option={moveview_option}/>
+            <MoveView onRef={this.onRef} moveview_option={moveview_option}/>
             <ScrollView>
               {
                 list.length == 0 ?(

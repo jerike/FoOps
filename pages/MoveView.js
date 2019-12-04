@@ -5,7 +5,7 @@ import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBo
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ActionSheet from 'react-native-action-sheet';
-
+import {SingleImage} from 'react-native-zoom-lightbox';
 
 var t = 0;
 
@@ -16,7 +16,9 @@ export default class MoveView extends React.Component {
           photos:[],
         }
     }
-
+    componentWillMount(){
+      this.props.onRef(this);
+    }
     getPhotos(id){
       fetch(global.API+'/ticket/'+id+'/getMoveScooter_photo/',{
           method: 'GET',
@@ -45,9 +47,6 @@ export default class MoveView extends React.Component {
     }
     render() {
         const {moveview_option} = this.props;
-        if(this.state.photos.length == 0 && moveview_option.data != undefined){
-          this.getPhotos(moveview_option.data.id);
-        }
 
         var photos = this.state.photos.map(function(m,i){
             if(m == ""){
@@ -60,7 +59,7 @@ export default class MoveView extends React.Component {
                     ]}
                     key={"photo"+i}
                   >
-                    <View><Image style={styles.avatar} source={{uri: m}} /></View>
+                    <SingleImage style={styles.avatar} uri={m} />
                   </View>
             );
         })
@@ -71,11 +70,19 @@ export default class MoveView extends React.Component {
               visible={moveview_option.moveview_modal}
               presentationStyle="fullScreen"
               >
-              <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
-                
+              <SafeAreaView style={{flex: 1, backgroundColor: '#2F3345'}}>
+                <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                  <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
+                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>{moveview_option.data.plate}</Text>
+                  </View>
+                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                     <Icon name='times-circle' size={30} color="#ffffff"  onPress={() => {
+                        this.clearData();
+                      }} />
+                  </View>
+                </View>
                 <ScrollView >
-
-                  <View style={{flex:1,justifyContent:'center'}}>
+                  <View style={{justifyContent:'center',alignItems: 'center'}}>
                     {this.state.show_loading && (
                       <View style={{position:'absolute',justifyContent:'center',alignItems:'center',width:'100%',height:'110%',top:0,left:0,zIndex:100005,backgroundColor:'rgba(0,0,0,0.6)'}}>
                           <View  style={styles.loading}>
@@ -84,33 +91,26 @@ export default class MoveView extends React.Component {
                           </View>
                       </View>
                     )}
-                      <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-                        <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
-                          <Text style={{ color: '#333',fontSize:18,textAlign:'center' }}>{moveview_option.data.plate}</Text>
-                        </View>
-                        <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
-                           <Icon name='times-circle' size={30}  onPress={() => {
-                              this.clearData();
-                            }} />
-                        </View>
+                    <View style={{width:'80%',justifyContent:'center',marginBottom:50}}>
+                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                        <Text style={{ color: '#fff',fontSize:18 }}>📷 移車拍照</Text>
                       </View>
-                      <Card title="📷 移車拍照">
-                        <View style={{flexDirection:'row',justifyContent: "space-around",alignItems: "center"}}>
-                          {photos}    
-                        </View>
-                      </Card>
-                     
-                      
-                      <Card title="👨‍🔧 移車人員">
-                        <View>
-                          <Text>{moveview_option.data.operator}</Text>
-                        </View>
-                      </Card>
-                      <Card title="⏰ 移車時間">
-                        <View>
-                           <Text>{this.dateFormat(moveview_option.data.created)}</Text>
-                        </View>
-                      </Card>
+                      <View style={{flexDirection:'row',marginTop:10,justifyContent: "space-around",alignItems: "center"}}>
+                        {photos}    
+                      </View>
+                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                        <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 移車人員</Text>
+                      </View>
+                      <View style={{padding:10}}>
+                        <Text style={{fontSize:18,color:'#fff'}} >{moveview_option.data.operator}</Text>
+                      </View>
+                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                        <Text style={{ color: '#fff',fontSize:18 }}>⏰ 移車時間</Text>
+                      </View>
+                      <View style={{padding:10}}>
+                        <Text style={{fontSize:18,color:'#fff'}}>{this.dateFormat(moveview_option.data.created)}</Text>
+                      </View>
+                    </View>
                   </View>
                 </ScrollView>    
               </SafeAreaView>

@@ -5,7 +5,7 @@ import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBo
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ActionSheet from 'react-native-action-sheet';
-
+import {SingleImage} from 'react-native-zoom-lightbox';
 
 var t = 0;
 
@@ -16,7 +16,9 @@ export default class ViolationView extends React.Component {
           photos:[],
         }
     }
-
+    componentWillMount(){
+      this.props.onRef(this);
+    }
     getPhotos(id){
       fetch(global.API+'/scooter/violation/'+id+'/photo',{
           method: 'GET',
@@ -45,9 +47,9 @@ export default class ViolationView extends React.Component {
     }
     render() {
         const {violation_option} = this.props;
-        if(this.state.photos.length == 0 && violation_option.data != undefined){
-          this.getPhotos(violation_option.data.id);
-        }
+        // if(this.state.photos.length == 0 && violation_option.data != undefined){
+        //   this.getPhotos(violation_option.data.id);
+        // }
 
         var photos = this.state.photos.map(function(m,i){
             if(m == ""){
@@ -60,7 +62,7 @@ export default class ViolationView extends React.Component {
                     ]}
                     key={"photo"+i}
                   >
-                    <Image style={styles.avatar} source={{uri: m}} />
+                    <SingleImage style={styles.avatar} uri={m} />
                   </View>
             );
         })
@@ -71,47 +73,62 @@ export default class ViolationView extends React.Component {
               visible={violation_option.violation_modal}
               presentationStyle="fullScreen"
               >
-              <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+              <SafeAreaView style={{flex: 1, backgroundColor: '#2F3345'}}>
+                <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                    <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
+                      <Text style={{ color: '#ff5722',fontSize:18,textAlign:'center' }}>{violation_option.scooter.plate}</Text>
+                    </View>
+                    <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                       <Icon name='times-circle' size={30} color="#fff"  onPress={() => {
+                          this.clearData();
+                        }} />
+                    </View>
+                </View>
                 <ScrollView>
-                  {this.state.show_loading && (
-                    <View style={{position:'absolute',justifyContent:'center',alignItems:'center',width:'100%',height:'110%',top:0,left:0,zIndex:100005,backgroundColor:'rgba(0,0,0,0.6)'}}>
-                        <View  style={styles.loading}>
-                        <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                        <Text style={{color:'#fff'}}>Loading...</Text>
+                  <View style={{justifyContent:'center',alignItems: 'center'}}>
+                    {this.state.show_loading && (
+                      <View style={{position:'absolute',justifyContent:'center',alignItems:'center',width:'100%',height:'110%',top:0,left:0,zIndex:100005,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                          <View  style={styles.loading}>
+                          <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
+                          <Text style={{color:'#fff'}}>Loading...</Text>
+                          </View>
+                      </View>
+                    )}
+                    <View style={{width:'80%',justifyContent:'center',marginBottom:50}}>
+                        <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                          <Text style={{ color: '#fff',fontSize:18 }}>📷 違規照片</Text>
+                        </View>
+                        <View style={{flexDirection:'row',marginTop:10,justifyContent: "space-around",alignItems: "center"}}>
+                          {photos}    
+                        </View>
+                        <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                          <Text style={{ color: '#fff',fontSize:18 }}>📌 地點</Text>
+                        </View>
+                        <View style={{padding:10}}>
+                          <Text style={{color: '#fff',textAlign:'center',fontSize:12}} >{violation_option.data.location}</Text>
+                        </View>
+
+                        <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                          <Text style={{ color: '#fff',fontSize:18 }}>⚠️ 違規項目</Text>
+                        </View>
+                        <View style={{padding:10}}>
+                          <Text style={{color: '#fff',textAlign:'center',fontSize:15,marginBottom:5}}>{violation_option.data.type}</Text>
+                          <Text style={{color: '#fff',textAlign:'center',fontSize:12,padding:5}}>{violation_option.data.subtype}</Text>
+                        </View>
+                        <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                          <Text style={{ color: '#fff',fontSize:18 }}>👮‍♂️ 回報人員</Text>
+                        </View>
+                        <View style={{padding:10}}>
+                          <Text style={{fontSize:18,color:'#fff'}} >{violation_option.data.operator}</Text>
+                        </View>
+                        <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                          <Text style={{ color: '#fff',fontSize:18 }}>⏰ 回報時間</Text>
+                        </View>
+                        <View style={{padding:10}}>
+                          <Text style={{fontSize:18,color:'#fff'}}>{this.dateFormat(violation_option.data.created_at)}</Text>
                         </View>
                     </View>
-                  )}
-                  <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
-                     <Icon name='times-circle' size={30}  onPress={() => {
-                        this.clearData();
-                      }} />
                   </View>
-                    <Card title="📷 拍照">
-                      <View style={{flexDirection:'row',justifyContent: "space-around",alignItems: "center"}}>
-                        {photos}    
-                      </View>
-                    </Card>
-                    <Card title="📌 地點">
-                      <View>
-                        <Text style={{textAlign:'center',fontSize:12}} >{violation_option.data.location}</Text>
-                      </View>
-                    </Card>
-                    <Card title="⚠️ 違規項目">
-                      <View>
-                        <Text style={{textAlign:'center',fontSize:15,marginBottom:5}}>{violation_option.data.type}</Text>
-                        <Text style={{textAlign:'center',fontSize:12,padding:5}}>{violation_option.data.subtype}</Text>
-                      </View>
-                    </Card>
-                    <Card title="👮‍♂️ 回報人員">
-                      <View>
-                        <Text>{violation_option.data.operator}</Text>
-                      </View>
-                    </Card>
-                    <Card title="⏰ 回報時間">
-                      <View>
-                         <Text>{this.dateFormat(violation_option.data.created_at)}</Text>
-                      </View>
-                    </Card>
                 </ScrollView>    
               </SafeAreaView>
             </Modal>

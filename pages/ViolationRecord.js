@@ -27,6 +27,9 @@ export default class ViolationRecord extends React.Component {
         this.props.navigation.goBack();
       }
     }
+    onRef = (e) => {
+      this.modal = e
+    }
     componentDidMount(){
       if (Platform.OS === 'android') {  
         BackHandler.addEventListener('hardwareBackPress', ()=>{this.props.navigation.goBack();});
@@ -67,7 +70,7 @@ export default class ViolationRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.showModal('violation_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('violation_modal')},100)});
     }
 
     
@@ -93,7 +96,7 @@ export default class ViolationRecord extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
-            <ViolationView  violation_option={violation_option}/>
+            <ViolationView onRef={this.onRef}  violation_option={violation_option}/>
             <ScrollView>
               {
                 list.map((l, i) => (

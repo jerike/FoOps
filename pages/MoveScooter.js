@@ -165,11 +165,10 @@ export default class MoveScooter extends React.Component {
               }
           })
           .then((json) => {
-            this.setState({send_now:false});
             if(json.code == 1){
               Alert.alert('系統訊息',"已完成紀錄！",[{text: '回列表頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.navigate('Home')}}]);
             }else{
-              Alert.alert('系統訊息',json.reason,[{text: 'ok'}]);
+              Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
             }
           });
       }
@@ -189,7 +188,7 @@ export default class MoveScooter extends React.Component {
                   rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
                   containerStyle={styles.header}
                 />
-                <View style={{flex: 1}}>
+                <ScrollView style={{flex: 1}}>
                   <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
                     <View>
                       <View style={{justifyContent:'center',textAlign:'left',marginBottom:10,paddingBottom:5,width:120,borderBottomColor:'#FFFF00',borderBottomWidth:1}}>
@@ -236,27 +235,27 @@ export default class MoveScooter extends React.Component {
                     </View>
 
                   </View>
-                  <View style={{flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-                  {this.state.send_now ? 
-                    <Button title="傳送中..."  containerStyle={{width:'70%',marginTop:20}} raised={true} buttonStyle={{backgroundColor:'#FF3333'}} disabled  disabledStyle={{backgroundColor:'#e0e0e0'}}/>
-                  :
-                    <Button
-                      title="確定送出"
-                      containerStyle={{width:'70%',marginTop:20}}
-                      buttonStyle={{backgroundColor:'#FF3333'}}
-                      raised={true}
-                      onPress={()=>this.Confirm()}
-                      icon={<Icon
-                            name="paper-plane"
-                            size={15}
-                            color="white"
-                          />}
-                      titleStyle={{marginLeft:10}}
-                    />
-                  }
-                  </View> 
+                  
+                </ScrollView> 
+                <View style={{width:'100%',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
+                {this.state.send_now ? 
+                  <Button title="傳送中..."  containerStyle={{width:'100%',marginTop:20}} raised={true} buttonStyle={{backgroundColor:'#FF3333'}} disabled  disabledStyle={{backgroundColor:'#e0e0e0'}}/>
+                :
+                  <Button
+                    title="確定送出"
+                    containerStyle={{width:'100%',marginTop:20}}
+                    buttonStyle={{backgroundColor:'#FF3333'}}
+                    raised={true}
+                    onPress={()=>this.Confirm()}
+                    icon={<Icon
+                          name="paper-plane"
+                          size={15}
+                          color="white"
+                        />}
+                    titleStyle={{marginLeft:10}}
+                  />
+                }
                 </View> 
-
             </SafeAreaView>
         );
     }

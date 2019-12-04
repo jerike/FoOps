@@ -72,6 +72,7 @@ export default class ScooterDetail extends React.Component {
     onRef1 = (e) => {
       this.modal1 = e
     }
+    
     back2page(){
       var backpage = (global.page != undefined) ? global.page : "Home" ;
       this.props.navigation.navigate(backpage);
@@ -98,7 +99,7 @@ export default class ScooterDetail extends React.Component {
     }
     newScooter(sid){
         // console.warn(sid);
-        this.setState({sid:sid});
+        this.setState({sid:sid,show_loading:true});
         fetch(global.API+'/scooter/'+sid,{
           method: 'GET',
           credentials: 'include'
@@ -119,6 +120,12 @@ export default class ScooterDetail extends React.Component {
              Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}],{ cancelable: false });           
           }
         });
+    }
+    ClearDate(){
+      this.setState({
+        scooter:{}
+
+      });
     }
     getScooterType(sid){
       fetch(global.API+'/scooter/'+sid+'/status',{
@@ -307,55 +314,56 @@ export default class ScooterDetail extends React.Component {
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
-      var request_option = '/scooter/'+this.state.scooter.id+'/type';
+      var request_option = '/scooter/'+this.state.scooter.id+'/status?type='+type;
+      var method = "PUT";
       if(type == "MAINTENANCE" || type == "FREE"){
-        request_option = '/scooter/'+this.state.scooter.id+'/status';
+        request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type;
+        method = "PATCH";  
       }
-      fetch(global.API+request_option,{
-        method: 'PUT',
+
+      // var request_option = '/scooter/'+this.state.scooter.id+'/type';
+      // if(type == "MAINTENANCE" || type == "FREE"){
+      //   request_option = '/scooter/'+this.state.scooter.id+'/status';
+      // }
+      // fetch(global.API+request_option,{
+      fetch(global.ServiceAPI+request_option,{
+        method: method,
         credentials: 'include',
         body: formData
       })
       .then((response) => {
-          if(response.status == 200){
-            return response.json();
-          }else{
+          if(response.status == 401){
             this.props.navigation.navigate('TimeOut');
-          }
-      })
-      .then((json) => {
-        if(json.code == 1){
-          var msg = "";
-          switch(type){
-            case "FREE":
-              msg = "車輛已上線";
-            break;
-            case "MAINTENANCE":
-              msg = "車輛已下線";
-            break;
-            case "unlock":
-              msg = "車輛已啟動";
-            break;
-            case "lock":
-              msg = "車輛已熄火";
-            break;
-            case "trunk":
-              msg = "車廂已開啟";
-            break;
-            case "whistle":
-              msg = "喇叭已響起";
-            break;
-          }
-          setTimeout(
-            ()=>{
-              this.setState({show_loading:false});
-              this.newScooter(this.state.scooter.id);
-              Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}]);
+          }else{
+            var msg = "";
+            switch(type){
+              case "FREE":
+                msg = "車輛已上線";
+              break;
+              case "MAINTENANCE":
+                msg = "車輛已下線";
+              break;
+              case "unlock":
+                msg = "車輛已啟動";
+              break;
+              case "lock":
+                msg = "車輛已熄火";
+              break;
+              case "trunk":
+                msg = "車廂已開啟";
+              break;
+              case "whistle":
+                msg = "喇叭已響起";
+              break;
             }
-          ,3000);
-        }else{
-          this.props.navigation.navigate('TimeOut');        
-        }
+            setTimeout(
+              ()=>{
+                this.setState({show_loading:false});
+                this.newScooter(this.state.scooter.id);
+                Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}]);
+              }
+            ,3000);
+          }
       });
     }
 
@@ -452,11 +460,13 @@ export default class ScooterDetail extends React.Component {
       this.onClose('action_tools_modal');
     }
     selectWork(selectedIndex){
+       
         if(selectedIndex == 1){
             this.props.navigation.navigate("ChargingBattery",{scooter:this.state.scooter});
         }else{
             this.props.navigation.navigate("MoveScooter",{scooter:this.state.scooter});
         }
+        
         this.onClose('action_tools_modal');
     }
     render() {

@@ -14,24 +14,29 @@ export default class ChargingBattery extends React.Component {
           chk_power:false,
           photo1: null,
           photo2: null,
+          photo3: null,
+          photo4: null,
           scooter:{},
           show_loading:false,
           show_msg:"Loading...",
           after_power:"?",
-          send_now:false
+          send_now:false,
+          pumpup:false,
+          last_pump_date:""
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.back2page=this.back2page.bind(this);
+        this.ChkTirePressure=this.ChkTirePressure.bind(this);
     }
     componentDidMount() {
-      this.setState({scooter:this.props.navigation.state.params.scooter});
+      this.setState({scooter:this.props.navigation.state.params.scooter},()=>{this.ChkTirePressure()});
     }
     shouldComponentUpdate(nextProps, nextState){
       return shallowCompare(this, nextProps, nextState);
     }   
     componentWillUpdate(nextProps,nextState){
       if(nextProps.navigation.state.params.scooter != this.state.scooter){
-        this.setState({scooter:nextProps.navigation.state.params.scooter});
+        this.setState({scooter:nextProps.navigation.state.params.scooter},()=>{this.ChkTirePressure()});
       }
     }
     back2page(){
@@ -117,8 +122,48 @@ export default class ChargingBattery extends React.Component {
       this.setState({photo2: null});
       this.selectPhotoTapped(2);
     }
+    takePhoto3(){
+      this.selectPhotoTapped(3);
+    }
+    retakePhoto3(){
+      this.setState({photo3: null});
+      this.selectPhotoTapped(3);
+    }
+    takePhoto4(){
+      if(this.state.photo4 == null){
+        this.selectPhotoTapped(4);
+      }
+    }
+    retakePhoto4(){
+      this.setState({photo4: null});
+      this.selectPhotoTapped(4);
+    }
+
     link2Confirm(){
       this.setState({step:6,step_title:"最後確認"}); 
+    }
+    ChkTirePressure(){
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/tire_pressure',{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+            return response.json();
+      })
+      .then((json) => {
+        console.warn(json);
+        if(json.code == 1){
+          this.setState({pumpup:true});
+        }
+        if(json.last_date != undefined){
+          if(json.last_date == "-"){
+            this.setState({last_pump_date:"無紀錄"});
+          }else{
+            this.setState({last_pump_date:"上次紀錄："+json.last_date});
+          }
+          
+        }
+      });
     }
     selectPhotoTapped(index) {
       ImagePicker.openCamera({
@@ -135,6 +180,12 @@ export default class ChargingBattery extends React.Component {
           case 2 :
             this.setState({photo2:image.data});
           break;
+          case 3 :
+            this.setState({photo3:image.data});
+          break;
+          case 4 :
+            this.setState({photo4:image.data});
+          break;
         }
       });
     }
@@ -143,6 +194,8 @@ export default class ChargingBattery extends React.Component {
         chk_power:false,
         photo1: null,
         photo2: null,
+        photo3: null,
+        photo4: null,
         scooter:{},
         show_loading:false,
         show_msg:"Loading...",
@@ -156,7 +209,11 @@ export default class ChargingBattery extends React.Component {
           return false;
       }
       else if(this.state.photo1 == null || this.state.photo2 == null){
-          Alert.alert('系統訊息',"請上傳照片",[{text: 'ok'}]);
+          Alert.alert('系統訊息',"請上傳車輛照片",[{text: 'ok'}]);
+          return false;
+      }
+      else if(this.state.pumpup && (this.state.photo3 == null || this.state.photo4 == null)){
+          Alert.alert('系統訊息',"請上傳胎壓照片",[{text: 'ok'}]);
           return false;
       }
       else{
@@ -170,6 +227,10 @@ export default class ChargingBattery extends React.Component {
           formData.append("after_power", this.state.after_power);
           formData.append("photo1", 'data:image/jpeg;base64,'+this.state.photo1);
           formData.append("photo2", 'data:image/jpeg;base64,'+this.state.photo2);
+          if(this.state.pumpup){
+            formData.append("photo3", 'data:image/jpeg;base64,'+this.state.photo3);
+            formData.append("photo4", 'data:image/jpeg;base64,'+this.state.photo4);
+          }
           // 送出紀錄
           fetch(global.API+'/ticket/addChgBettery_record',{
             method: 'POST',
@@ -187,16 +248,18 @@ export default class ChargingBattery extends React.Component {
             if(json.code == 1){
               Alert.alert('系統訊息',"已完成紀錄！",[{text: '回列表頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.navigate('Home')}}]);
             }else{
-              Alert.alert('系統訊息',json.reason,[{text: 'ok'}]);
+              Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
             }
           });
       }
       
     }
     render() {
-        const {step,step_title,chk_power,photo1,photo2,scooter,show_msg,after_power} = this.state;
+        const {step,step_title,chk_power,photo1,photo2,photo3,photo4,scooter,show_msg,after_power,pumpup,last_pump_date} = this.state;
         var show_photo1 = (photo1 != null) ? 'data:image/jpeg;base64,'+photo1 : null;
         var show_photo2 = (photo2 != null) ? 'data:image/jpeg;base64,'+photo2 : null;
+        var show_photo3 = (photo3 != null) ? 'data:image/jpeg;base64,'+photo3 : null;
+        var show_photo4 = (photo4 != null) ? 'data:image/jpeg;base64,'+photo4 : null;
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
@@ -270,28 +333,74 @@ export default class ChargingBattery extends React.Component {
                           
                         </View>
                       </View>
-                      <View style={{flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-                      {this.state.send_now ? 
-                        <Button title="傳送中..."  containerStyle={{width:'70%',marginTop:20}} raised={true} buttonStyle={{backgroundColor:'#FF3333'}} disabled  disabledStyle={{backgroundColor:'#e0e0e0'}}/>
-                      :
-                        <Button
-                          title="確定送出"
-                          containerStyle={{width:'70%',marginTop:20}}
-                          buttonStyle={{backgroundColor:'#FF3333'}}
-                          raised={true}
-                          onPress={()=>this.Confirm()}
-                          icon={<Icon
-                                name="paper-plane"
-                                size={15}
-                                color="white"
-                              />}
-                          titleStyle={{marginLeft:10}}
-                        />
-                      }
-                      </View> 
+
+                      {pumpup &&(
+                        <View>
+                          <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'flex-end',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                            <Text style={{ color: '#fff',fontSize:18 }}>胎壓照片</Text>
+                            <Text style={{ color: '#fff',fontSize:11,marginLeft:20 }}>({last_pump_date})</Text>
+                          </View>
+                          <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
+                            <View style={{width:150,height:200}}>
+                              {show_photo3 == null ?(
+                              <TouchableOpacity onPress={()=>this.takePhoto3()}>
+                                <View style={[
+                                  styles.avatar,
+                                  styles.avatarContainer,
+                                ]}>
+                                    <Icon name="camera-retro" size={30} color={"#333"} />
+                                </View>
+                              </TouchableOpacity>
+                              ):(
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto3()}>
+                                  <Image source={{uri: show_photo3}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
+                                </TouchableOpacity>
+                              )}
+                            </View>
+                            <View style={{width:150,height:200}}>
+                              {show_photo4 == null ?(
+                              <TouchableOpacity onPress={()=>this.takePhoto4()}>
+                                <View style={[
+                                  styles.avatar,
+                                  styles.avatarContainer,
+                                ]}>
+                                    <Icon name="camera-retro" size={30} color={"#333"} />
+                                </View>
+                              </TouchableOpacity>
+                              ):(
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto4()}>
+                                  <Image source={{uri: show_photo4}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
+                                </TouchableOpacity>
+                              )}
+                              
+                            </View>
+                          </View>
+                        </View>
+                      )}
+                      
                     </View>                        
                   </View>
+                  
                 </ScrollView>
+                <View style={{width:'100%',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
+                  {this.state.send_now ? 
+                    <Button title="傳送中..."  containerStyle={{width:'100%',marginTop:20}} raised={true} buttonStyle={{backgroundColor:'#FF3333',borderRadius:0}} disabled  disabledStyle={{backgroundColor:'#e0e0e0'}}/>
+                  :
+                    <Button
+                      title="確定送出"
+                      containerStyle={{width:'100%',marginTop:20}}
+                      buttonStyle={{backgroundColor:'#FF3333',borderRadius:0}}
+                      raised={true}
+                      onPress={()=>this.Confirm()}
+                      icon={<Icon
+                            name="paper-plane"
+                            size={15}
+                            color="white"
+                          />}
+                      titleStyle={{marginLeft:10}}
+                    />
+                  }
+                  </View> 
                 
                 
 

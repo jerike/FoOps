@@ -28,6 +28,9 @@ export default class WorkRecord extends React.Component {
         BackHandler.addEventListener('hardwareBackPress', ()=>{this.props.navigation.goBack();});
       } 
     }
+    onRef = (e) => {
+      this.modal = e
+    }
     getRecord(){
       this.setState({show_loading:true});
       var uid = global.user_id;
@@ -65,7 +68,7 @@ export default class WorkRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.showModal('chbview_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.modal.getTirePumpRecord(data.id);this.showModal('chbview_modal')},100)});
     }
 
     
@@ -91,7 +94,7 @@ export default class WorkRecord extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
-            <ChBView  chbview_option={chbview_option}/>
+            <ChBView onRef={this.onRef} chbview_option={chbview_option}/>
             <ScrollView>
               {
                 list.length == 0 ?(
