@@ -15,6 +15,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 import '../global.js';
 import isEqual from 'lodash.isequal'
 import AndroidOpenSettings from 'react-native-android-open-settings'
+import ActionSheet from 'react-native-action-sheet';
 
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
@@ -77,7 +78,8 @@ export default class MapScreen extends React.Component {
         this.setState({
           condition:global.condition,
           show_loading:true,
-          set_polygon:true
+          set_polygon:true,
+          show_msg:'車輛佈點中...'
         });
         
         
@@ -338,7 +340,80 @@ export default class MapScreen extends React.Component {
         promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
       
     }
+    showController(id){
+      var BUTTONS = [
+        '📋 瀏覽車輛資料',
+        '🔊 響鈴',
+        '❌ 取消',
+      ];
+
+      var DESTRUCTIVE_INDEX = parseInt(BUTTONS.length) - 2;
+      var CANCEL_INDEX = parseInt(BUTTONS.length) - 1;
+      ActionSheet.showActionSheetWithOptions({
+        title:'車輛控制項',
+        message:'目前只提供 4G 網路操作，無法提供藍芽選項',
+        options: BUTTONS,
+        cancelButtonIndex: CANCEL_INDEX,
+        destructiveButtonIndex: DESTRUCTIVE_INDEX,
+        tintColor: '#ff5722',
+      },
+      (buttonIndex) => {
+        switch(buttonIndex){
+          case 0:
+            this.openDetail(id);
+          break;
+          case 1:
+            this.controller(id,'whistle');
+          break;
+        }
+      });
+    }
+
+
+
+    controller(id,type){
+      this.setState({show_loading:true,show_msg:'系統處理中...'});
+      var formData  = new FormData();    
+      formData.append("value", type);  
+      formData.append("operator", global.user_givenName);
+      var request_option = '/scooter/'+id+'/status?type='+type;
+      var method = "PUT";
+      fetch(global.ServiceAPI+request_option,{
+        method: method,
+        credentials: 'include',
+        body: formData
+      })
+      .then((response) => {
+          if(response.status == 401){
+            this.props.navigation.navigate('TimeOut');
+          }else{
+            var msg = "";
+            switch(type){
+              case "unlock":
+                msg = "車輛已啟動";
+              break;
+              case "lock":
+                msg = "車輛已熄火";
+              break;
+              case "trunk":
+                msg = "車廂已開啟";
+              break;
+              case "whistle":
+                msg = "喇叭已響起";
+              break;
+            }
+            setTimeout(
+              ()=>{
+                this.setState({show_loading:false});
+                Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}]);
+              }
+            ,3000);
+          }
+      });
+    }
+
     openDetail(id){
+      global.page = "Map";
       this.props.navigation.navigate('ScooterDetail',{scooter:id,screen:'Map'});
       if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.newScooter != undefined){
           this.props.navigation.state.params.newScooter(id);
@@ -348,7 +423,7 @@ export default class MapScreen extends React.Component {
       this.setState({setCenter:{latitude: 22.622673,longitude: 120.300267,latitudeDelta:0.005,longitudeDelta: 0.005}});
     }
     render() {
-        const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location,show_loading,all_work_area} = this.state;
+        const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location,show_loading,all_work_area,show_msg} = this.state;
         // var scooter = [];
         var search = global.search;
         var set_polygon = this.state.set_polygon;
@@ -430,7 +505,7 @@ export default class MapScreen extends React.Component {
             if(m.status == "RIDING"){
               scooterG.push(m);
             }
-            else if(m.status == "MAINTAINCE"){
+            else if(m.status == "MAINTENANCE"){
               scooterW.push(m);
             }
             else{
@@ -471,7 +546,7 @@ export default class MapScreen extends React.Component {
               {show_loading &&(
                 <View style={styles.loading}>
                   <ActivityIndicator size="small" color="#ffffff" style={{marginRight:5}} />
-                  <Text style={{color:'#fff'}}>車輛佈點中...</Text>
+                  <Text style={{color:'#fff'}}>{show_msg}</Text>
                 </View>
               )}
               <View style={styles.dokodemo_door}>
@@ -512,7 +587,7 @@ export default class MapScreen extends React.Component {
                 {scooterG.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}  pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
+                        <Callout onPress={() => {this.showController(m.id); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
@@ -524,7 +599,7 @@ export default class MapScreen extends React.Component {
                 {scooterO.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}   pinColor="orange"  onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
+                        <Callout onPress={() => {this.showController(m.id); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
@@ -536,7 +611,7 @@ export default class MapScreen extends React.Component {
                 {scooterW.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}  pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {global.page = "Map";this.openDetail(m.id); }}>
+                        <Callout onPress={() => {this.showController(m.id); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>

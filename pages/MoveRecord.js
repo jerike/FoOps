@@ -65,7 +65,7 @@ export default class MoveRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('moveview_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.get_position(1,data.before_location);this.modal.get_position(2,data.after_location);this.modal.getPhotos(data.id);this.showModal('moveview_modal')},100)});
     }
     onRef = (e) => {
       this.modal = e

@@ -72,7 +72,7 @@ export default class ScooterDetail extends React.Component {
     onRef1 = (e) => {
       this.modal1 = e
     }
-    
+
     back2page(){
       var backpage = (global.page != undefined) ? global.page : "Home" ;
       this.props.navigation.navigate(backpage);
@@ -247,20 +247,20 @@ export default class ScooterDetail extends React.Component {
       this.showModal('action_tools_modal');
     }
     showController(){
-      var Status = "車輛下線(維護)";
+      var Status = "⛔ 車輛下線(維護)";
       var button_status = "MAINTENANCE";
       if(this.state.scooter.status == "MAINTENANCE"){
-        var Status = '車輛上線(營運)';
+        var Status = '🆙 車輛上線(營運)';
         var button_status = "FREE";
       }
 
       var BUTTONS = [
         Status,
-        '啟動(4G)',
-        '熄火(4G)',
-        '車廂(4G)',
-        '響鈴(4G)',
-        '取消',
+        '🔓 啟動',
+        '🔒 熄火',
+        '🔑 車廂',
+        '🔊 響鈴',
+        '❌ 取消',
       ];
 
       var DESTRUCTIVE_INDEX = parseInt(BUTTONS.length) - 2;

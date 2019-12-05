@@ -48,8 +48,8 @@ export default class ChargingBattery extends React.Component {
       this.Control_scooter('trunk');
       // setTimeout(()=>{Alert.alert('車輛訊息',"車廂已開啟",[{text: '好的！'}]);this.setState({show_loading:false})},3000)
     }
-    CheckPower(){
-      this.setState({show_loading:true,show_msg:"取得資料中..."});
+    GetPower(){
+      this.setState({show_loading:true,show_msg:"獲取電量中..."});
       fetch(global.API+'/scooter/'+this.state.scooter.id,{
         method: 'GET',
         credentials: 'include'
@@ -68,7 +68,49 @@ export default class ChargingBattery extends React.Component {
         }
       });
     }
+    CheckPower(type){
+      var show_msg = "";
+      switch(type){
+        case "unlock":
+          show_msg = "車輛啟動中...";
+        break;
+        case "lock":
+          show_msg = "車輛熄火中...";
+        break;
+      }
+      this.setState({show_loading:true,show_msg:show_msg});
+      var formData  = new FormData();    
+      formData.append("value", type);  
+      formData.append("operator", global.user_givenName);
+
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/type',{
+        method: 'PUT',
+        credentials: 'include',
+        body: formData
+      })
+      .then((response) => {
+          if(response.status == 200){
+            return response.json();
+          }else{
+            this.props.navigation.navigate('TimeOut');
+          }
+      })
+      .then((json) => {
+        if(json.code == 1){
+          if(type == "unlock"){
+            setTimeout(()=>{this.CheckPower('lock')},5000);
+          }else{
+            setTimeout(()=>{this.GetPower()},3000);
+          }
+        }else{
+          this.props.navigation.navigate('TimeOut');        
+        }
+      });
+    }
+
+
     Control_scooter(type){
+      this.setState({show_loading:true,show_msg:"開啟車廂中..."});
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
@@ -96,7 +138,6 @@ export default class ChargingBattery extends React.Component {
           setTimeout(
             ()=>{
               this.setState({show_loading:false});
-              this.setState({step:2,step_title:"換電 Step2"})
               Alert.alert('車輛訊息',msg,[{text: '好的！'}]);
             }
           ,3000);
@@ -291,7 +332,7 @@ export default class ChargingBattery extends React.Component {
                           <Button title="開啟車廂" icon={ <Icon name="lock-open" size={15} color="white" />} onPress={()=>this.OpenTrunk()} titleStyle={{marginLeft:5}} containerStyle={{padding:10}} buttonStyle={{backgroundColor:'#DDAA00'}}/>
                         </View>
                         <View>
-                          <Button title="更新電量" icon={ <Icon name="bolt" size={15} color="white" />} onPress={()=>this.CheckPower()} titleStyle={{marginLeft:5}} containerStyle={{padding:10}} buttonStyle={{backgroundColor:'#5B9D2D'}}/>
+                          <Button title="更新電量" icon={ <Icon name="bolt" size={15} color="white" />} onPress={()=>this.CheckPower('unlock')} titleStyle={{marginLeft:5}} containerStyle={{padding:10}} buttonStyle={{backgroundColor:'#5B9D2D'}}/>
                         </View>
                       </View>
 
@@ -306,7 +347,8 @@ export default class ChargingBattery extends React.Component {
                               styles.avatar,
                               styles.avatarContainer,
                             ]}>
-                                <Icon name="camera-retro" size={30} color={"#333"} />
+                                <Image source={require('../img/back_trunk.jpeg')} style={{width: 80,height: 80,resizeMode:'contain'}} />
+                                <Text>車廂照</Text>
                             </View>
                           </TouchableOpacity>
                           ):(
@@ -322,7 +364,9 @@ export default class ChargingBattery extends React.Component {
                               styles.avatar,
                               styles.avatarContainer,
                             ]}>
-                                <Icon name="camera-retro" size={30} color={"#333"} />
+
+                                <Image source={require('../img/scooter_cushion.jpeg')} style={{width: 80,height: 80,resizeMode:'contain'}} />
+                                <Text>車身照</Text>
                             </View>
                           </TouchableOpacity>
                           ):(
@@ -348,7 +392,8 @@ export default class ChargingBattery extends React.Component {
                                   styles.avatar,
                                   styles.avatarContainer,
                                 ]}>
-                                    <Icon name="camera-retro" size={30} color={"#333"} />
+                                    <Icon name="camera-retro" size={50} color={"#333"} />
+                                    <Text>前胎壓</Text>
                                 </View>
                               </TouchableOpacity>
                               ):(
@@ -364,7 +409,8 @@ export default class ChargingBattery extends React.Component {
                                   styles.avatar,
                                   styles.avatarContainer,
                                 ]}>
-                                    <Icon name="camera-retro" size={30} color={"#333"} />
+                                    <Icon name="camera-retro" size={50} color={"#333"} />
+                                    <Text>後胎壓</Text>
                                 </View>
                               </TouchableOpacity>
                               ):(
@@ -454,8 +500,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     resizeMode:'contain'
   },
   avatar2: {

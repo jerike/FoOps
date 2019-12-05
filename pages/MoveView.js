@@ -14,6 +14,8 @@ export default class MoveView extends React.Component {
         super()
         this.state={
           photos:[],
+          location1:"",
+          location2:"",
         }
     }
     componentWillMount(){
@@ -35,6 +37,37 @@ export default class MoveView extends React.Component {
           }
         });
     }
+    get_position(idx,latlng){
+      fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latlng+"&language=zh-TW&key="+global.key,{
+         method: 'GET',
+      })
+      .then((response) => response.json())
+      .then((json)=> {
+        this.setState({hit_position:true});
+        if(json.results.length > 0){
+          if(json.results.length == 1){
+            switch(idx){
+              case 1:
+                this.setState({location1:json.results[0].formatted_address});
+              break;
+              case 2:
+                this.setState({location2:json.results[0].formatted_address});
+              break;
+            }
+              
+          }else{
+            switch(idx){
+              case 1:
+                this.setState({location1:json.results[0].formatted_address+"\n\n"+json.results[1].formatted_address});
+              break;
+              case 2:
+                this.setState({location2:json.results[0].formatted_address+"\n\n"+json.results[1].formatted_address});
+              break;
+            }
+          }
+        }
+      });
+    }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -42,27 +75,12 @@ export default class MoveView extends React.Component {
       return create_date;
     }
     clearData(){
-      this.setState({photos: []});
+      this.setState({photos: [],location1:"",location2:"",});
       this.props.moveview_option.onClose('moveview_modal');
     }
     render() {
         const {moveview_option} = this.props;
-
-        var photos = this.state.photos.map(function(m,i){
-            if(m == ""){
-              return true;
-            }
-            return (<View
-                    style={[
-                      styles.avatar,
-                      styles.avatarContainer,
-                    ]}
-                    key={"photo"+i}
-                  >
-                    <SingleImage style={styles.avatar} uri={m} />
-                  </View>
-            );
-        })
+        const {photos} = this.state;
         return (
             <Modal
               animationType="slide"
@@ -93,10 +111,38 @@ export default class MoveView extends React.Component {
                     )}
                     <View style={{width:'80%',justifyContent:'center',marginBottom:50}}>
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>📷 移車拍照</Text>
+                        <Text style={{ color: '#fff',fontSize:18 }}>📷 移動前</Text>
                       </View>
                       <View style={{flexDirection:'row',marginTop:10,justifyContent: "space-around",alignItems: "center"}}>
-                        {photos}    
+                        <View
+                          style={[
+                            styles.avatar,
+                            styles.avatarContainer,
+                          ]}
+                          key={"photo1"}
+                        >
+                          <SingleImage style={styles.avatar} uri={photos[0]} />
+                        </View>  
+                        <View style={{width:'50%',wordBreak:'break-all'}}>
+                          <Text style={{fontSize:12,color:'#fff'}} >{this.state.location1}</Text>
+                        </View> 
+                      </View>
+                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                        <Text style={{ color: '#fff',fontSize:18 }}>📷 移動後</Text>
+                      </View>
+                      <View style={{flexDirection:'row',marginTop:10,justifyContent: "space-around",alignItems: "center"}}>
+                        <View
+                          style={[
+                            styles.avatar,
+                            styles.avatarContainer,
+                          ]}
+                          key={"photo2"}
+                        >
+                          <SingleImage style={styles.avatar} uri={photos[1]} />
+                        </View> 
+                        <View style={{width:'50%',wordBreak:'break-all'}}>
+                          <Text style={{fontSize:12,color:'#fff'}} >{this.state.location2}</Text>
+                        </View>   
                       </View>
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
                         <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 移車人員</Text>
