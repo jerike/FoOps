@@ -4,16 +4,16 @@ import { createDrawerNavigator, createAppContainer,NavigationActions } from 'rea
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
-import ChBView from './ChBView';
+import TireView from './TireView';
 const API = global.API;
 
-export default class WorkRecord extends React.Component {
+export default class TireRecord extends React.Component {
     constructor () {
       super()
       this.state = {
         show_loading:true,
         list:[],
-        chbview_modal:false,
+        tireview_modal:false,
         select_data:{}
       }
       this.onClose=this.onClose.bind(this);
@@ -34,7 +34,7 @@ export default class WorkRecord extends React.Component {
     getRecord(){
       this.setState({show_loading:true});
       var uid = global.user_id;
-      fetch(global.API+'/operator/'+uid+'/getChgBettery_record/',{
+      fetch(global.API+'/operator/'+uid+'/getTirePump_record/',{
         method: 'GET',
         credentials: 'include'
       })
@@ -68,22 +68,22 @@ export default class WorkRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('chbview_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('tireview_modal')},100)});
     }
 
     
     render() {
-        const {scooter,list,select_data,chbview_modal} = this.state;
+        const {scooter,list,select_data,tireview_modal} = this.state;
         var chbview_option={
           onClose:this.onClose,
-          chbview_modal:chbview_modal,
+          tireview_modal:tireview_modal,
           scooter:scooter,
           data:select_data
         }
         return (
         <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
             <Header
-              centerComponent={{ text: "換電記錄", style: { color: '#fff' } }}
+              centerComponent={{ text: "胎壓紀錄", style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.navigate('Home')}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回列表頁</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
               rightComponent={<TouchableHighlight onPress={()=>this.getRecord()}><Icon name="sync-alt" size={20} color="#ffffff"  /></TouchableHighlight>}
@@ -100,7 +100,7 @@ export default class WorkRecord extends React.Component {
                 list.length == 0 ?(
                   <ListItem
                     key={"list_none"}
-                    title="沒有任何換電記錄"
+                    title="沒有任何胎壓記錄"
                     chevron
                     bottomDivider={true}
                     titleStyle={{fontSize:13}}
@@ -111,7 +111,6 @@ export default class WorkRecord extends React.Component {
                     <ListItem
                       key={i}
                       title={l.plate}
-                      subtitle={l.before_power+" > "+l.after_power}
                       badge={{ value: this.dateFormat(l.created), textStyle: { color: '#fff' },badgeStyle:{backgroundColor:'#FF8800'}, containerStyle: { marginTop: -20 } }}
                       chevron
                       bottomDivider={true}

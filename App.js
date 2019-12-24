@@ -16,6 +16,8 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import DeviceInfo from 'react-native-device-info';
 import WorkRecord from './pages/WorkRecord';
 import MoveRecord from './pages/MoveRecord';
+import TirePump from './pages/TirePump';
+import TireRecord from './pages/TireRecord';
 
 // console.disableYellowBox = true;
 const { width, height } = Dimensions.get('screen');
@@ -62,18 +64,24 @@ const DrawerContent = (props) => (
 const TabNavigator = createBottomTabNavigator({
   WorkRecord: { screen: WorkRecord,navigationOptions: { title: '車輛換電'} },
   MoveRecord: { screen: MoveRecord,navigationOptions: { title: '違規移車'} },
+  TireRecord: { screen: TireRecord,navigationOptions: { title: '胎壓紀錄'} },
 },
 {
     defaultNavigationOptions: ({ navigation }) => ({
       tabBarIcon: ({ focused, horizontal, tintColor }) => {
         const { routeName } = navigation.state;
         let iconName;
-        if (routeName === 'WorkRecord') {
-          iconName = `charging-station`;
-        } else if (routeName === 'MoveRecord') {
-          iconName = `route`;
+        switch(routeName){
+          case "WorkRecord":
+            iconName = `charging-station`;
+          break;
+          case "MoveRecord":
+            iconName = `route`;
+          break;
+          case "TireRecord":
+            iconName = `wind`;
+          break;
         }
-
         // You can return any component that you like here!
         return <Icon name={iconName} size={25} color={tintColor} />;
       },
@@ -92,8 +100,8 @@ const HomeStack=createStackNavigator(
     TimeOut:{screen: TimeOut},
     ChargingBattery:{screen:ChargingBattery},
     MoveScooter:{screen:MoveScooter},
-   
-
+    TirePump:{screen:TirePump},
+    BrokenTrack:{screen:BrokenTrack},
   },{
     headerMode:'none',
     defaultNavigationOptions: {

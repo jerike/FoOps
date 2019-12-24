@@ -9,7 +9,7 @@ import {SingleImage} from 'react-native-zoom-lightbox';
 
 var t = 0;
 
-export default class ChBView extends React.Component {
+export default class TireView extends React.Component {
     constructor () {
         super()
         this.state={
@@ -22,7 +22,7 @@ export default class ChBView extends React.Component {
       this.props.onRef(this);
     }
     getPhotos(id){
-      fetch(global.API+'/ticket/'+id+'/getChgBettery_photo/',{
+      fetch(global.API+'/ticket/'+id+'/getTireRecord_photo/',{
           method: 'GET',
           credentials: 'include'
         })
@@ -37,24 +37,6 @@ export default class ChBView extends React.Component {
           }
         });
     }
-    // getTirePumpRecord(id){
-    //   this.setState({getTireRecord:true});
-    //   fetch(global.API+'/ticket/'+id+'/getTireRecord_photo/',{
-    //       method: 'GET',
-    //       credentials: 'include'
-    //     })
-    //     .then((response) => {
-    //       return response.json();
-    //     })
-    //     .then((json) => {
-    //       console.warn(json.data);
-    //       if(json.code ==1){
-    //           this.setState({
-    //             photos2:json.data
-    //           });
-    //       }
-    //     });
-    // }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
@@ -67,13 +49,6 @@ export default class ChBView extends React.Component {
     }
     render() {
         const {chbview_option} = this.props;
-        // if(this.state.photos.length == 0 && chbview_option.data != undefined){
-        //   this.getPhotos(chbview_option.data.id);
-        // }
-        // if(!this.state.getTireRecord){
-        //   this.getTirePumpRecord(chbview_option.data.id);
-        // }
-
         var photos = this.state.photos.map(function(m,i){
             if(m == ""){
               return true;
@@ -89,22 +64,6 @@ export default class ChBView extends React.Component {
                   </View>
             );
         });
-        // var photos2 = this.state.photos2.map(function(m,i){
-        //     if(m == ""){
-        //       return true;
-        //     }
-        //     return (<View
-        //             style={[
-        //               styles.avatar,
-        //               styles.avatarContainer,
-        //             ]}
-        //             key={"photo2"+i}
-        //           >
-        //             <SingleImage style={styles.avatar} uri={m} />
-        //           </View>
-        //     );
-        // });
-        // var show_tire_pressure = (photos2.length > 0) ? true : false
         return (
             <Modal
               animationType="slide"
@@ -138,29 +97,20 @@ export default class ChBView extends React.Component {
                     
                     <View style={{width:'80%',justifyContent:'center',marginBottom:50}}>
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>⚡ 換電狀況</Text>
-                      </View>
-                      <View style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center'}}>
-                        <View><Text style={{ color: '#DB5A5A',fontSize:30 }}>{chbview_option.data.before_power}</Text></View>
-                        <View><Icon name="arrow-right" size={13} style={{color:'#D2D56B',lineHeight:30}} /></View>
-                        <View><Text style={{ color: '#A0D444',fontSize:50 }}>{chbview_option.data.after_power}</Text></View>
-                      </View>
-
-                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>📷 車輛照片</Text>
+                        <Text style={{ color: '#fff',fontSize:18 }}>📷 胎壓照片</Text>
                       </View>
                       <View style={{flexDirection:'row',marginTop:10,justifyContent: "space-around",alignItems: "center"}}>
                         {photos}    
                       </View>
                       
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 換電人員</Text>
+                        <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 打氣人員</Text>
                       </View>
                       <View style={{padding:10}}>
                         <Text style={{fontSize:18,color:'#fff'}} >{chbview_option.data.operator}</Text>
                       </View>
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>⏰ 換電時間</Text>
+                        <Text style={{ color: '#fff',fontSize:18 }}>⏰ 執行時間</Text>
                       </View>
                       <View style={{padding:10}}>
                         <Text style={{fontSize:18,color:'#fff'}}>{this.dateFormat(chbview_option.data.created)}</Text>

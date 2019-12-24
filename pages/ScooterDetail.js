@@ -460,14 +460,23 @@ export default class ScooterDetail extends React.Component {
       this.onClose('action_tools_modal');
     }
     selectWork(selectedIndex){
-       
-        if(selectedIndex == 1){
+        switch(selectWork){
+          case 1:
             this.props.navigation.navigate("ChargingBattery",{scooter:this.state.scooter});
-        }else{
+          break;
+          case 2:
             this.props.navigation.navigate("MoveScooter",{scooter:this.state.scooter});
+          break;
+          case 3:
+            this.props.navigation.navigate("TirePump",{scooter:this.state.scooter});
+          break;
+
         }
-        
         this.onClose('action_tools_modal');
+    }
+    BrokenTrack(){
+      this.props.navigation.navigate("BrokenTrack",{scooter:this.state.scooter});
+      this.onClose('action_tools_modal');
     }
     render() {
         const {search,selectedIndex,toSearch,scooter} = this.state;
@@ -550,6 +559,7 @@ export default class ScooterDetail extends React.Component {
           onClose:this.onClose,
           action_tools_modal:this.state.action_tools_modal,
           ViewViolationRecord:this.ViewViolationRecord,
+          BrokenTrack:this.BrokenTrack,
           showMaintain:this.showMaintain,
           selectWork:this.selectWork
 

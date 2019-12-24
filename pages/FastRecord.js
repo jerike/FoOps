@@ -152,7 +152,7 @@ export default class FastRecord extends React.Component {
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   <View style={{flexDirection:'row',justifyContent:'space-between'}}>
                     <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
-                      <Text style={{ color: '#333',fontSize:18,textAlign:'center' }}>音速建單</Text>
+                      <Text style={{ color: '#333',fontSize:18,textAlign:'center' }}>快速建單</Text>
                     </View>
                     <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
                        <Icon name='times-circle' size={30}  onPress={() => {

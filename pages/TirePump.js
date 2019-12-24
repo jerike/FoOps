@@ -7,7 +7,7 @@ import '../global.js';
 import ImagePicker from 'react-native-image-crop-picker';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export default class ChargingBattery extends React.Component {
+export default class TirePump extends React.Component {
     constructor(props) {
         super(props);
         this.state={
@@ -19,128 +19,29 @@ export default class ChargingBattery extends React.Component {
           show_msg:"Loading...",
           after_power:"?",
           send_now:false,
+          pumpup:false,
+          last_pump_date:""
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.back2page=this.back2page.bind(this);
+        this.ChkTirePressure=this.ChkTirePressure.bind(this);
     }
     componentDidMount() {
-      this.setState({scooter:this.props.navigation.state.params.scooter});
+      this.setState({scooter:this.props.navigation.state.params.scooter},()=>{this.ChkTirePressure()});
     }
     shouldComponentUpdate(nextProps, nextState){
       return shallowCompare(this, nextProps, nextState);
     }   
     componentWillUpdate(nextProps,nextState){
       if(nextProps.navigation.state.params.scooter != this.state.scooter){
-        this.setState({scooter:nextProps.navigation.state.params.scooter});
+        this.setState({scooter:nextProps.navigation.state.params.scooter},()=>{this.ChkTirePressure()});
       }
     }
     back2page(){
       this.clearData();
       this.props.navigation.navigate('Home');
     }
-    OpenTrunk(){
-      this.setState({show_loading:true,show_msg:"開啟車廂中..."});
-      this.Control_scooter('trunk');
-      // setTimeout(()=>{Alert.alert('車輛訊息',"車廂已開啟",[{text: '好的！'}]);this.setState({show_loading:false})},3000)
-    }
-    GetPower(){
-      this.setState({show_loading:true,show_msg:"獲取電量中..."});
-      fetch(global.API+'/scooter/'+this.state.scooter.id,{
-        method: 'GET',
-        credentials: 'include'
-      })
-      .then((response) => {
-          if(response.status == 200){
-            return response.json();
-          }else{
-            this.props.navigation.navigate('TimeOut');
-          }
-      })
-      .then((json) => {
-        if(json.code == 1){
-          var data = json.data;
-          this.setState({after_power:data.power,show_loading:false});
-        }
-      });
-    }
-    CheckPower(type){
-      var show_msg = "";
-      switch(type){
-        case "unlock":
-          show_msg = "車輛啟動中...";
-        break;
-        case "lock":
-          show_msg = "車輛熄火中...";
-        break;
-      }
-      this.setState({show_loading:true,show_msg:show_msg});
-      var formData  = new FormData();    
-      formData.append("value", type);  
-      formData.append("operator", global.user_givenName);
-
-      fetch(global.API+'/scooter/'+this.state.scooter.id+'/type',{
-        method: 'PUT',
-        credentials: 'include',
-        body: formData
-      })
-      .then((response) => {
-          if(response.status == 200){
-            return response.json();
-          }else{
-            this.props.navigation.navigate('TimeOut');
-          }
-      })
-      .then((json) => {
-        if(json.code == 1){
-          if(type == "unlock"){
-            setTimeout(()=>{this.CheckPower('lock')},5000);
-          }else{
-            setTimeout(()=>{this.GetPower()},3000);
-          }
-        }else{
-          this.props.navigation.navigate('TimeOut');        
-        }
-      });
-    }
-
-
-    Control_scooter(type){
-      this.setState({show_loading:true,show_msg:"開啟車廂中..."});
-      var formData  = new FormData();    
-      formData.append("value", type);  
-      formData.append("operator", global.user_givenName);
-
-      fetch(global.API+'/scooter/'+this.state.scooter.id+'/type',{
-        method: 'PUT',
-        credentials: 'include',
-        body: formData
-      })
-      .then((response) => {
-          if(response.status == 200){
-            return response.json();
-          }else{
-            this.props.navigation.navigate('TimeOut');
-          }
-      })
-      .then((json) => {
-        if(json.code == 1){
-          var msg = "";
-          switch(type){
-            case "trunk":
-              msg = "車廂已開啟";
-            break;
-          }
-          setTimeout(
-            ()=>{
-              this.setState({show_loading:false});
-              Alert.alert('車輛訊息',msg,[{text: '好的！'}]);
-            }
-          ,3000);
-        }else{
-          this.props.navigation.navigate('TimeOut');        
-        }
-      });
-    }
+    
 
     takePhoto1(){
       this.selectPhotoTapped(1);
@@ -158,11 +59,29 @@ export default class ChargingBattery extends React.Component {
       this.setState({photo2: null});
       this.selectPhotoTapped(2);
     }
-
-    link2Confirm(){
-      this.setState({step:6,step_title:"最後確認"}); 
+    ChkTirePressure(){
+      fetch(global.API+'/scooter/'+this.state.scooter.id+'/tire_pressure',{
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then((response) => {
+            return response.json();
+      })
+      .then((json) => {
+        console.warn(json);
+        if(json.code == 1){
+          this.setState({pumpup:true});
+        }
+        if(json.last_date != undefined){
+          if(json.last_date == "-"){
+            this.setState({last_pump_date:"無紀錄"});
+          }else{
+            this.setState({last_pump_date:"上次紀錄："+json.last_date});
+          }
+          
+        }
+      });
     }
-    
     selectPhotoTapped(index) {
       ImagePicker.openCamera({
         compressImageMaxWidth: 800,
@@ -186,8 +105,6 @@ export default class ChargingBattery extends React.Component {
         chk_power:false,
         photo1: null,
         photo2: null,
-        photo3: null,
-        photo4: null,
         scooter:{},
         show_loading:false,
         show_msg:"Loading...",
@@ -196,12 +113,8 @@ export default class ChargingBattery extends React.Component {
       });
     }
     Confirm(){
-      if(this.state.after_power == "?"){
-          Alert.alert('系統訊息',"請更新電量！",[{text: 'ok'}]);
-          return false;
-      }
-      else if(this.state.photo1 == null || this.state.photo2 == null){
-          Alert.alert('系統訊息',"請上傳車輛照片",[{text: 'ok'}]);
+      if(this.state.photo1 == null || this.state.photo1 == null){
+          Alert.alert('系統訊息',"請上傳胎壓照片",[{text: 'ok'}]);
           return false;
       }
       else{
@@ -211,12 +124,11 @@ export default class ChargingBattery extends React.Component {
           formData.append("plate", this.state.scooter.plate);
           formData.append("operator", global.user_givenName);
           formData.append("operator_id", global.user_id);
-          formData.append("before_power", this.state.scooter.power);
-          formData.append("after_power", this.state.after_power);
           formData.append("photo1", 'data:image/jpeg;base64,'+this.state.photo1);
           formData.append("photo2", 'data:image/jpeg;base64,'+this.state.photo2);
+
           // 送出紀錄
-          fetch(global.API+'/ticket/addChgBettery_record',{
+          fetch(global.API+'/ticket/addTirePump_record',{
             method: 'POST',
             credentials: 'include',
             body: formData
@@ -246,7 +158,7 @@ export default class ChargingBattery extends React.Component {
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
                   centerComponent={<View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#16B354',borderBottomWidth:1}}>
-                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車輛換電</Text>
+                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>胎壓紀錄</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
                   rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
@@ -262,64 +174,49 @@ export default class ChargingBattery extends React.Component {
                   <View style={{justifyContent:'center',alignItems: 'center'}}>
                     <View style={{width:'80%',justifyContent:'center'}}>
                       
-                      <View style={{flexDirection:'row',justifyContent:'space-around',alignItems:'center',marginTop:10,paddingBottom:5,borderBottomColor:'#60EE4C',borderBottomWidth:1}}>
-                        <View><Text style={{ color: '#fff',fontSize:18,textAlign:'left' }}>電量</Text></View>
-                        <View><Text style={{ color: '#DB5A5A',fontSize:30 }}>{scooter.power}</Text></View>
-                        <View><Icon name="arrow-right" size={13} style={{color:'#D2D56B',lineHeight:30}} /></View>
-                        <View><Text style={{ color: '#A0D444',fontSize:50 }}>{after_power}</Text></View>
-                      </View>
-                      <View style={{marginTop:10,marginBottom:10,justifyContent:'space-around',flexDirection:'row'}}>
                         <View>
-                          <Button title="開啟車廂" icon={ <Icon name="lock-open" size={15} color="white" />} onPress={()=>this.OpenTrunk()} titleStyle={{marginLeft:5}} containerStyle={{padding:10}} buttonStyle={{backgroundColor:'#DDAA00'}}/>
-                        </View>
-                        <View>
-                          <Button title="更新電量" icon={ <Icon name="bolt" size={15} color="white" />} onPress={()=>this.CheckPower('unlock')} titleStyle={{marginLeft:5}} containerStyle={{padding:10}} buttonStyle={{backgroundColor:'#5B9D2D'}}/>
-                        </View>
-                      </View>
-
-                      <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>車輛照片</Text>
-                      </View>
-                      <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
-                        <View style={{width:150,height:200}}>
-                          {show_photo1 == null ?(
-                          <TouchableOpacity onPress={()=>this.takePhoto1()}>
-                            <View style={[
-                              styles.avatar,
-                              styles.avatarContainer,
-                            ]}>
-                                <Image source={require('../img/back_trunk.jpeg')} style={{width: 80,height: 80,resizeMode:'contain'}} />
-                                <Text>車廂照</Text>
+                          <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'flex-end',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                            <Text style={{ color: '#fff',fontSize:18 }}>胎壓照片</Text>
+                            <Text style={{ color: '#fff',fontSize:11,marginLeft:20 }}>({last_pump_date})</Text>
+                          </View>
+                          <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
+                            <View style={{width:150,height:200}}>
+                              {show_photo1 == null ?(
+                              <TouchableOpacity onPress={()=>this.takePhoto3()}>
+                                <View style={[
+                                  styles.avatar,
+                                  styles.avatarContainer,
+                                ]}>
+                                    <Icon name="camera-retro" size={50} color={"#333"} />
+                                    <Text>前胎壓</Text>
+                                </View>
+                              </TouchableOpacity>
+                              ):(
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto3()}>
+                                  <Image source={{uri: show_photo1}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
+                                </TouchableOpacity>
+                              )}
                             </View>
-                          </TouchableOpacity>
-                          ):(
-                            <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto1()}>
-                              <Image source={{uri: show_photo1}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                        <View style={{width:150,height:200}}>
-                          {show_photo2 == null ?(
-                          <TouchableOpacity onPress={()=>this.takePhoto2()}>
-                            <View style={[
-                              styles.avatar,
-                              styles.avatarContainer,
-                            ]}>
-
-                                <Image source={require('../img/scooter_cushion.jpeg')} style={{width: 80,height: 80,resizeMode:'contain'}} />
-                                <Text>車身照</Text>
+                            <View style={{width:150,height:200}}>
+                              {show_photo2 == null ?(
+                              <TouchableOpacity onPress={()=>this.takePhoto4()}>
+                                <View style={[
+                                  styles.avatar,
+                                  styles.avatarContainer,
+                                ]}>
+                                    <Icon name="camera-retro" size={50} color={"#333"} />
+                                    <Text>後胎壓</Text>
+                                </View>
+                              </TouchableOpacity>
+                              ):(
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto4()}>
+                                  <Image source={{uri: show_photo2}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
+                                </TouchableOpacity>
+                              )}
+                              
                             </View>
-                          </TouchableOpacity>
-                          ):(
-                            <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto2()}>
-                              <Image source={{uri: show_photo2}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
-                            </TouchableOpacity>
-                          )}
-                          
+                          </View>
                         </View>
-                      </View>
-
-                      
                       
                     </View>                        
                   </View>
@@ -413,4 +310,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-// AppRegistry.registerComponent('default', () => ChargingBattery);

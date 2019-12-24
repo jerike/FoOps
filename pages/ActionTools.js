@@ -63,9 +63,19 @@ export default class ActionTools extends React.Component {
                         <Text style={{fontSize:13}}>車輛換電</Text>
                       </View>
                       <View>
-                        <Button  key={"abtn_4"} icon={<Icon name="route" size={25} color="#EA0000"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(2)} />
+                        <Button  key={"abtn_4"} icon={<Icon name="charging-station" size={25} color="#00A600"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(3)} />
+                        <Text style={{fontSize:13}}>胎壓紀錄</Text>
+                      </View>
+                      <View>
+                        <Button  key={"abtn_5"} icon={<Icon name="route" size={25} color="#EA0000"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(2)} />
                         <Text style={{fontSize:13}}>違規移動</Text>
                       </View>
+                      <View>
+                        <Button  key={"abtn_6"} icon={<Icon name="route" size={25} color="#EA0000"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.BrokenTrack()} />
+                        <Text style={{fontSize:13}}>車損追蹤</Text>
+                      </View>
+
+                      
                     </View>
                   </ScrollView>
               </View>
