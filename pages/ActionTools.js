@@ -32,9 +32,10 @@ export default class ActionTools extends React.Component {
               hardwareAccelerated={true}
               onRequestClose={() => {action_tools_option.onClose('action_tools_modal')}}
               transparent={true}
+              onRequestClose={()=>action_tools_option.onClose('action_tools_modal')}
             >
             <View style={{flex:1,backgroundColor:'rgba(0,0,0,0.7)'}}></View>
-              <View style={{position:'absolute',width:'100%',height:180,bottom:0,backgroundColor: '#fff',borderTopWidth:1,borderColor:'#666'}}>
+              <View style={{position:'absolute',width:'100%',height:220,bottom:0,backgroundColor: '#fff',borderTopWidth:1,borderColor:'#666'}}>
                   {this.state.show_loading &&(
                     <View style={styles.loading}>
                       <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
@@ -62,20 +63,27 @@ export default class ActionTools extends React.Component {
                         <Button  key={"abtn_3"} icon={<Icon name="charging-station" size={25} color="#00A600"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(1)} />
                         <Text style={{fontSize:13}}>車輛換電</Text>
                       </View>
-                      <View>
-                        <Button  key={"abtn_4"} icon={<Icon name="charging-station" size={25} color="#00A600"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(3)} />
-                        <Text style={{fontSize:13}}>胎壓紀錄</Text>
-                      </View>
+
                       <View>
                         <Button  key={"abtn_5"} icon={<Icon name="route" size={25} color="#EA0000"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(2)} />
                         <Text style={{fontSize:13}}>違規移動</Text>
                       </View>
-                      <View>
-                        <Button  key={"abtn_6"} icon={<Icon name="route" size={25} color="#EA0000"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.BrokenTrack()} />
-                        <Text style={{fontSize:13}}>車損追蹤</Text>
-                      </View>
 
                       
+                    </View>
+                    <View style={{flexDirection:'row',marginTop:20,justifyContent:'space-around',alignItems:'flex-start'}}>
+                      <View>
+                        <Button  key={"abtn_4"} icon={<Icon name="stopwatch" size={25} color="#00AAAA"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.selectWork(3)} />
+                        <Text style={{fontSize:13}}>胎壓紀錄</Text>
+                      </View>
+                      <View>
+                        <Button  key={"abtn_6"} icon={<Icon name="screwdriver" size={25} color="#888888"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.BrokenTrack()} />
+                        <Text style={{fontSize:13}}>車損追蹤</Text>
+                      </View>
+                      <View>
+                        <Button  key={"abtn_6"} icon={<Icon name="clipboard" size={25} color="tan"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.BrokenTrackRecord()} />
+                        <Text style={{fontSize:13}}>車損紀錄</Text>
+                      </View>
                     </View>
                   </ScrollView>
               </View>

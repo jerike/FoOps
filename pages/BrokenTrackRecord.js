@@ -4,21 +4,25 @@ import { createDrawerNavigator, createAppContainer,NavigationActions } from 'rea
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
-import ViolationView from './ViolationView';
+import BrokenTrackView from './BrokenTrackView';
+import shallowCompare from 'react-addons-shallow-compare';
+
 const API = global.API;
 
-export default class ViolationRecord extends React.Component {
+export default class BrokenTrackRecord extends React.Component {
     constructor () {
       super()
       this.state = {
         show_loading:true,
         list:[],
-        violation_modal:false,
-        select_data:{}
+        btv_modal:false,
+        select_data:{},
+        scooter:{},
       }
       this.onClose=this.onClose.bind(this);
       this.showDetail=this.showDetail.bind(this);
       this.showModal=this.showModal.bind(this);
+      this.getRecord=this.getRecord.bind(this);
     }
     componentWillMount() {
       if(this.props.navigation.getParam('scooter') != undefined){
@@ -39,27 +43,36 @@ export default class ViolationRecord extends React.Component {
     componentWillUnmount() {
       this.backHandler.remove();
     }
+
+
+
+    onRef = (e) => {
+      this.modal = e
+    }
     getRecord(){
+      this.setState({show_loading:true});
       var sid = this.state.scooter.id;
-      fetch(global.API+'/scooter/'+sid+'/violation',{
+      console.warn(global.API+'/scooter/'+sid+'/track/broken');
+      fetch(global.API+'/scooter/'+sid+'/track/broken',{
         method: 'GET',
         credentials: 'include'
       })
       .then((response) => {
-          if(response.status == 200){
+        console.warn(response);
             return response.json();
-          }else{
-            this.props.navigation.navigate('TimeOut');
-          }
       })
       .then((json) => {
-          this.setState({list:json.data,show_loading:false});
+          if(json.data.length == 0){
+            this.setState({list:[],show_loading:false});
+          }else{
+            this.setState({list:json.data,show_loading:false});
+          }
       });
     }
     pad(number){ return (number < 10 ? '0' : '') + number }
     dateFormat(date){
       var format_date = new Date(date);
-      var create_date = this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
+      var create_date = this.pad(format_date.getFullYear())+'/'+this.pad(format_date.getMonth()+1)+'/'+this.pad(format_date.getDate())+' '+this.pad(format_date.getHours())+':'+this.pad(format_date.getMinutes());
       return create_date;
     }
     showModal(key){
@@ -74,25 +87,25 @@ export default class ViolationRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('violation_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('btv_modal')},100)});
     }
 
     
     render() {
-        const {scooter,list,select_data,violation_modal} = this.state;
-        var header_title = scooter.plate+" 違規紀錄";
-        var violation_option={
+        const {scooter,list,select_data,btv_modal} = this.state;
+        var btv_option={
           onClose:this.onClose,
-          violation_modal:violation_modal,
+          btv_modal:btv_modal,
           scooter:scooter,
           data:select_data
         }
         return (
         <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
             <Header
-              centerComponent={{ text: header_title, style: { color: '#fff' } }}
+              centerComponent={{ text: "車損紀錄", style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
+              rightComponent={<TouchableHighlight onPress={()=>this.getRecord()}><Icon name="sync-alt" size={20} color="#ffffff"  /></TouchableHighlight>}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>
@@ -100,22 +113,33 @@ export default class ViolationRecord extends React.Component {
                 <Text style={{color:'#fff'}}>Loading...</Text>
               </View>
             )}
-            <ViolationView onRef={this.onRef}  violation_option={violation_option}/>
+            <BrokenTrackView onRef={this.onRef} btv_option={btv_option}/>
             <ScrollView>
               {
-                list.map((l, i) => (
+                list.length == 0 ?(
                   <ListItem
-                    key={i}
-                    title={l.type}
-                    subtitle={l.subtype}
-                    badge={{ value: this.dateFormat(l.created_at), textStyle: { color: '#fff' },badgeStyle:{backgroundColor:'#FF8800'}, containerStyle: { marginTop: -20 } }}
+                    key={"list_none"}
+                    title="沒有任何車損記錄"
                     chevron
                     bottomDivider={true}
                     titleStyle={{fontSize:13}}
                     subtitleStyle={{fontSize:10,color:'#ccc'}}
-                    onPress={()=>{this.showDetail(l)}}
                   />
-                ))
+                ):(
+                  list.map((l, i) => (
+                    <ListItem
+                      key={i}
+                      title={this.dateFormat(l.created)}
+                      subtitle={"回報人員："+l.operator}
+                      badge={{ value: l.status, textStyle: { color: '#fff' },badgeStyle:{backgroundColor:'#FF8800'} }}
+                      chevron
+                      bottomDivider={true}
+                      titleStyle={{fontSize:16}}
+                      subtitleStyle={{fontSize:11,color:'#666'}}
+                      onPress={()=>{this.showDetail(l)}}
+                    />
+                  ))
+                )
               }
                 
             </ScrollView>

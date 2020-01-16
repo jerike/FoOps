@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
+import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,Platform,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
 import { Text,Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar,Input,Divider   } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
+import ActionSheet from 'react-native-action-sheet';
 import ImagePicker from 'react-native-image-crop-picker';
 import shallowCompare from 'react-addons-shallow-compare';
+import {SingleImage} from 'react-native-zoom-lightbox';
 
 export default class BrokenTrack extends React.Component {
     constructor(props) {
@@ -14,8 +16,7 @@ export default class BrokenTrack extends React.Component {
           chk_power:false,
           content:null,
           fix_cost:null,
-          photo1: null,
-          photo2: null,
+          photos:[],
           scooter:{},
           show_loading:false,
           show_msg:"Loading...",
@@ -25,8 +26,15 @@ export default class BrokenTrack extends React.Component {
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.back2page=this.back2page.bind(this);
     }
-    componentDidMount() {
+    componentDidMount(){
+      this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        this.props.navigation.goBack();
+        return true;
+      });
       this.setState({scooter:this.props.navigation.state.params.scooter});
+    }
+    componentWillUnmount() {
+      this.backHandler.remove();
     }
     shouldComponentUpdate(nextProps, nextState){
       return shallowCompare(this, nextProps, nextState);
@@ -164,12 +172,12 @@ export default class BrokenTrack extends React.Component {
               let source = 'data:image/jpeg;base64,' + m.data;
               return (<View
                       style={[
-                        styles.avatar,
-                        styles.avatarContainer,
+                        styles.avatar2,
+                        styles.avatar2Container,
                       ]}
                       key={"photo"+i}
                     >
-                      <Image style={styles.avatar} source={{uri: source}} />
+                      <SingleImage style={styles.avatar} uri={source} />
                     </View>
               );
             }
@@ -178,7 +186,7 @@ export default class BrokenTrack extends React.Component {
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
                   centerComponent={<View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#16B354',borderBottomWidth:1}}>
-                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車輛換電</Text>
+                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車損紀錄</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
                   rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
@@ -194,25 +202,32 @@ export default class BrokenTrack extends React.Component {
                   <View style={{justifyContent:'center',alignItems: 'center'}}>
                     <View style={{width:'80%',justifyContent:'center'}}>
                       <View style={{marginTop:10,marginBottom:10,justifyContent:'space-around',flexDirection:'row'}}>
-                        <View>
-                          <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                        <View style={{width:'45%'}}>
+                          <View style={{justifyContent:'space-around',marginTop:10,marginBottom:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
                             <Text style={{ color: '#fff',fontSize:18 }}>車輛狀況</Text>
                           </View>
                           <TextInput
+                            style={{borderColor:'#fff',borderWidth:1,color:'#fff'}}
+                            placeholderTextColor={'#A9A9A9'}
                             multiline={true}
-                            numberOfLines={4}
-                            onChangeText={(text) => this.setState({content})}
+                            numberOfLines={5}
+                            onChangeText={(text) => this.setState({content:text})}
+                            placeholder="請輸入車輛狀況..."
                             value={this.state.content}/>
                         </View>
-                        <View>
-                          <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
+                         <View style={{width:'45%'}}>
+                          <View style={{justifyContent:'space-around',marginTop:10,marginBottom:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
                             <Text style={{ color: '#fff',fontSize:18 }}>修復費用</Text>
                           </View>
                           <TextInput
+                            style={{borderColor:'#fff',borderWidth:1,color:'#fff'}}
+                            placeholderTextColor={'#A9A9A9'}
                             multiline={true}
-                            numberOfLines={4}
-                            onChangeText={(text) => this.setState({fix_cost})}
+                            numberOfLines={5}
+                            onChangeText={(text) => this.setState({fix_cost:text})}
+                            placeholder="請輸入修復費用..."
                             value={this.state.fix_cost}/>
+
                         </View>
                       </View>
 
@@ -228,7 +243,7 @@ export default class BrokenTrack extends React.Component {
                               styles.avatar,
                               styles.avatarContainer,
                             ]}>
-                                <Text>+</Text>
+                                <Icon name="camera-retro" size={30} color={"#333"} />
                             </View>
                           </TouchableOpacity>
                         )}
@@ -317,13 +332,19 @@ const styles = StyleSheet.create({
     resizeMode:'contain'
   },
   avatar2: {
-    width: 200,
-    height: 300,
+    width: 100,
+    height: 100,
     resizeMode:'contain'
   },
   avatarContainer: {
     backgroundColor: '#F5F5F5',
     borderColor: '#9B9B9B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarContainer2: {
+    backgroundColor: '#2F3345',
+    borderColor: '#2F3345',
     justifyContent: 'center',
     alignItems: 'center',
   },

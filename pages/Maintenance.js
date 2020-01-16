@@ -178,6 +178,7 @@ export default class Maintenance extends React.Component {
               transparent={false}
               visible={maintain_option.maintain_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>maintain_option.onClose('maintain_modal')}
             >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   {this.state.show_loading &&(

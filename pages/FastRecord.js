@@ -148,6 +148,7 @@ export default class FastRecord extends React.Component {
               transparent={false}
               visible={fastrecord_option.fastrecord_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>fastrecord_option.onClose('fastrecord_modal')}
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   <View style={{flexDirection:'row',justifyContent:'space-between'}}>

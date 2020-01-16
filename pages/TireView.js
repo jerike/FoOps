@@ -14,8 +14,7 @@ export default class TireView extends React.Component {
         super()
         this.state={
           photos:[],
-          photos2:[],
-          getTireRecord:false
+          photos2:[]
         }
     }
     componentWillMount(){
@@ -44,11 +43,11 @@ export default class TireView extends React.Component {
       return create_date;
     }
     clearData(){
-      this.setState({photos: [],photos2:[],getTireRecord:false});
-      this.props.chbview_option.onClose('chbview_modal');
+      this.setState({photos: []});
+      this.props.tireview_option.onClose('tireview_modal');
     }
     render() {
-        const {chbview_option} = this.props;
+        const {tireview_option} = this.props;
         var photos = this.state.photos.map(function(m,i){
             if(m == ""){
               return true;
@@ -68,13 +67,14 @@ export default class TireView extends React.Component {
             <Modal
               animationType="slide"
               transparent={false}
-              visible={chbview_option.chbview_modal}
+              visible={tireview_option.tireview_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>this.clearData()}
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#2F3345'}}>
                 <View style={{flexDirection:'row',justifyContent:'space-between'}}>
                     <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
-                      <Text style={{ color: '#ff5722',fontSize:18,textAlign:'center' }}>{chbview_option.data.plate}</Text>
+                      <Text style={{ color: '#ff5722',fontSize:18,textAlign:'center' }}>胎壓紀錄</Text>
                     </View>
                     <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
                        <Icon name='times-circle' size={30} color="#fff"  onPress={() => {
@@ -104,16 +104,16 @@ export default class TireView extends React.Component {
                       </View>
                       
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
-                        <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 打氣人員</Text>
+                        <Text style={{ color: '#fff',fontSize:18 }}>👨‍🔧 紀錄人員</Text>
                       </View>
                       <View style={{padding:10}}>
-                        <Text style={{fontSize:18,color:'#fff'}} >{chbview_option.data.operator}</Text>
+                        <Text style={{fontSize:18,color:'#fff'}} >{tireview_option.data.operator}</Text>
                       </View>
                       <View style={{justifyContent:'space-around',marginTop:10,paddingBottom:5,borderBottomColor:'#C67B38',borderBottomWidth:1}}>
                         <Text style={{ color: '#fff',fontSize:18 }}>⏰ 執行時間</Text>
                       </View>
                       <View style={{padding:10}}>
-                        <Text style={{fontSize:18,color:'#fff'}}>{this.dateFormat(chbview_option.data.created)}</Text>
+                        <Text style={{fontSize:18,color:'#fff'}}>{this.dateFormat(tireview_option.data.created)}</Text>
                       </View>
                     </View>
                   </View>

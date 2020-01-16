@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,PixelRatio,TouchableOpacity,TextInput,Picker,ActivityIndicator } from 'react-native';
+import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,PixelRatio,TouchableOpacity,TextInput,Picker,ActivityIndicator,BackHandler } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBox } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -35,6 +35,7 @@ export default class Violation extends React.Component {
     componentWillMount(){
       // this.getPosition();
     }
+
     async chk_location_permission(){
       if(Platform.OS == 'ios'){
             this.getPosition();
@@ -290,6 +291,7 @@ export default class Violation extends React.Component {
               transparent={false}
               visible={violation_option.violation_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>{violation_option.onClose('violation_modal');this.clearData()}}
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   {this.state.show_loading && (

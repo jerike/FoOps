@@ -7,7 +7,7 @@ import '../global.js';
 import ImagePicker from 'react-native-image-crop-picker';
 import AndroidOpenSettings from 'react-native-android-open-settings'
 import shallowCompare from 'react-addons-shallow-compare';
-
+import ScooterMoveRecord from './ScooterMoveRecord';
 export default class MoveScooter extends React.Component {
     constructor(props) {
         super(props);
@@ -19,11 +19,19 @@ export default class MoveScooter extends React.Component {
           show_msg:"Loading...",
           before_location:{},
           after_location:{},
-          send_now:false
+          send_now:false,
+          move_modal:false,
         }
         this.getLocation=this.getLocation.bind(this);
+        this.onClose=this.onClose.bind(this);
     }
-    componentDidMount() {
+    onRef = (e) => {
+      this.modal = e
+    }
+    componentDidMount(){
+      if (Platform.OS === 'android') {  
+        BackHandler.addEventListener('hardwareBackPress', ()=>{this.props.navigation.goBack();});
+      } 
       this.setState({scooter:this.props.navigation.state.params.scooter});
       this.chk_location_permission();
     }
@@ -174,10 +182,23 @@ export default class MoveScooter extends React.Component {
       }
       
     }
+    openRecord(){
+      this.modal.getRecord(this.state.scooter);
+      this.setState({move_modal:true});
+    }
+    onClose(key){
+        this.setState({
+          [key]: false,
+        });
+    }
     render() {
-        const {photo1,photo2,scooter,show_msg} = this.state;
+        const {photo1,photo2,scooter,show_msg,move_modal} = this.state;
         var show_photo1 = (photo1 != null) ? 'data:image/jpeg;base64,'+photo1 : null;
         var show_photo2 = (photo2 != null) ? 'data:image/jpeg;base64,'+photo2 : null;
+        var move_record_option={
+          onClose:this.onClose,
+          move_modal:move_modal
+        }
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
@@ -185,9 +206,10 @@ export default class MoveScooter extends React.Component {
                                     <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>違規移動</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
-                  rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
+                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={scooter.plate} onPress={()=>this.openRecord()}/>}
                   containerStyle={styles.header}
                 />
+                <ScooterMoveRecord onRef={this.onRef} move_record_option={move_record_option} />
                 <ScrollView style={{flex: 1}}>
                   <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
                     <View>

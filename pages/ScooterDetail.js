@@ -52,6 +52,8 @@ export default class ScooterDetail extends React.Component {
       this.confirm_controller=this.confirm_controller.bind(this);
       this.ViewViolationRecord=this.ViewViolationRecord.bind(this);
       this.selectWork=this.selectWork.bind(this);
+      this.BrokenTrack=this.BrokenTrack.bind(this);
+      this.BrokenTrackRecord=this.BrokenTrackRecord.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -60,14 +62,19 @@ export default class ScooterDetail extends React.Component {
     }
     componentDidMount(){
       this.getStorage().done();
-      if (Platform.OS === 'android') {  
-        BackHandler.addEventListener('hardwareBackPress', ()=>{this.back2page();});
-      } 
+      this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        this.back2page();
+        return true;
+      });
+      // if (Platform.OS === 'android') {  
+      //   BackHandler.addEventListener('hardwareBackPress', ()=>{this.back2page();});
+      // } 
     }
     componentWillUnmount() {
-        if (Platform.OS === 'android') {
-           BackHandler.removeEventListener('hardwareBackPress',()=>{});
-        }
+      this.backHandler.remove();
+        // if (Platform.OS === 'android') {
+        //    BackHandler.removeEventListener('hardwareBackPress',()=>{});
+        // }
     }
     onRef1 = (e) => {
       this.modal1 = e
@@ -460,7 +467,7 @@ export default class ScooterDetail extends React.Component {
       this.onClose('action_tools_modal');
     }
     selectWork(selectedIndex){
-        switch(selectWork){
+        switch(selectedIndex){
           case 1:
             this.props.navigation.navigate("ChargingBattery",{scooter:this.state.scooter});
           break;
@@ -476,6 +483,10 @@ export default class ScooterDetail extends React.Component {
     }
     BrokenTrack(){
       this.props.navigation.navigate("BrokenTrack",{scooter:this.state.scooter});
+      this.onClose('action_tools_modal');
+    }
+    BrokenTrackRecord(){
+      this.props.navigation.navigate("BrokenTrackRecord",{scooter:this.state.scooter});
       this.onClose('action_tools_modal');
     }
     render() {
@@ -560,6 +571,7 @@ export default class ScooterDetail extends React.Component {
           action_tools_modal:this.state.action_tools_modal,
           ViewViolationRecord:this.ViewViolationRecord,
           BrokenTrack:this.BrokenTrack,
+          BrokenTrackRecord:this.BrokenTrackRecord,
           showMaintain:this.showMaintain,
           selectWork:this.selectWork
 

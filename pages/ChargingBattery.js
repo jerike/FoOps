@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
+import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,ScrollView,Platform,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
 import { Text,Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar,Input,Divider   } from 'react-native-elements';
+
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ImagePicker from 'react-native-image-crop-picker';
 import shallowCompare from 'react-addons-shallow-compare';
+import ScooterChbRecord from './ScooterChbRecord';
 
 export default class ChargingBattery extends React.Component {
     constructor(props) {
@@ -19,13 +21,26 @@ export default class ChargingBattery extends React.Component {
           show_msg:"Loading...",
           after_power:"?",
           send_now:false,
+          chb_modal:false,
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.back2page=this.back2page.bind(this);
+        this.onClose=this.onClose.bind(this);
     }
-    componentDidMount() {
+    onRef = (e) => {
+      this.modal = e
+    }
+    componentDidMount(){
+      this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        this.props.navigation.goBack();
+        return true;
+      });
       this.setState({scooter:this.props.navigation.state.params.scooter});
     }
+    componentWillUnmount() {
+      this.backHandler.remove();
+    }
+
     shouldComponentUpdate(nextProps, nextState){
       return shallowCompare(this, nextProps, nextState);
     }   
@@ -238,10 +253,23 @@ export default class ChargingBattery extends React.Component {
       }
       
     }
+    openRecord(){
+      this.modal.getRecord(this.state.scooter);
+      this.setState({chb_modal:true});
+    }
+    onClose(key){
+        this.setState({
+          [key]: false,
+        });
+    }
     render() {
-        const {step,step_title,chk_power,photo1,photo2,scooter,show_msg,after_power,pumpup,last_pump_date} = this.state;
+        const {step,step_title,chk_power,photo1,photo2,scooter,show_msg,after_power,pumpup,last_pump_date,chb_modal} = this.state;
         var show_photo1 = (photo1 != null) ? 'data:image/jpeg;base64,'+photo1 : null;
         var show_photo2 = (photo2 != null) ? 'data:image/jpeg;base64,'+photo2 : null;
+        var chb_record_option={
+          onClose:this.onClose,
+          chb_modal:chb_modal
+        }
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
@@ -249,7 +277,7 @@ export default class ChargingBattery extends React.Component {
                                     <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車輛換電</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
-                  rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
+                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={scooter.plate} onPress={()=>this.openRecord()}/>}
                   containerStyle={styles.header}
                 />
                 {this.state.show_loading &&(
@@ -258,6 +286,7 @@ export default class ChargingBattery extends React.Component {
                     <Text style={{color:'#fff'}}>{show_msg}</Text>
                   </View>
                 )}
+                <ScooterChbRecord onRef={this.onRef} chb_record_option={chb_record_option} />
                 <ScrollView style={{width:'100%'}}>
                   <View style={{justifyContent:'center',alignItems: 'center'}}>
                     <View style={{width:'80%',justifyContent:'center'}}>

@@ -665,6 +665,7 @@ export default class Filter extends React.Component {
               transparent={false}
               visible={filter_option.modalVisible}
               presentationStyle="fullScreen"
+              onRequestClose={()=>filter_option.setModalVisible(false)}
               >
               <SafeAreaView style={{position:'relative',flex: 1,justifyContent: "center", alignItems: "center", backgroundColor: '#fff'}}>
                   <View style={{position:'absolute',top:5,right:5,zIndex:1001 }}>

@@ -4,37 +4,34 @@ import { createDrawerNavigator, createAppContainer,NavigationActions } from 'rea
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
-import TireView from './TireView';
+import MoveView from './MoveView';
 const API = global.API;
 
-export default class TireRecord extends React.Component {
+export default class ScooterMoveRecord extends React.Component {
     constructor () {
       super()
       this.state = {
         show_loading:true,
         list:[],
-        tireview_modal:false,
-        select_data:{}
+        moveview_modal:false,
+        select_data:{},
+        scooter:{}
       }
       this.onClose=this.onClose.bind(this);
       this.showDetail=this.showDetail.bind(this);
       this.showModal=this.showModal.bind(this);
+      this.clearData=this.clearData.bind(this);
+      this.getRecord=this.getRecord.bind(this);
     }
-    componentWillMount() {
-      this.getRecord();
-    }
-    componentDidMount(){
-      if (Platform.OS === 'android') {  
-        BackHandler.addEventListener('hardwareBackPress', ()=>{this.props.navigation.goBack();});
-      } 
+    componentWillMount(){
+      this.props.onRef(this);
     }
     onRef = (e) => {
       this.modal = e
     }
-    getRecord(){
-      this.setState({show_loading:true});
-      var uid = global.user_id;
-      fetch(global.API+'/operator/'+uid+'/getTirePump_record/',{
+    getRecord(scooter){
+      this.setState({show_loading:true,scooter:scooter});
+      fetch(global.API+'/scooter/'+scooter.id+'/getMoveScooter_record_by_scooter/',{
         method: 'GET',
         credentials: 'include'
       })
@@ -42,6 +39,7 @@ export default class TireRecord extends React.Component {
           return response.json();
       })
       .then((json) => {
+        console.warn(json);
           if(json.data.length == 0){
             this.setState({list:[],show_loading:false});
           }else{
@@ -67,38 +65,48 @@ export default class TireRecord extends React.Component {
     }
 
     showDetail(data){
-      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('tireview_modal')},100)});
+      this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.get_position(1,data.before_location);this.modal.get_position(2,data.after_location);this.modal.getPhotos(data.id);this.showModal('moveview_modal')},100)});
+      // this.setState({select_data:data},()=>{setTimeout(()=>{this.modal.getPhotos(data.id);this.showModal('moveview_modal')},100)});
     }
-
+    clearData(){
+      this.setState({list: []});
+      this.props.move_record_option.onClose('move_modal');
+    }
     
     render() {
-        const {scooter,list,select_data,tireview_modal} = this.state;
-        var tireview_option={
+        const {scooter,list,select_data,moveview_modal} = this.state;
+        const {move_record_option} = this.props;
+        var moveview_option={
           onClose:this.onClose,
-          tireview_modal:tireview_modal,
+          moveview_modal:moveview_modal,
           data:select_data
         }
         return (
-        <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
-            <Header
-              centerComponent={{ text: "胎壓紀錄", style: { color: '#fff' } }}
-              leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.navigate('Home')}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回列表頁</Text></View></TouchableHighlight>}
-              containerStyle={styles.header}
-              rightComponent={<TouchableHighlight onPress={()=>this.getRecord()}><Icon name="sync-alt" size={20} color="#ffffff"  /></TouchableHighlight>}
-            />
-            {this.state.show_loading &&(
-              <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#ffffff" style={{marginBottom:5}} />
-                <Text style={{color:'#fff'}}>Loading...</Text>
-              </View>
-            )}
-            <TireView onRef={this.onRef} tireview_option={tireview_option}/>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={move_record_option.move_modal}
+          presentationStyle="fullScreen"
+          onRequestClose={()=>this.clearData()}
+          >
+          <SafeAreaView style={{flex: 1, backgroundColor: '#2F3345'}}>
+            <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                <View style={{justifyContent:'center',textAlign:'center',marginTop:5,marginLeft:10,marginBottom:10,width:120,borderBottomColor:'#ccc',borderBottomWidth:1}}>
+                  <Text style={{ color: '#ff5722',fontSize:18,textAlign:'center' }}>{scooter.plate}</Text>
+                </View>
+                <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:5,marginTop:5 }}>
+                   <Icon name='times-circle' size={30} color="#fff"  onPress={() => {
+                      this.clearData();
+                    }} />
+                </View>
+            </View>
+            <MoveView onRef={this.onRef} moveview_option={moveview_option}/>
             <ScrollView>
               {
                 list.length == 0 ?(
                   <ListItem
                     key={"list_none"}
-                    title="沒有任何胎壓記錄"
+                    title="沒有任何違規移動紀錄"
                     chevron
                     bottomDivider={true}
                     titleStyle={{fontSize:13}}
@@ -108,8 +116,8 @@ export default class TireRecord extends React.Component {
                   list.map((l, i) => (
                     <ListItem
                       key={i}
-                      title={"車號："+l.scooter}
-                      badge={{ value: this.dateFormat(l.created), textStyle: { color: '#fff' },badgeStyle:{backgroundColor:'#FF8800'}, containerStyle: { marginTop: -20 } }}
+                      title={this.dateFormat(l.created)}
+                      badge={{ value: l.operator, textStyle: { color: '#fff' },badgeStyle:{backgroundColor:'#FF8800'} }}
                       chevron
                       bottomDivider={true}
                       titleStyle={{fontSize:13}}
@@ -122,7 +130,8 @@ export default class TireRecord extends React.Component {
                 
             </ScrollView>
 
-        </SafeAreaView>
+          </SafeAreaView>
+        </Modal>
          
         );
     }

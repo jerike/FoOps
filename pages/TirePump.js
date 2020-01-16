@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,ScrollView,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
+import { TextInput, View,StyleSheet,TouchableOpacity,Image,TouchableHighlight,Alert,ScrollView,Platform,Animated,Easing,ActivityIndicator,Dimensions,SafeAreaView,BackHandler,AppRegistry} from 'react-native';
 import { Text,Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar,Input,Divider   } from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import '../global.js';
 import ImagePicker from 'react-native-image-crop-picker';
 import shallowCompare from 'react-addons-shallow-compare';
-
+import ScooterTireRecord from './ScooterTireRecord';
 export default class TirePump extends React.Component {
     constructor(props) {
         super(props);
@@ -20,14 +20,26 @@ export default class TirePump extends React.Component {
           after_power:"?",
           send_now:false,
           pumpup:false,
-          last_pump_date:""
+          last_pump_date:"",
+          str_modal:false,
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
         this.back2page=this.back2page.bind(this);
         this.ChkTirePressure=this.ChkTirePressure.bind(this);
+        this.onClose=this.onClose.bind(this);
     }
-    componentDidMount() {
+    onRef = (e) => {
+      this.modal = e
+    }
+    componentDidMount(){
+      this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        this.props.navigation.goBack();
+        return true;
+      });
       this.setState({scooter:this.props.navigation.state.params.scooter},()=>{this.ChkTirePressure()});
+    }
+    componentWillUnmount() {
+      this.backHandler.remove();
     }
     shouldComponentUpdate(nextProps, nextState){
       return shallowCompare(this, nextProps, nextState);
@@ -41,7 +53,10 @@ export default class TirePump extends React.Component {
       this.clearData();
       this.props.navigation.navigate('Home');
     }
-    
+    openRecord(){
+      this.modal.getRecord(this.state.scooter);
+      this.setState({str_modal:true});
+    }
 
     takePhoto1(){
       this.selectPhotoTapped(1);
@@ -109,7 +124,8 @@ export default class TirePump extends React.Component {
         show_loading:false,
         show_msg:"Loading...",
         after_power:"?",
-        send_now:false
+        send_now:false,
+        str_modal:false
       });
     }
     Confirm(){
@@ -150,10 +166,20 @@ export default class TirePump extends React.Component {
       }
       
     }
+    onClose(key){
+        this.setState({
+          [key]: false,
+        });
+    }
     render() {
-        const {step,step_title,chk_power,photo1,photo2,scooter,show_msg,after_power,pumpup,last_pump_date} = this.state;
+        const {step,step_title,chk_power,photo1,photo2,scooter,show_msg,after_power,pumpup,last_pump_date,str_modal} = this.state;
         var show_photo1 = (photo1 != null) ? 'data:image/jpeg;base64,'+photo1 : null;
         var show_photo2 = (photo2 != null) ? 'data:image/jpeg;base64,'+photo2 : null;
+        var tire_record_option={
+          onClose:this.onClose,
+          str_modal:str_modal
+        }
+
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
@@ -161,7 +187,7 @@ export default class TirePump extends React.Component {
                                     <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>胎壓紀錄</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
-                  rightComponent={<Text style={{color:'#ff5722'}}>{scooter.plate}</Text>}
+                  rightComponent={<Button buttonStyle={{backgroundColor:'#FF3333',color:'#fff',height:30}} titleStyle={{fontSize:11}}  title={scooter.plate} onPress={()=>this.openRecord()}/>}
                   containerStyle={styles.header}
                 />
                 {this.state.show_loading &&(
@@ -170,6 +196,7 @@ export default class TirePump extends React.Component {
                     <Text style={{color:'#fff'}}>{show_msg}</Text>
                   </View>
                 )}
+                <ScooterTireRecord onRef={this.onRef} tire_record_option={tire_record_option} />
                 <ScrollView style={{width:'100%'}}>
                   <View style={{justifyContent:'center',alignItems: 'center'}}>
                     <View style={{width:'80%',justifyContent:'center'}}>
@@ -182,7 +209,7 @@ export default class TirePump extends React.Component {
                           <View style={{flexDirection:'row',marginTop:10,justifyContent:'space-around'}}>
                             <View style={{width:150,height:200}}>
                               {show_photo1 == null ?(
-                              <TouchableOpacity onPress={()=>this.takePhoto3()}>
+                              <TouchableOpacity onPress={()=>this.takePhoto1()}>
                                 <View style={[
                                   styles.avatar,
                                   styles.avatarContainer,
@@ -192,14 +219,14 @@ export default class TirePump extends React.Component {
                                 </View>
                               </TouchableOpacity>
                               ):(
-                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto3()}>
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto1()}>
                                   <Image source={{uri: show_photo1}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
                                 </TouchableOpacity>
                               )}
                             </View>
                             <View style={{width:150,height:200}}>
                               {show_photo2 == null ?(
-                              <TouchableOpacity onPress={()=>this.takePhoto4()}>
+                              <TouchableOpacity onPress={()=>this.takePhoto2()}>
                                 <View style={[
                                   styles.avatar,
                                   styles.avatarContainer,
@@ -209,7 +236,7 @@ export default class TirePump extends React.Component {
                                 </View>
                               </TouchableOpacity>
                               ):(
-                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto4()}>
+                                <TouchableOpacity style={{width:150,height:200}} onPress={()=>this.retakePhoto2()}>
                                   <Image source={{uri: show_photo2}} style={{flex: 1,width: null,height: null,resizeMode:'contain'}}/>
                                 </TouchableOpacity>
                               )}

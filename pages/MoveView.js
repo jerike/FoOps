@@ -87,6 +87,7 @@ export default class MoveView extends React.Component {
               transparent={false}
               visible={moveview_option.moveview_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>this.clearData()}
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#2F3345'}}>
                 <View style={{flexDirection:'row',justifyContent:'space-between'}}>

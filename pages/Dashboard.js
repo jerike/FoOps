@@ -24,10 +24,19 @@ export default class Dashboard extends React.Component {
     componentWillMount() {
         global.search = '';
         this.getStorage().done();
-        if (Platform.OS === 'android') {  
-            BackHandler.addEventListener('hardwareBackPress', this.onBackClicked);
-        } 
     }
+    componentDidMount(){
+      this.getStorage().done();
+      this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        this.props.navigation.goBack();
+        return true;
+      });
+    }
+    componentWillUnmount() {
+      this.backHandler.remove();
+    }
+
+
     componentWillUnmount() {
         if (Platform.OS === 'android') {
            BackHandler.removeEventListener('hardwareBackPress',()=>{});

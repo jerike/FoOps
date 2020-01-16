@@ -18,6 +18,9 @@ import WorkRecord from './pages/WorkRecord';
 import MoveRecord from './pages/MoveRecord';
 import TirePump from './pages/TirePump';
 import TireRecord from './pages/TireRecord';
+import BrokenTrack from './pages/BrokenTrack';
+import BrokenTrackRecord from './pages/BrokenTrackRecord';
+import MultipleController from './pages/MultipleController';
 
 // console.disableYellowBox = true;
 const { width, height } = Dimensions.get('screen');
@@ -102,6 +105,7 @@ const HomeStack=createStackNavigator(
     MoveScooter:{screen:MoveScooter},
     TirePump:{screen:TirePump},
     BrokenTrack:{screen:BrokenTrack},
+    BrokenTrackRecord:{screen:BrokenTrackRecord},
   },{
     headerMode:'none',
     defaultNavigationOptions: {
@@ -117,6 +121,7 @@ const MenuScreen=createDrawerNavigator(
     HomeStack:{screen:HomeStack,navigationOptions: {drawerLabel: <Hidden />}},
     Dashboard: {screen:Dashboard,navigationOptions: { title: '導航頁'}},
     TabNavigator:{screen:TabNavigator,navigationOptions: { title: '工作記錄'}},
+    MultipleController:{screen:MultipleController,navigationOptions: { title: '批次操作'}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}
 
   },{
