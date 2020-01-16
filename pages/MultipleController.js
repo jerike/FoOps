@@ -131,6 +131,10 @@ export default class MultipleController extends React.Component {
       }
     }
     submit(scooter_list){
+      if(admin.indexOf(global.user_givenName) == -1){
+          Alert.alert('系統訊息',"您沒有權限可以執行",[{text: 'ok',onPress:()=>{this.props.navigation.navigate('Home')}}]);
+          return false;
+      }
       this.setState({update_now:true});
       if(scooter_list.length == 0){
         Alert.alert('系統訊息',"無法取得車輛號碼",[{text: '我知道了'}]);
@@ -176,6 +180,10 @@ export default class MultipleController extends React.Component {
       }
     }
     reload(scooter_list){
+      if(admin.indexOf(global.user_givenName) == -1){
+          Alert.alert('系統訊息',"您沒有權限可以執行",[{text: 'ok',onPress:()=>{this.props.navigation.navigate('Home')}}]);
+          return false;
+      }
       this.setState({reload_now:true});
       if(scooter_list.length == 0){
         Alert.alert('系統訊息',"無法取得車輛號碼",[{text: '我知道了'}]);
@@ -251,9 +259,7 @@ export default class MultipleController extends React.Component {
     }
     render() {
         const {scooter,show_msg,idx} = this.state;
-        if(admin.indexOf(global.user_givenName) == -1){
-            Alert.alert('系統訊息',"您沒有權限進入！",[{text: 'ok',onPress:()=>{this.props.navigation.goBack()}}]);
-        }
+
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
