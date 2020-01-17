@@ -65,7 +65,12 @@ export default class Dashboard extends React.Component {
     fetch_scooters(){
         this.setState({load_data:true});
         var result = []
-        fetch(global.API+'/scooter',{
+        if(global.outsource == "true"){
+          var scooter_url = global.API+'/scooter/outsource';
+        }else{
+          var scooter_url = global.API+'/scooter';
+        }
+        fetch(scooter_url,{
           method: 'GET',
           credentials: 'include'
         })

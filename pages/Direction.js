@@ -57,12 +57,14 @@ export default class Direction extends React.Component {
         if(this.state.positionData != null){
           origin = this.state.positionData.latitude+","+this.state.positionData.longitude;
         }
+        console.warn(origin);
         return (
             <Modal
               animationType="slide"
               transparent={false}
               visible={direction_option.direction_modal}
               presentationStyle="fullScreen"
+              onRequestClose={()=>direction_option.onClose('direction_modal')}
               >
               <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
                   <View style={{  justifyContent: "flex-start", alignItems: "flex-end",marginRight:10 }}>
@@ -73,7 +75,7 @@ export default class Direction extends React.Component {
                   <WebView
                     onNavigationStateChange={this._onNavigationStateChange.bind(this)}
                     geolocationEnabled={true}
-                    source={{uri: 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+latlng+'&travelmode=two-wheeler'}}
+                    source={{uri: 'https://www.google.com/maps/dir/?api=1&destination='+latlng}}
                   />
                 </SafeAreaView>
             </Modal>

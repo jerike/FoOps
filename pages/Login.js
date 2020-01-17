@@ -56,12 +56,14 @@ export default class Login extends React.Component {
           global.scooter = global.scooters = JSON.parse(scooters);
           global.reload_time = await AsyncStorage.getItem('@FoOps:reload_time');
           global.last_get_time = await AsyncStorage.getItem('@FoOps:last_get_time');
-          // console.warn(global.scooter);
-          if(global.scooter ==undefined){
-            this.props.navigation.navigate('TimeOut');
-          }else{
-            this.props.navigation.navigate('Home');
-          }
+          global.outsource = await AsyncStorage.getItem('@FoOps:outsource');
+          console.warn(global.outsource);
+          this.props.navigation.navigate('Home');
+          // if(global.scooter ==undefined){
+          //   this.props.navigation.navigate('TimeOut');
+          // }else{
+          //   this.props.navigation.navigate('Home');
+          // }
         }else{
           // console.warn('show_login');
           this.setState({show_login:true},()=>this.ShowLogin());
@@ -111,13 +113,18 @@ export default class Login extends React.Component {
           if(data.Name == "OPERATOR"){
               var account = json.data.email;
               // 儲存資料
+              var Outsource = "false";
+              // if(account.toLowerCase().indexOf('jerike@onlyku.com') != -1){
+              //   Outsource = "true";
+              // }
+              global.outsource = Outsource;
               this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar});
               login = true;
           }
         }.bind(this));
 
         if(login){
-          this.get_scooter();
+          setTimeout(()=>{this.get_scooter()},50);
         }else{
           Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
           this.setState({show_loading:false});
@@ -134,7 +141,12 @@ export default class Login extends React.Component {
   }
   fetch_scooters(){
       var result = []
-      fetch(global.API+'/scooter',{
+      if(global.outsource == "true"){
+        var scooter_url = global.API+'/scooter/outsource';
+      }else{
+        var scooter_url = global.API+'/scooter';
+      }
+      fetch(scooter_url,{
         method: 'GET',
         credentials: 'include'
       })
@@ -146,11 +158,16 @@ export default class Login extends React.Component {
           }
       })
       .then((json) => {
-          global.scooters = json.data;
-          global.scooter = json.data;
-          var last_get_time = json.data[0]['last_get_time'];
+          var data = [];
+          var last_get_time = "";
+          if(json.data.length > 0){
+            data = json.data;
+            last_get_time = json.data[0]['last_get_time'];
+          } 
+          global.scooters = data;
+          global.scooter = data;
           global.last_get_time = last_get_time;
-          this.setState({scooter:json.data,show_loading:false,last_get_time:last_get_time},()=>{this.setStorage()});
+          this.setState({scooter:data,show_loading:false,last_get_time:last_get_time},()=>{this.setStorage()});
           Vibration.vibrate(500);
           this.props.navigation.navigate('Home');
           this.setState({show_loading:false});           
@@ -170,7 +187,8 @@ export default class Login extends React.Component {
         ['@FoOps:avatar', this.state.avatar],
         ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
         ['@FoOps:reload_time', global.reload_time],
-        ['@FoOps:last_get_time',this.state.last_get_time]
+        ['@FoOps:last_get_time',this.state.last_get_time],
+        ['@FoOps:outsource', global.outsource],
       ]);
       if(this.state.save_login){
         await AsyncStorage.multiSet([

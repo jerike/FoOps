@@ -180,7 +180,12 @@ export default class Home extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter',{
+        if(global.outsource == "true"){
+          var scooter_url = global.API+'/scooter/outsource';
+        }else{
+          var scooter_url = global.API+'/scooter';
+        }
+        fetch(scooter_url,{
           method: 'GET',
           credentials: 'include'
         })
@@ -192,12 +197,15 @@ export default class Home extends React.Component {
             }
         })
         .then((json) => {
-          if(json.data.length == 0){
-            this.props.navigation.navigate('TimeOut');
-          }else{
-            global.last_get_time =  json.data[0]['last_get_time'];
-            this.set_scooter_data(json.data);            
-          }
+            var data = [];
+            var last_get_time = "";
+            if(json.data.length > 0){
+                data = json.data;
+                last_get_time = json.data[0]['last_get_time'];
+            } 
+            global.last_get_time = last_get_time;
+            this.set_scooter_data(data);
+
         }).then(() => {
           this.setState({refreshing: false});
         });

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS,ScrollView,ActivityIndicator,BackHandler } from 'react-native';
+import {  Text,View,FlatList,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActionSheetIOS,ScrollView,ActivityIndicator,BackHandler,Linking } from 'react-native';
 import { createDrawerNavigator, createAppContainer,NavigationActions } from 'react-navigation';
 import { Card, ListItem,Header, Button,Image,SearchBar,ButtonGroup,Badge,Input,Divider } from 'react-native-elements'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -247,8 +247,10 @@ export default class ScooterDetail extends React.Component {
       this.showModal('violation_modal');
     }
     showDirection(){
-      // console.warn('open direction');
-      this.showModal('direction_modal');
+      const latLng = `${this.state.scooter.location.lat},${this.state.scooter.location.lng}`;
+      console.warn(latLng);
+      url = "geo:0,0?q="+latLng;
+      Linking.openURL(url).catch((err) => console.error('找不到 google map App', err));
     }
     showActionTools(){
       this.showModal('action_tools_modal');
@@ -618,6 +620,7 @@ export default class ScooterDetail extends React.Component {
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.back2page()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>返回</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
+              rightComponent={<TouchableHighlight onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#fff" onPress={()=>this.showDirection()} /></TouchableHighlight>}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>

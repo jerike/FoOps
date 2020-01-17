@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text,Alert, View,ScrollView,SafeAreaView,StyleSheet,Image,Modal,BackHandler,Platform,TouchableWithoutFeedback,ActivityIndicator,PermissionsAndroid,Animated } from 'react-native';
+import { Text,Alert, View,ScrollView,SafeAreaView,StyleSheet,Image,Modal,BackHandler,Platform,TouchableWithoutFeedback,ActivityIndicator,PermissionsAndroid,Animated,Linking } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Card, ListItem,Header, Button,SearchBar,ButtonGroup,Avatar } from 'react-native-elements'
@@ -16,6 +16,7 @@ import '../global.js';
 import isEqual from 'lodash.isequal'
 import AndroidOpenSettings from 'react-native-android-open-settings'
 import ActionSheet from 'react-native-action-sheet';
+import Direction from './Direction'
 
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
@@ -52,11 +53,15 @@ export default class MapScreen extends React.Component {
         no_change_center:false,
         marginBottom:1,
         show_user_location:false,
-        geofence:[]
+        geofence:[],
+        select_scooter:{},
+        direction_modal:false
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.setModalVisible=this.setModalVisible.bind(this);
       this.onClear=this.onClear.bind(this);
+      this.showModal=this.showModal.bind(this);
+      this.onClose=this.onClose.bind(this);
       this.reload_all_scooter=this.reload_all_scooter.bind(this);
       this.fetch_scooters=this.fetch_scooters.bind(this);
       this.filter_scooter=this.filter_scooter.bind(this);
@@ -234,7 +239,12 @@ export default class MapScreen extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        fetch(global.API+'/scooter',{
+        if(global.outsource == "true"){
+          var scooter_url = global.API+'/scooter/outsource';
+        }else{
+          var scooter_url = global.API+'/scooter';
+        }
+        fetch(scooter_url,{
           method: 'GET',
           credentials: 'include'
         })
@@ -246,15 +256,17 @@ export default class MapScreen extends React.Component {
             }
         })
         .then((json) => {
-          if(json.data.length == 0){
-            this.props.navigation.navigate('TimeOut');
-          }else{
-             global.scooters = json.data;
-            // global.scooter = json.data;
-            global.last_get_time =  json.data[0]['last_get_time'];
-            this.setStorage(json.data);
-            this.after_reload_scooter(json.data);
-          }
+          var data = [];
+          var last_get_time = "";
+          if(json.data.length > 0){
+            data = json.data;
+            last_get_time = json.data[0]['last_get_time'];
+          } 
+          global.scooters = data;
+          // global.scooter = json.data;
+          global.last_get_time =  last_get_time;
+          this.setStorage(data);
+          this.after_reload_scooter(data);
         });
     }
     after_reload_scooter(data){
@@ -340,10 +352,11 @@ export default class MapScreen extends React.Component {
         promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
       
     }
-    showController(id){
+    showController(scooter){
       var BUTTONS = [
         '📋 瀏覽車輛資料',
         '🔊 響鈴',
+        '📍 導航',
         '❌ 取消',
       ];
 
@@ -360,10 +373,13 @@ export default class MapScreen extends React.Component {
       (buttonIndex) => {
         switch(buttonIndex){
           case 0:
-            this.openDetail(id);
+            this.openDetail(scooter.id);
           break;
           case 1:
-            this.controller(id,'whistle');
+            this.controller(scooter.id,'whistle');
+          break;
+          case 2:
+            this.setState({select_scooter:scooter},()=>{this.showDirection()});
           break;
         }
       });
@@ -422,6 +438,22 @@ export default class MapScreen extends React.Component {
     chg_location(){
       this.setState({setCenter:{latitude: 22.622673,longitude: 120.300267,latitudeDelta:0.005,longitudeDelta: 0.005}});
     }
+    showDirection(){
+      const latLng = `${this.state.select_scooter.location.lat},${this.state.select_scooter.location.lng}`;
+      console.warn(latLng);
+      url = "geo:0,0?q="+latLng;
+      Linking.openURL(url).catch((err) => console.error('找不到 google map App', err));
+    }
+    showModal(key){
+        this.setState({
+          [key]: true,
+        });
+    }
+    onClose(key){
+        this.setState({
+          [key]: false,
+        });
+    }
     render() {
         const {selectedIndex,toSearch,clickMarker,scooter,geofence,changed,show_user_location,show_loading,all_work_area,show_msg} = this.state;
         // var scooter = [];
@@ -432,7 +464,11 @@ export default class MapScreen extends React.Component {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="list" style={{marginRight:10}} /><Text>列表</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-
+        const direction_option={
+          onClose:this.onClose,
+          direction_modal:this.state.direction_modal,
+          scooter:this.state.select_scooter,
+        }
         
         mapStyle = [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#6195a0"}]},{"featureType":"landscape","stylers":[{"color":"#e0dcdc"},{"visibility":"simplified"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","elementType":"labels","stylers":[{"lightness":"60"},{"gamma":"1"},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#e6f3d6"},{"visibility":"on"}]},{"featureType":"road","stylers":[{"saturation":-100},{"lightness":"65"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f4f4f4"},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#787878"}]},{"featureType":"road.highway","stylers":[{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#f4d2c5"},{"visibility":"simplified"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#f4d2c5"},{"visibility":"on"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"color":"#4e4e4e"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#fdfafa"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#fdfafa"},{"visibility":"on"}]},{"featureType":"transit.station.rail","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.icon","stylers":[{"hue":"#1b00ff"},{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"transit.station.rail","elementType":"labels.text.stroke","stylers":[{"visibility":"on"}]},{"featureType":"water","stylers":[{"color":"#eaf6f8"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#eaf6f8"}]}];
 
@@ -535,6 +571,7 @@ export default class MapScreen extends React.Component {
               containerStyle={styles.header}
             />
               <Filter filter_option={filter_option} onRefilter={this.onRefilter}/>
+              <Direction direction_option={direction_option} />
               <ButtonGroup
                 onPress={this.updateIndex}
                 selectedIndex={selectedIndex}
@@ -587,7 +624,7 @@ export default class MapScreen extends React.Component {
                 {scooterG.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}  pinColor="green"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {this.showController(m.id); }}>
+                        <Callout onPress={() => {this.showController(m); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
@@ -599,7 +636,7 @@ export default class MapScreen extends React.Component {
                 {scooterO.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}   pinColor="orange"  onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {this.showController(m.id); }}>
+                        <Callout onPress={() => {this.showController(m); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>
@@ -611,7 +648,7 @@ export default class MapScreen extends React.Component {
                 {scooterW.map(m => (
                     <MapView.Marker key={"marker_"+m.id} tracksViewChanges={false}   coordinate={{latitude:parseFloat(m.location.lat),longitude:parseFloat(m.location.lng),latitudeDelta: 0.01,longitudeDelta: 0.01}}
                     {...this.props}  pinColor="red"   onPress={(e) => {e.stopPropagation();}} >
-                        <Callout onPress={() => {this.showController(m.id); }}>
+                        <Callout onPress={() => {this.showController(m); }}>
                           <View style={{padding:10,width:120}}>
                             <Text>{m.plate}</Text>
                             <Text>電量：{m.power}%</Text>

@@ -119,7 +119,6 @@ const MenuScreen=createDrawerNavigator(
     Home: {screen:Home,path:'app/home',navigationOptions: {drawerLabel: <Hidden />}},
     Map:{screen: MapScreen,navigationOptions: {drawerLabel: <Hidden />}},
     HomeStack:{screen:HomeStack,navigationOptions: {drawerLabel: <Hidden />}},
-    Dashboard: {screen:Dashboard,navigationOptions: { title: '導航頁'}},
     TabNavigator:{screen:TabNavigator,navigationOptions: { title: '工作記錄'}},
     MultipleController:{screen:MultipleController,navigationOptions: { title: '批次操作'}},
     Logout:{screen: Logout,navigationOptions: { title: '登 出'}}

@@ -7,7 +7,7 @@ import '../global.js';
 import ActionSheet from 'react-native-action-sheet';
 import shallowCompare from 'react-addons-shallow-compare';
 import {SingleImage} from 'react-native-zoom-lightbox';
-let admin = ['huang','wlee'];
+let admin = ['huang','wlee','jerike'];
 export default class MultipleController extends React.Component {
     constructor(props) {
         super(props);
@@ -131,7 +131,7 @@ export default class MultipleController extends React.Component {
       }
     }
     submit(scooter_list){
-      if(admin.indexOf(global.user_givenName) == -1){
+      if(admin.indexOf(global.user_givenName.toLowerCase()) == -1){
           Alert.alert('系統訊息',"您沒有權限可以執行",[{text: 'ok',onPress:()=>{this.props.navigation.navigate('Home')}}]);
           return false;
       }
@@ -180,7 +180,7 @@ export default class MultipleController extends React.Component {
       }
     }
     reload(scooter_list){
-      if(admin.indexOf(global.user_givenName) == -1){
+      if(admin.indexOf(global.user_givenName.toLowerCase()) == -1){
           Alert.alert('系統訊息',"您沒有權限可以執行",[{text: 'ok',onPress:()=>{this.props.navigation.navigate('Home')}}]);
           return false;
       }
