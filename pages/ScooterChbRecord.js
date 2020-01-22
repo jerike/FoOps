@@ -40,7 +40,6 @@ export default class ScooterChbRecord extends React.Component {
           return response.json();
       })
       .then((json) => {
-        console.warn(json);
           if(json.data.length == 0){
             this.setState({list:[],show_loading:false});
           }else{

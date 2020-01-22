@@ -57,7 +57,6 @@ export default class Direction extends React.Component {
         if(this.state.positionData != null){
           origin = this.state.positionData.latitude+","+this.state.positionData.longitude;
         }
-        console.warn(origin);
         return (
             <Modal
               animationType="slide"

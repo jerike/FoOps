@@ -83,7 +83,6 @@ export default class TirePump extends React.Component {
             return response.json();
       })
       .then((json) => {
-        console.warn(json);
         if(json.code == 1){
           this.setState({pumpup:true});
         }

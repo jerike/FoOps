@@ -259,7 +259,6 @@ export default class MultipleController extends React.Component {
     }
     render() {
         const {scooter,show_msg,idx} = this.state;
-
         return (
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header

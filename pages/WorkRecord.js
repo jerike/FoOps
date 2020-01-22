@@ -39,7 +39,6 @@ export default class WorkRecord extends React.Component {
         credentials: 'include'
       })
       .then((response) => {
-        console.warn(response);
             return response.json();
       })
       .then((json) => {

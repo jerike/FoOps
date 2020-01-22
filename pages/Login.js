@@ -57,7 +57,6 @@ export default class Login extends React.Component {
           global.reload_time = await AsyncStorage.getItem('@FoOps:reload_time');
           global.last_get_time = await AsyncStorage.getItem('@FoOps:last_get_time');
           global.outsource = await AsyncStorage.getItem('@FoOps:outsource');
-          console.warn(global.outsource);
           this.props.navigation.navigate('Home');
           // if(global.scooter ==undefined){
           //   this.props.navigation.navigate('TimeOut');
@@ -114,9 +113,9 @@ export default class Login extends React.Component {
               var account = json.data.email;
               // 儲存資料
               var Outsource = "false";
-              // if(account.toLowerCase().indexOf('jerike@onlyku.com') != -1){
-              //   Outsource = "true";
-              // }
+              if(account.toLowerCase().indexOf('@24tms.com.tw') != -1){
+                Outsource = "true";
+              }
               global.outsource = Outsource;
               this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar});
               login = true;
@@ -229,9 +228,9 @@ export default class Login extends React.Component {
                                       outputRange: [150, 0]
                                     }),
                                   }],}} >
-           
                 <TextInput
                   style={styles.input}
+                  keyboardType={'email-address'}
                   onChangeText={(text) => this.setState({email:text})}
                   value={this.state.email}
                   placeholder='帳號'

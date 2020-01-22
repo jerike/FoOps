@@ -440,7 +440,6 @@ export default class MapScreen extends React.Component {
     }
     showDirection(){
       const latLng = `${this.state.select_scooter.location.lat},${this.state.select_scooter.location.lng}`;
-      console.warn(latLng);
       url = "geo:0,0?q="+latLng;
       Linking.openURL(url).catch((err) => console.error('找不到 google map App', err));
     }
@@ -476,8 +475,8 @@ export default class MapScreen extends React.Component {
 
         var setPolyPath=[];
         if(set_polygon){
-            var fence = [];
             if(geofence != undefined){
+              var fence = [];
               geofence.map(function(value,index){
                   if(value.promotion > 0){
                     return;
@@ -486,12 +485,15 @@ export default class MapScreen extends React.Component {
                   value.zone.map(function(v,i){
                     fence[index].push({latitude:parseFloat(v[1]),longitude: parseFloat(v[0])});
                   });
-                  setPolyPath.push(fence[index]);
+                  if(fence[index].length > 0){
+                    setPolyPath.push(fence[index]);
+                  }
               });
             }
+            var work_areas = [];
             var work_area_color1 = ['rgba(255,255,119,0.6)','rgba(204,238,255,0.6)','rgba(255,204,204,0.6)','rgba(204,204,255,0.6)','rgba(119,255,204,0.6)','rgba(238,119,0,0.6)'];
             var work_area_color2 = ['rgba(255,255,119,0.2)','rgba(204,238,255,0.2)','rgba(255,204,204,0.2)','rgba(204,204,255,0.2)','rgba(119,255,204,0.2)','rgba(238,119,0,0.2)'];
-            var work_areas = all_work_area.map(function(value,index){
+            work_areas = all_work_area.map(function(value,index){
               // console.log(index);
               if(Array.isArray(value[0])){
                 return value.map(function(m,i){
@@ -526,7 +528,7 @@ export default class MapScreen extends React.Component {
             
             
         }
-
+        console.warn(setPolyPath);
 
         var filter_option = {
             modalVisible:this.state.modalVisible,

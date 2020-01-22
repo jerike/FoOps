@@ -52,13 +52,11 @@ export default class BrokenTrackRecord extends React.Component {
     getRecord(){
       this.setState({show_loading:true});
       var sid = this.state.scooter.id;
-      console.warn(global.API+'/scooter/'+sid+'/track/broken');
       fetch(global.API+'/scooter/'+sid+'/track/broken',{
         method: 'GET',
         credentials: 'include'
       })
       .then((response) => {
-        console.warn(response);
             return response.json();
       })
       .then((json) => {

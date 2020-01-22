@@ -83,7 +83,6 @@ export default class Filter extends React.Component {
       })
       .then((response) => response.json())
       .then((json)=>{
-          console.warn('取得 Lables');
           var data = [];
           json.data.map(function(m,i){
             data.push(m[0]);
@@ -469,7 +468,6 @@ export default class Filter extends React.Component {
             await this.filter_scooter_for_only_change_power();
             await delay(5);
             await new Promise((resolve,reject)=>{
-                console.warn('filter End');
                 this.setState({show_loading:false});
                 this.props.filter_option.filter_scooter(this.state.scooter);
             });

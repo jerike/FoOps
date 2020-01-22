@@ -99,7 +99,6 @@ export default class Home extends React.Component {
       this.modalFilter = e
     }
     _onBackClicked(){
-        console.warn('back');
         return true;
     }
     getScooterStorage = async () => {

@@ -36,7 +36,6 @@ export default class MoveRecord extends React.Component {
         credentials: 'include'
       })
       .then((response) => {
-        console.warn(response);
             return response.json();
       })
       .then((json) => {

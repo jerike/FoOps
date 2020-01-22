@@ -248,7 +248,6 @@ export default class ScooterDetail extends React.Component {
     }
     showDirection(){
       const latLng = `${this.state.scooter.location.lat},${this.state.scooter.location.lng}`;
-      console.warn(latLng);
       url = "geo:0,0?q="+latLng;
       Linking.openURL(url).catch((err) => console.error('找不到 google map App', err));
     }
@@ -614,13 +613,18 @@ export default class ScooterDetail extends React.Component {
 
         var no_rental_days = (scooter.range_days != undefined) ? scooter.range_days+"天" : "...";
         var labels = (scooter.labels != undefined) ? scooter.labels.join(",") : "";
+        var right_menu = "";
+        if(global.outsource == "false"){
+          right_menu = <TouchableHighlight onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#fff" onPress={()=>this.showDirection()} /></TouchableHighlight>;
+        }
+
         return (
         <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.back2page()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>返回</Text></View></TouchableHighlight>}
               containerStyle={styles.header}
-              rightComponent={<TouchableHighlight onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#fff" onPress={()=>this.showDirection()} /></TouchableHighlight>}
+              rightComponent={right_menu}
             />
             {this.state.show_loading &&(
               <View style={styles.loading}>
@@ -736,18 +740,21 @@ export default class ScooterDetail extends React.Component {
                 )}
 
             </ScrollView>
-              <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
-
-                
-                <Button  key={"btn_1"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
-                <Button  key={"btn_2"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()}/>
-                
-                <Button  key={"btn_3"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
-                <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
-                <Button  key={"btn_5"} icon={<Icon name="bars" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showActionTools()} />
-                
-
-              </View>
+              {global.outsource == "false" ? (
+                <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
+                  <Button  key={"btn_1"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
+                  <Button  key={"btn_2"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()}/>
+                  <Button  key={"btn_3"} icon={<Icon name="camera" size={50} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0,borderRadius:50}} raised={true} onPress={()=>this.showViolation()} />
+                  <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                  <Button  key={"btn_5"} icon={<Icon name="bars" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showActionTools()} />
+                </View>
+              ):(
+                <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
+                  <Button  key={"btn_1"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
+                  <Button  key={"btn_4"} icon={<Icon name="tools" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showMaintain()} />
+                  <Button  key={"btn_5"} icon={<Icon name="directions" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showDirection()} />
+                </View>
+              )} 
         </SafeAreaView>
          
         );
