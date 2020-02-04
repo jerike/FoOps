@@ -239,10 +239,16 @@ export default class MapScreen extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        if(global.outsource == "true"){
-          var scooter_url = global.API+'/scooter/outsource';
-        }else{
-          var scooter_url = global.API+'/scooter';
+        switch(global.outsource){
+          case 2:
+            var scooter_url = global.API+'/scooter/outsource?team=2';
+          break;
+          case 3:
+            var scooter_url = global.API+'/scooter/outsource?team=3';
+          break;
+          default:
+            var scooter_url = global.API+'/scooter';
+          break;
         }
         fetch(scooter_url,{
           method: 'GET',
@@ -551,7 +557,7 @@ export default class MapScreen extends React.Component {
             }
             
         });
-
+        var count = scooter.length;
         return (
         <SafeAreaView style={{flex: 1,justifyContent:'center', backgroundColor: '#ff5722'}}>
             <Header
@@ -678,9 +684,11 @@ export default class MapScreen extends React.Component {
 
             
 
-             <View style={{position:'absolute',left:0,bottom:0,width:'100%',padding:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
-                <View style={{flexDirection: 'column',justifyContent:'center',alignItems:'center'}}>
+             <View style={{position:'absolute',left:0,bottom:0,width:'100%',paddingLeft:40,paddingTop:2,paddingBottom:2,backgroundColor:'rgba(0,0,0,0.6)'}}>
+                <View style={{flexDirection: 'row',justifyContent:'space-around',alignItems:'center'}}>
                   <Text style={{fontSize:11,color:'#fff'}}>最後更新時間：{global.last_get_time}</Text>
+                  <Text style={{fontSize:11,color:'#fff'}}>數量：{count}</Text>
+                  
                 </View>
              </View>
         </SafeAreaView>

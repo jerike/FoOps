@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActivityIndicator } from 'react-native';
+import { Text,TextInput, View,ScrollView,SafeAreaView,StyleSheet,Modal,TouchableHighlight,Platform,Alert,ActivityIndicator } from 'react-native';
 import { createDrawerNavigator, createAppContainer } from 'react-navigation';
 import { Card, ListItem,Header,Input, Button,Image,SearchBar,ButtonGroup,CheckBox } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -39,18 +39,17 @@ export default class Maintenance extends React.Component {
     }
     get_data(){
         SCooter_ticket = this.props.maintain_option.scooter.ticket;
-        // console.warn(this.props.maintain_option.scooter);
+        
         if(SCooter_ticket != undefined){
           other_conditions = SCooter_ticket.other_conditions;
           sel_condition = SCooter_ticket.scooter_conditions;
-
           this.setState({sel_condition:sel_condition,other_conditions:other_conditions})
         }
     }
     onChangeOther(key,value){
-      var other_summaries = this.state.other_summaries;
-      other_summaries[key] = value;
-      this.setState({other_summaries:other_summaries});
+      var other_conditions = this.state.other_conditions;
+      other_conditions.push({id:key,summary:value});
+      this.setState({other_conditions:other_conditions});
     }
     updateCondition(id){
         this.setState({show_loading:true});
@@ -71,15 +70,14 @@ export default class Maintenance extends React.Component {
         sel_condition && sel_condition.map(function(m,i){
             formData.append("scooter_status[]", m);
         });
-        var other_summaries = this.state.other_summaries;
-        other_summaries && other_summaries.map(function(m,i){
-            if(m != null){
-              formData.append("other_summary_id[]", i);
-              formData.append("other_summary_value[]", m);
-            }
+        var other_conditions = this.state.other_conditions;
+        other_conditions && other_conditions.map(function(m,i){
+              formData.append("other_summary_id[]", m.id);
+              formData.append("other_summary_value[]", m.summary);
         });
-        // console.log(formData);
-
+        // console.warn(formData);
+        // this.setState({show_loading:false});
+        // return false;
         fetch(API+'/ticket',{
             method: 'POST',
             mode: 'cors',
@@ -88,9 +86,9 @@ export default class Maintenance extends React.Component {
         })
         .then((response) => response.json())
         .then((json) => {
-          console.log(json);
           if(json.code == 1){
             this.props.maintain_option.onClose('maintain_modal');
+            this.props.maintain_option.fetch_scooters();
             // this.props.maintain_option.newScooter(id);
             this.setState({show_loading:false});
           }else{
@@ -162,7 +160,7 @@ export default class Maintenance extends React.Component {
                   }
               });
             }
-            other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onChangeText={(text) => onChangeOther(m.id,text)} inputStyle={{fontSize:13,height:15}} />
+            other_input = <Input type="text" defaultValue={summary} leftIcon={<Icon name='edit' size={13} color='#999' />} placeholder="請輸入原因" name={"other_summary_"+m.id}  containerStyle={{width:200}}  inputContainerStyle={{height:30}}   onEndEditing={(e) => onChangeOther(m.id,e.nativeEvent.text)} inputStyle={{fontSize:13,height:15}} />
           }
           var checked = false;
           if(sel_condition != undefined){

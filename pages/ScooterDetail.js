@@ -47,6 +47,8 @@ export default class ScooterDetail extends React.Component {
       this.showModal=this.showModal.bind(this);
       this.onClose=this.onClose.bind(this);
       this.getStorage=this.getStorage.bind(this);
+      this.fetch_scooters=this.fetch_scooters.bind(this);
+      this.set_scooter_data=this.set_scooter_data.bind(this);
       this.onPressTask=this.onPressTask.bind(this);
       this.removeRemark=this.removeRemark.bind(this);
       this.confirm_controller=this.confirm_controller.bind(this);
@@ -82,6 +84,9 @@ export default class ScooterDetail extends React.Component {
 
     back2page(){
       var backpage = (global.page != undefined) ? global.page : "Home" ;
+      if(this.props.navigation.state.params != undefined && this.props.navigation.state.params.show_scooter != undefined){
+          this.props.navigation.state.params.show_scooter();
+      }
       this.props.navigation.navigate(backpage);
       this.props.navigation.navigate(backpage,{
           newScooter: this.newScooter,
@@ -94,6 +99,16 @@ export default class ScooterDetail extends React.Component {
             global.task = task;
             this.setState({task:task});
           }
+        } catch (error) {
+          console.warn(error);
+        }
+    }
+    setScooterStorage = async () => {
+        try {
+          await AsyncStorage.multiSet([
+            ['@FoOps:scooters', JSON.stringify(global.scooter)],
+            ['@FoOps:last_get_time',global.scooter[0].last_get_time]
+          ]);
         } catch (error) {
           console.warn(error);
         }
@@ -230,8 +245,54 @@ export default class ScooterDetail extends React.Component {
     onClose(key){
         this.setState({
           [key]: false,
-        },()=>{this.newScooter(this.state.sid)});
+        },()=>{this.newScooter(this.state.sid);});
     }
+    fetch_scooters(){
+        var result = []
+        switch(global.outsource){
+          case 2:
+            var scooter_url = global.API+'/scooter/outsource?team=2';
+          break;
+          case 3:
+            var scooter_url = global.API+'/scooter/outsource?team=3';
+          break;
+          default:
+            var scooter_url = global.API+'/scooter';
+          break;
+        }
+        fetch(scooter_url,{
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then((response) => {
+          return response.json();
+        })
+        .then((json) => {
+            console.warn('fetch scooters');
+            var data = [];
+            var last_get_time = "";
+            if(json.data.length > 0){
+                data = json.data;
+                last_get_time = json.data[0]['last_get_time'];
+            } 
+            global.last_get_time = last_get_time;
+            this.set_scooter_data(data);
+
+        });
+    }
+    set_scooter_data(all_scooters){
+        var reload_time = this.get_timestamp();
+        global.reload_time = reload_time;
+        global.scooters = all_scooters;
+        global.scooter = all_scooters;
+        this.setScooterStorage();
+    }
+    get_timestamp(){
+        var theTime = new Date();
+        var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
+        return reload_time;
+    }
+
     showMaintain(){
       if(this.state.scooter.ticket != undefined){
           const scooter_conditions = this.state.scooter.ticket.scooter_conditions;
@@ -545,7 +606,8 @@ export default class ScooterDetail extends React.Component {
           onClose:this.onClose,
           maintain_modal:this.state.maintain_modal,
           scooter:this.state.scooter,
-          newScooter:this.newScooter
+          newScooter:this.newScooter,
+          fetch_scooters:this.fetch_scooters,
         }
         const fastrecord_option={
           onClose:this.onClose,
@@ -614,7 +676,7 @@ export default class ScooterDetail extends React.Component {
         var no_rental_days = (scooter.range_days != undefined) ? scooter.range_days+"天" : "...";
         var labels = (scooter.labels != undefined) ? scooter.labels.join(",") : "";
         var right_menu = "";
-        if(global.outsource == "false"){
+        if(global.outsource === 0){
           right_menu = <TouchableHighlight onPress={()=>this.showDirection()}><Icon name="directions" size={25} color="#fff" onPress={()=>this.showDirection()} /></TouchableHighlight>;
         }
 
@@ -740,7 +802,7 @@ export default class ScooterDetail extends React.Component {
                 )}
 
             </ScrollView>
-              {global.outsource == "false" ? (
+              {global.outsource === 0 ? (
                 <View style={{width:'100%',position:'absolute',bottom:0,flexDirection:'row',backgroundColor:'#fff',borderTopWidth:1,borderTopColor:'#ccc',paddingTop:10,paddingBottom:10,paddingLeft:20,paddingRight:20,justifyContent:'space-between',alignItems: "center"}}>
                   <Button  key={"btn_1"} icon={<Icon name="motorcycle" size={25} color="#6A7684"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showController()}/>
                   <Button  key={"btn_2"} icon={<Icon name="fighter-jet" size={25} color="#6A7684"  />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>this.showFastRecord()}/>

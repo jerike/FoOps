@@ -56,7 +56,8 @@ export default class Login extends React.Component {
           global.scooter = global.scooters = JSON.parse(scooters);
           global.reload_time = await AsyncStorage.getItem('@FoOps:reload_time');
           global.last_get_time = await AsyncStorage.getItem('@FoOps:last_get_time');
-          global.outsource = await AsyncStorage.getItem('@FoOps:outsource');
+          var outsource = await AsyncStorage.getItem('@FoOps:outsource');
+          global.outsource = parseInt(outsource);
           this.props.navigation.navigate('Home');
           // if(global.scooter ==undefined){
           //   this.props.navigation.navigate('TimeOut');
@@ -112,9 +113,12 @@ export default class Login extends React.Component {
           if(data.Name == "OPERATOR"){
               var account = json.data.email;
               // 儲存資料
-              var Outsource = "false";
+              var Outsource = 0;
               if(account.toLowerCase().indexOf('@24tms.com.tw') != -1){
-                Outsource = "true";
+                Outsource = 2;
+              }
+              if(json.data.id == 58495 || json.data.id == 24973 ){
+                Outsource = 3;
               }
               global.outsource = Outsource;
               this.setState({user_id:json.data.id,user_email:json.data.email,user_givenName:account.split('@')[0],token:json.token,avatar:json.data.avatar});
@@ -140,10 +144,16 @@ export default class Login extends React.Component {
   }
   fetch_scooters(){
       var result = []
-      if(global.outsource == "true"){
-        var scooter_url = global.API+'/scooter/outsource';
-      }else{
-        var scooter_url = global.API+'/scooter';
+      switch(global.outsource){
+        case 2:
+          var scooter_url = global.API+'/scooter/outsource?team=2';
+        break;
+        case 3:
+          var scooter_url = global.API+'/scooter/outsource?team=3';
+        break;
+        default:
+          var scooter_url = global.API+'/scooter';
+        break;
       }
       fetch(scooter_url,{
         method: 'GET',
@@ -187,7 +197,7 @@ export default class Login extends React.Component {
         ['@FoOps:scooters', JSON.stringify(this.state.scooter)],
         ['@FoOps:reload_time', global.reload_time],
         ['@FoOps:last_get_time',this.state.last_get_time],
-        ['@FoOps:outsource', global.outsource],
+        ['@FoOps:outsource', String(global.outsource)],
       ]);
       if(this.state.save_login){
         await AsyncStorage.multiSet([

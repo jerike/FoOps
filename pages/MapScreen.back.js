@@ -172,11 +172,18 @@ export default class MapScreen extends React.Component {
     }
     fetch_scooters(){
         var result = []
-        if(global.outsource == "true"){
-          var scooter_url = global.API+'/scooter/outsource';
-        }else{
-          var scooter_url = global.API+'/scooter';
+        switch(global.outsource){
+          case 2:
+            var scooter_url = global.API+'/scooter/outsource?team=2';
+          break;
+          case 3:
+            var scooter_url = global.API+'/scooter/outsource?team=3';
+          break;
+          default:
+            var scooter_url = global.API+'/scooter';
+          break;
         }
+      
         fetch(scooter_url,{
           method: 'GET',
           credentials: 'include'
