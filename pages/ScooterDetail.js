@@ -383,19 +383,21 @@ export default class ScooterDetail extends React.Component {
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
-      var request_option = '/scooter/'+this.state.scooter.id+'/status?type='+type;
+
+      // var request_option = '/scooter/'+this.state.scooter.id+'/status?type='+type;
+      // var method = "PUT";
+      // if(type == "MAINTENANCE" || type == "FREE"){
+      //   request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type;
+      //   method = "PATCH";  
+      // }
+
+      var request_option = '/scooter/'+this.state.scooter.id+'/type?from=FoOps';
       var method = "PUT";
       if(type == "MAINTENANCE" || type == "FREE"){
-        request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type;
-        method = "PATCH";  
+        request_option = '/scooter/'+this.state.scooter.id+'/status?from=FoOps';
       }
-
-      // var request_option = '/scooter/'+this.state.scooter.id+'/type';
-      // if(type == "MAINTENANCE" || type == "FREE"){
-      //   request_option = '/scooter/'+this.state.scooter.id+'/status';
-      // }
-      // fetch(global.API+request_option,{
-      fetch(global.ServiceAPI+request_option,{
+      fetch(global.API+request_option,{
+      // fetch(global.ServiceAPI+request_option,{
         method: method,
         credentials: 'include',
         body: formData
