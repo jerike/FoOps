@@ -345,36 +345,46 @@ export default class ScooterDetail extends React.Component {
       (buttonIndex) => {
         switch(buttonIndex){
           case 0:
-            this.confirm_controller(button_status,BUTTONS[buttonIndex]);
+            this.confirm_controller(button_status);
           break;
           case 1:
-            this.confirm_controller('unlock',BUTTONS[buttonIndex]);
+            this.controller('unlock');
+            // this.confirm_controller('unlock',BUTTONS[buttonIndex]);
           break;
           case 2:
-            this.confirm_controller('lock',BUTTONS[buttonIndex]);
+            this.controller('lock');
+            // this.confirm_controller('lock',BUTTONS[buttonIndex]);
           break;
           case 3:
-            this.confirm_controller('trunk',BUTTONS[buttonIndex]);
+            this.controller('trunk');
+            // this.confirm_controller('trunk',BUTTONS[buttonIndex]);
           break;
           case 4:
-            this.confirm_controller('whistle',BUTTONS[buttonIndex]);
+            this.controller('whistle');
+            // this.confirm_controller('whistle',BUTTONS[buttonIndex]);
           break;
         }
       });
       
       // this.showModal('controller_modal');
     }
-    confirm_controller(type,msg){
-      this.controller(type);
-      // Alert.alert(
-      //   '🤔 三思而後行',
-      //   '確定執行【'+msg+'】?',
-      //   [
-      //     {text: 'Yes', onPress: () => this.controller(type)},
-      //     {text: 'No'},
-      //   ],
-      //   {cancelable: false},
-      // );
+    confirm_controller(type){
+      var msg = "";
+      if(type=="MAINTENANCE"){
+        msg = "確定要將車輛下線(維護)?";
+      }else{
+        msg = "確定要將車輛上線(營運)?";
+      }
+      // this.controller(type);
+      Alert.alert(
+        '系統訊息',
+        msg,
+        [
+          {text: 'Yes', onPress: () => this.controller(type)},
+          {text: 'No'},
+        ],
+        {cancelable: false},
+      );
     }
 
 
@@ -389,12 +399,6 @@ export default class ScooterDetail extends React.Component {
         request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type;
         method = "PATCH";  
       }
-
-      // var request_option = '/scooter/'+this.state.scooter.id+'/type';
-      // if(type == "MAINTENANCE" || type == "FREE"){
-      //   request_option = '/scooter/'+this.state.scooter.id+'/status';
-      // }
-      // fetch(global.API+request_option,{
       fetch(global.ServiceAPI+request_option,{
         method: method,
         credentials: 'include',
