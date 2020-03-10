@@ -90,7 +90,7 @@ export default class FastRecord extends React.Component {
             }
         });
 
-        fetch(API+'/ticket/addworkrecord',{
+        fetch(global.API+'/ticket/addworkrecord',{
             method: 'POST',
             mode: 'cors',
             body: formData,
@@ -118,7 +118,7 @@ export default class FastRecord extends React.Component {
           other_conditions = SCooter_ticket.other_conditions;
           scooter_conditions = SCooter_ticket.scooter_conditions;
         }
-        var fase_conditions = [604,607,608,614,615,616,617,618,619,622,623]
+        var fase_conditions = [604,607,608,614,615,616,617,618,619,622,623,627]
         var condition_list = condition.map(function(m,i){
           if(fase_conditions.indexOf(m.id) == -1){
             return true;

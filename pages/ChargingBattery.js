@@ -245,7 +245,7 @@ export default class ChargingBattery extends React.Component {
           })
           .then((json) => {
             if(json.code == 1){
-              Alert.alert('系統訊息',"已完成紀錄！",[{text: '回列表頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.navigate('Home')}}]);
+              Alert.alert('系統訊息',"已完成紀錄！",[{text: '返回資訊頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.goBack()}}]);
             }else{
               Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
             }

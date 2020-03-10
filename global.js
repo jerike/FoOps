@@ -12,3 +12,5 @@ global.power_min=0;
 global.power_max=100;
 global.day_min=0;
 global.day_max=1000;
+global.sel_scooter_condition=[];
+global.condition = [];

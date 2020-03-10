@@ -161,6 +161,8 @@ export default class MultipleController extends React.Component {
           formData.append("sel_scooters[]", m);
         });
         formData.append("operator", global.user_givenName);
+        formData.append("from", "FoOps");
+        
         fetch(global.API+'/scooter/controller/update',{
           method: 'POST',
           mode: 'cors',
@@ -210,6 +212,7 @@ export default class MultipleController extends React.Component {
           formData.append("sel_scooters[]", m);
         });
         formData.append("operator", global.user_givenName);
+        formData.append("from", "FoOps");
         fetch(global.API+'/scooter/controller/reload',{
           method: 'POST',
           mode: 'cors',

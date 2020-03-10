@@ -362,6 +362,8 @@ export default class MapScreen extends React.Component {
       var BUTTONS = [
         '📋 瀏覽車輛資料',
         '🔊 響鈴',
+        '🔓 啟動',
+        '🔒 熄火',
         '📍 導航',
         '❌ 取消',
       ];
@@ -385,6 +387,12 @@ export default class MapScreen extends React.Component {
             this.controller(scooter.id,'whistle');
           break;
           case 2:
+            this.controller(scooter.id,'unlock');
+          break;
+          case 3:
+            this.controller(scooter.id,'lock');
+          break;
+          case 4:
             this.setState({select_scooter:scooter},()=>{this.showDirection()});
           break;
         }
@@ -398,9 +406,11 @@ export default class MapScreen extends React.Component {
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
-      var request_option = '/scooter/'+id+'/status?type='+type;
+      formData.append("from", "FoOps");
+      var request_option = '/scooter/'+id+'/type';
       var method = "PUT";
-      fetch(global.ServiceAPI+request_option,{
+      fetch(global.API+request_option,{
+      // fetch(global.ServiceAPI+request_option,{
         method: method,
         credentials: 'include',
         body: formData

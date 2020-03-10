@@ -7,6 +7,7 @@ export default class Logout extends React.Component {
     super(props);
   }
   componentDidMount() {
+    this.removeGlobal();
     this.removeStorage();
   }
   removeStorage = async () => {
@@ -17,7 +18,17 @@ export default class Logout extends React.Component {
           },1000);
       });
   }
-
+  removeGlobal(){
+    console.warn('logout');
+    global.user_id = null;
+    global.user_givenName = null;
+    global.avatar = null;
+    global.scooter = null;
+    global.scooters = null;
+    global.reload_time = null;
+    global.last_get_time = null;
+    global.outsource = null;
+  }
   render() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' ,backgroundColor:'#2f3345' }}>

@@ -329,6 +329,8 @@ export default class ScooterDetail extends React.Component {
         '🔒 熄火',
         '🔑 車廂',
         '🔊 響鈴',
+        '📍 更新定位',
+        '🔄 重置',
         '❌ 取消',
       ];
 
@@ -363,6 +365,15 @@ export default class ScooterDetail extends React.Component {
             this.controller('whistle');
             // this.confirm_controller('whistle',BUTTONS[buttonIndex]);
           break;
+          case 5:
+            this.controller('location_trigger');
+            // this.confirm_controller('whistle',BUTTONS[buttonIndex]);
+          break;
+          case 6:
+            this.controller('reset');
+            // this.confirm_controller('whistle',BUTTONS[buttonIndex]);
+          break;
+          
         }
       });
       
@@ -393,13 +404,22 @@ export default class ScooterDetail extends React.Component {
       var formData  = new FormData();    
       formData.append("value", type);  
       formData.append("operator", global.user_givenName);
-      var request_option = '/scooter/'+this.state.scooter.id+'/status?type='+type;
+      formData.append("from", "FoOps");
+
+      // var request_option = '/scooter/'+this.state.scooter.id+'/status?type='+type+'&from=FoOps';
+      // var method = "PUT";
+      // if(type == "MAINTENANCE" || type == "FREE"){
+      //   request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type+'&from=FoOps';
+      //   method = "PATCH";  
+      // }
+
+      var request_option = '/scooter/'+this.state.scooter.id+'/type';
       var method = "PUT";
       if(type == "MAINTENANCE" || type == "FREE"){
-        request_option = '/scooter/'+this.state.scooter.id+'/status?value='+type;
-        method = "PATCH";  
+        request_option = '/scooter/'+this.state.scooter.id+'/status';
       }
-      fetch(global.ServiceAPI+request_option,{
+      fetch(global.API+request_option,{
+      // fetch(global.ServiceAPI+request_option,{
         method: method,
         credentials: 'include',
         body: formData
@@ -428,6 +448,13 @@ export default class ScooterDetail extends React.Component {
               case "whistle":
                 msg = "喇叭已響起";
               break;
+              case "reset":
+                msg = "車輛已重置";
+              break;
+              case "location_trigger":
+                msg = "重新定位\n\n請10秒後再確認定位狀態";
+              break;
+
             }
             setTimeout(
               ()=>{

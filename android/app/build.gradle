@@ -107,7 +107,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.28"
+        versionName "1.28.2"
         vectorDrawables.useSupportLibrary = true
         missingDimensionStrategy 'react-native-camera', 'general'
         multiDexEnabled true
@@ -152,7 +152,6 @@ android {
 
 dependencies {
     implementation project(':react-native-linear-gradient')
-    implementation project(':react-native-picker')
     implementation project(':react-native-permissions')
     implementation project(':react-native-device-info')
     implementation project(':react-native-android-open-settings')

@@ -51,7 +51,6 @@ target 'FoOps' do
   pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
 
 
-  pod 'Picker', :path => '../node_modules/react-native-picker'
 
   pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
 

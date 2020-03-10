@@ -4,7 +4,6 @@ import android.app.Application;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactApplication;
 import com.BV.LinearGradient.LinearGradientPackage;
-import com.beefe.picker.PickerViewPackage;
 import com.reactnativecommunity.rnpermissions.RNPermissionsPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.levelasquez.androidopensettings.AndroidOpenSettingsPackage;
@@ -38,7 +37,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new LinearGradientPackage(),
-            new PickerViewPackage(),
             new RNPermissionsPackage(),
             new RNDeviceInfo(),
             new AndroidOpenSettingsPackage(),

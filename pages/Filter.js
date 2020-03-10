@@ -40,13 +40,15 @@ export default class Filter extends React.Component {
         sel_task:false,
         sel_FOCP:false,
         scooter:[],
-        labels:[]
+        labels:[],
+        condition:[]
       }
       this.updateIndex = this.updateIndex.bind(this);
       this.show_loading = this.show_loading.bind(this);
       this.onChangeWorkArea=this.onChangeWorkArea.bind(this);
       this.onChangeTask=this.onChangeTask.bind(this);
       this.onChangeScooterStatus=this.onChangeScooterStatus.bind(this);
+      this.onChangeCondition=this.onChangeCondition.bind(this);
       this.onChangeSevere=this.onChangeSevere.bind(this);
       this.onChangeLabels=this.onChangeLabels.bind(this);
       this.set_power_change=this.set_power_change.bind(this);
@@ -66,9 +68,13 @@ export default class Filter extends React.Component {
       }
       this.props.onRefilter(this);
       this.get_labels();
+      
     }
     componentDidMount(){
       // this.getStorage();
+      if(global.condition != undefined){
+        this.setState({condition:global.condition});
+      }
       this.setState({scooter:global.scooters},()=>{this.after_reload_scooter()});
     }
     updateIndex (selectedIndex) {
@@ -418,6 +424,35 @@ export default class Filter extends React.Component {
             this.setState({ scooter:result });
         }
     }
+    onChangeCondition(id){
+        this.show_loading();
+        var select = global.sel_scooter_condition;
+        if(select.indexOf(id) > -1){
+          select.splice(select.indexOf(id), 1);
+        }else{
+          select.push(id);
+        }
+        global.sel_scooter_condition = select;
+        var promise1 = new Promise((resolve,reject)=>{resolve(0);});
+        promise1.then(value=>new Promise((resolve,reject)=>{this.after_reload_scooter();}))
+    }
+    get_scooter_by_condition(){
+        var status = global.sel_scooter_condition;
+        var result = [];
+        if(status.length > 0){
+            this.state.scooter.map(function(m, i){
+                if(m.ticket.scooter_conditions){
+                  var intersection = status.filter(value => -1 !== m.ticket.scooter_conditions.indexOf(value));
+                  if(intersection.length == status.length){
+                    result.push(m);
+                  }
+                  
+                }
+            }.bind(this));
+            this.setState({ scooter:result });
+        }
+    }
+
     // 選擇標籤 label
     onChangeLabels(label){
         this.show_loading();
@@ -467,6 +502,9 @@ export default class Filter extends React.Component {
             await delay(5);
             await this.filter_scooter_for_only_change_power();
             await delay(5);
+            await this.get_scooter_by_condition();
+            await delay(5);
+            
             await new Promise((resolve,reject)=>{
                 this.setState({show_loading:false});
                 this.props.filter_option.filter_scooter(this.state.scooter);
@@ -503,7 +541,7 @@ export default class Filter extends React.Component {
     // }
     render() {
         const {filter_option} = this.props;
-        const { selectedIndex,labels} = this.state;
+        const { selectedIndex,labels,condition} = this.state;
         const { show_loading } = this;
         var total = (global.scooter == undefined) ? 0 : global.scooter.length;
         var all = global.scooters.length;
@@ -586,6 +624,31 @@ export default class Filter extends React.Component {
             }
             scooter_status_btns.push(btn);
             
+        }.bind(this));
+        var condition_btns = [];
+        // console.warn(global.sel_scooter_condition);
+        condition.map(function(m,i){
+          var btn = <Button
+              key={i}
+              title={m.description}
+              type="outline"
+              style={styles.work_area_btn}
+              buttonStyle={{ borderColor:'#EE7700',marginRight: 10,marginBottom: 10}}
+              titleStyle={styles.titleStyle}
+              onPress={()=>this.onChangeCondition(m.id)}
+            />
+            if(global.sel_scooter_condition.indexOf(m.id) != -1) {
+              btn = <Button
+                key={i}
+                title={m.description}
+                style={styles.work_area_btn}
+                icon={<Icon name="check-circle" size={15}  color="white" />}
+                buttonStyle={{ borderColor:'#EE7700',backgroundColor:'#EE7700'}}
+                titleStyle={styles.titleStyleActive}
+                onPress={()=>this.onChangeCondition(m.id)}
+              />
+            }
+            condition_btns.push(btn);
         }.bind(this));
         var power_btns = [];
         var power_types = ['<15%','~35%','~40%','~45%','~50%'];
@@ -712,6 +775,10 @@ export default class Filter extends React.Component {
                       {power_btns}
                     </View>
                     <View style={styles.row_view}>
+                      <View style={{width:'100%',marginBottom:5}}><Text>車況</Text></View>
+                      {condition_btns}
+                    </View>
+                    <View style={styles.row_view}>
                       <View style={{width:'100%',marginBottom:5}}><Text>未租用天數</Text></View>
                       {days_btns}
                     </View>
@@ -786,7 +853,7 @@ const styles = StyleSheet.create({
   },
   row_view:{
     flexDirection:'row',
-    justifyContent:'space-around',
+    justifyContent:'space-between',
     alignItems:'flex-start',
     flexWrap:'wrap',
     paddingLeft:20,
@@ -795,6 +862,8 @@ const styles = StyleSheet.create({
     paddingTop:10,
     borderBottomColor: '#eeeeee',
     borderBottomWidth: 1,
+    marginBottom:10,
+    marginRight:10,
   },
   buttonStyle:{
     fontSize:11

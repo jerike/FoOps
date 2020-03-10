@@ -65,7 +65,7 @@ export default class Home extends React.Component {
     componentDidMount(){
         // this.getScooterStorage();
         
-        this.get_scooter_status();
+        // this.setState({ condition:global.condition });
         setTimeout(()=>{this.show_scooter();},10)
     }
     componentWillUnmount() {
@@ -141,24 +141,6 @@ export default class Home extends React.Component {
         this.setState({scooter:scooter},()=>{this.show_scooter()});
     }
     
-    
-    //取得車況
-    get_scooter_status =()=>{
-        fetch(global.API+'/scooter/status',{
-            method: 'GET'
-        })
-        .then((response) => {
-            return response.json();
-        })
-        .then((json) => {
-            if(json.code == 1){
-              global.condition = json.data;
-              this.setState({ condition:json.data });
-            }else{
-              alert(json.reason);
-            }
-        });
-    }
     get_timestamp(){
         var theTime = new Date();
         var reload_time = this.pad(theTime.getMonth()+1)+'/'+this.pad(theTime.getDate())+' '+this.pad(theTime.getHours())+':'+this.pad(theTime.getMinutes())+':'+this.pad(theTime.getSeconds());
@@ -367,23 +349,7 @@ export default class Home extends React.Component {
 
         return result;
     }
-    getConditions(id){
-        var result = "";
-        var condition = this.state.condition;
-        condition.map(function(m, i){
-            if(parseInt(m.id) == parseInt(id)){
-                var description = m.description;
-                if(m.name.indexOf('(option)') != -1){
-                    description = m.description + "_option";
-                }
-              
-                result = description;
-            }
-        });
-        return result;
-    }
-    
-    
+   
     
     _onRefresh = () => {
         this.setState({refreshing: true});
@@ -512,7 +478,8 @@ export default class Home extends React.Component {
                         subtitle={<Text style={(item.power <=30)?{color:'#f00'}:{color:'#28a745'}}>電量：{item.power}%</Text>}     
                         chevron   
                         bottomDivider={true}    
-                        onPress={() =>this.showDetail(item.id)}               
+                        onPress={() =>this.showDetail(item.id)}      
+                        rightTitle={"xxx"}         
                        />          
                      )}         
                     onRefresh={this._onRefresh}

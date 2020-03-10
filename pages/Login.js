@@ -16,8 +16,7 @@ export default class Login extends React.Component {
     this.ShowLogin=this.ShowLogin.bind(this);
   }
   componentWillMount() {
-    // this.setState({show_login:false});
-        this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false,show_loading2:true});
+      this.setState({show_login:false,fadeInOpacity: new Animated.Value(0),save_login:false,show_loading2:true});
   }
   componentDidMount() {
     this.getStorage().done();
@@ -59,11 +58,10 @@ export default class Login extends React.Component {
           var outsource = await AsyncStorage.getItem('@FoOps:outsource');
           global.outsource = parseInt(outsource);
           this.props.navigation.navigate('Home');
-          // if(global.scooter ==undefined){
-          //   this.props.navigation.navigate('TimeOut');
-          // }else{
-          //   this.props.navigation.navigate('Home');
-          // }
+          var condition =  await AsyncStorage.getItem('@FoOps:condition');
+          console.warn("storage:"+condition);
+          global.condition =  JSON.parse(condition);
+
         }else{
           // console.warn('show_login');
           this.setState({show_login:true},()=>this.ShowLogin());
@@ -127,6 +125,7 @@ export default class Login extends React.Component {
         }.bind(this));
 
         if(login){
+          this.get_scooter_status();
           setTimeout(()=>{this.get_scooter()},50);
         }else{
           Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
@@ -182,7 +181,30 @@ export default class Login extends React.Component {
           this.setState({show_loading:false});           
       });
   }
-
+  get_scooter_status =()=>{
+      fetch(global.API+'/scooter/status',{
+          method: 'GET'
+      })
+      .then((response) => {
+          return response.json();
+      })
+      .then((json) => {
+          if(json.code == 1){
+            var conditions = [];
+            json.data.map(function(m, i){
+                if(m.id < 600 || m.status == 0 || m.status == 2){
+                  return true;
+                }
+                if(m.severe_id ==4){
+                  return true;
+                }
+                conditions.push(m);
+            });
+            global.condition = conditions;
+            console.warn(global.condition);
+          }
+      });
+  }
 
   setStorage = async () => {
     try {
@@ -198,6 +220,7 @@ export default class Login extends React.Component {
         ['@FoOps:reload_time', global.reload_time],
         ['@FoOps:last_get_time',this.state.last_get_time],
         ['@FoOps:outsource', String(global.outsource)],
+        ['@FoOps:condition', JSON.stringify(global.condition)],
       ]);
       if(this.state.save_login){
         await AsyncStorage.multiSet([

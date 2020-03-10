@@ -24,6 +24,8 @@ export default class MoveScooter extends React.Component {
         }
         this.getLocation=this.getLocation.bind(this);
         this.onClose=this.onClose.bind(this);
+        this.addRecord=this.addRecord.bind(this);
+        this.Confirm=this.Confirm.bind(this);
     }
     onRef = (e) => {
       this.modal = e
@@ -174,6 +176,7 @@ export default class MoveScooter extends React.Component {
           })
           .then((json) => {
             if(json.code == 1){
+              this.addRecord(this.state.scooter.id);
               Alert.alert('系統訊息',"已完成紀錄！",[{text: '回列表頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.navigate('Home')}}]);
             }else{
               Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
@@ -182,6 +185,24 @@ export default class MoveScooter extends React.Component {
       }
       
     }
+    addRecord(id){
+        var formData  = new FormData();
+        formData.append("scooter_id", id);
+        formData.append("ticket_status_id", 0);
+        formData.append("operator", global.user_givenName);
+        formData.append("operator_id", global.user_id);
+        formData.append("zendesk", "");
+        formData.append("scooter_status[]", 622);
+
+        fetch(global.API+'/ticket/addworkrecord',{
+            method: 'POST',
+            mode: 'cors',
+            body: formData,
+            credentials: 'include'
+        });
+    }
+
+
     openRecord(){
       this.modal.getRecord(this.state.scooter);
       this.setState({move_modal:true});
