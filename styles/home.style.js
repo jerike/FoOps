@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
     search_container: {
-        backgroundColor:'#ff5722',
+        backgroundColor:'#2F3345',
         borderWidth:0,
         borderBottomColor: 'transparent',
         borderTopColor: 'transparent'
@@ -68,13 +68,13 @@ export default StyleSheet.create({
         justifyContent:'center',
         // borderTopRightRadius: 20,
         borderWidth: 0,
-        backgroundColor: '#ff5722',
+        backgroundColor: '#2F3345',
         marginTop: 0,
         borderRadius: 20,
         marginTop:5
     },
     btn2_buttonStyle: {
-        backgroundColor: '#ff5722',
+        backgroundColor: '#2F3345',
         borderWidth: 0
     },
     btn2_selectedButtonStyle:{
@@ -86,7 +86,7 @@ export default StyleSheet.create({
     },
     btn2_selectedTextStyle:{
         fontSize:12,
-        color:'#ff5722',
+        color:'#2F3345',
     },
 
     loading:{
@@ -102,7 +102,7 @@ export default StyleSheet.create({
         borderTopRightRadius:5
     },
     header:{
-        backgroundColor: '#ff5722',
+        backgroundColor: '#2F3345',
         justifyContent: 'space-around',
         paddingTop:-25,
         height:50

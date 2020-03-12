@@ -94,6 +94,10 @@ export default class Maintenance extends React.Component {
           }else{
             Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
           }
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({show_loading:false});
+          return false;
         });
     }
     

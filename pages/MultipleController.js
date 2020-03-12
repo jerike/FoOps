@@ -178,6 +178,10 @@ export default class MultipleController extends React.Component {
               Alert.alert('系統訊息',"所選車輛已更新",[{text: '我知道了'}]);
            }
            
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({update_now:false});
+          return false;
         });
       }
     }
@@ -227,6 +231,10 @@ export default class MultipleController extends React.Component {
            }else{
               Alert.alert('系統訊息',"所選車輛已重啟",[{text: '我知道了'}]);
            }
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({reload_now:false});
+          return false;
         });
       }
     }

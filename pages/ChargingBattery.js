@@ -249,6 +249,10 @@ export default class ChargingBattery extends React.Component {
             }else{
               Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
             }
+          }).catch( err => {
+            Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+            this.setState({send_now:false});
+            return false;
           });
       }
       

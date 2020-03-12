@@ -75,7 +75,7 @@ export default class ChBView extends React.Component {
         // }
 
         var photos = this.state.photos.map(function(m,i){
-            if(m == ""){
+            if(m == "" || m == null){
               return true;
             }
             return (<View
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#2F3345',
   },
   avatarContainer: {
     backgroundColor: '#F5F5F5',

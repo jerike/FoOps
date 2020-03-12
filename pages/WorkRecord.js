@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
 
   header:{
-      backgroundColor: '#ff5722',
+      backgroundColor: '#2F3345',
       justifyContent: 'space-around',
       paddingTop:-25,
       height:50

@@ -49,7 +49,7 @@ export default class TireView extends React.Component {
     render() {
         const {tireview_option} = this.props;
         var photos = this.state.photos.map(function(m,i){
-            if(m == ""){
+            if(m == "" || m == null){
               return true;
             }
             return (<View

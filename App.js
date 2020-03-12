@@ -105,7 +105,8 @@ const HomeStack=createStackNavigator(
     MoveScooter:{screen:MoveScooter},
     TirePump:{screen:TirePump},
     BrokenTrack:{screen:BrokenTrack},
-    BrokenTrackRecord:{screen:BrokenTrackRecord},
+    BrokenTrackRecord:{screen:BrokenTrackRecord}
+
   },{
     headerMode:'none',
     defaultNavigationOptions: {

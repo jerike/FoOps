@@ -52,7 +52,7 @@ export default class ViolationView extends React.Component {
         // }
 
         var photos = this.state.photos.map(function(m,i){
-            if(m == ""){
+            if(m == "" || m == null){
               return true;
             }
             return (<View

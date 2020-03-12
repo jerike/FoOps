@@ -141,12 +141,15 @@ export default class ScooterDetail extends React.Component {
           }else{
              Alert.alert('⚠️ Warning',json.reason,[{text: '好的！',onPress: () => this.props.navigation.goBack()}],{ cancelable: false });           
           }
+        }).catch( err => {
+          alert('API 更新中，請稍後再試！');
+          this.back2page()
+          return false;
         });
     }
     ClearDate(){
       this.setState({
         scooter:{}
-
       });
     }
     getScooterType(sid){
@@ -257,7 +260,7 @@ export default class ScooterDetail extends React.Component {
             var scooter_url = global.API+'/scooter/outsource?team=3';
           break;
           default:
-            var scooter_url = global.API+'/scooter';
+            var scooter_url = global.API+'/scooter?op=1';
           break;
         }
         fetch(scooter_url,{
@@ -268,7 +271,6 @@ export default class ScooterDetail extends React.Component {
           return response.json();
         })
         .then((json) => {
-            console.warn('fetch scooters');
             var data = [];
             var last_get_time = "";
             if(json.data.length > 0){
@@ -278,6 +280,9 @@ export default class ScooterDetail extends React.Component {
             global.last_get_time = last_get_time;
             this.set_scooter_data(data);
 
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          return false;
         });
     }
     set_scooter_data(all_scooters){
@@ -460,10 +465,14 @@ export default class ScooterDetail extends React.Component {
               ()=>{
                 this.setState({show_loading:false});
                 this.newScooter(this.state.scooter.id);
-                Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}]);
+                Alert.alert('車輛訊息',msg,[{text: '好的！'}]);
               }
             ,3000);
           }
+      }).catch( err => {
+        Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+        this.setState({show_loading:false});
+        return false;
       });
     }
 
@@ -521,6 +530,9 @@ export default class ScooterDetail extends React.Component {
         }else{
           this.props.navigation.navigate('TimeOut');        
         }
+      }).catch( err => {
+        alert('API 更新中，請稍後再試！');
+        return false;
       });
     }
     removeAlert(){
@@ -712,7 +724,7 @@ export default class ScooterDetail extends React.Component {
         }
 
         return (
-        <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#ff5722'  }}>
+        <SafeAreaView style={{flex: 1,width:'100%',backgroundColor: '#2F3345'  }}>
             <Header
               centerComponent={{ text: scooter.plate, style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.back2page()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>返回</Text></View></TouchableHighlight>}
@@ -887,7 +899,7 @@ const styles = StyleSheet.create({
   },
 
   header:{
-      backgroundColor: '#ff5722',
+      backgroundColor: '#2F3345',
       justifyContent: 'space-around',
       paddingTop:-25,
       height:50

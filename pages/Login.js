@@ -46,7 +46,9 @@ export default class Login extends React.Component {
   }
   getStorage = async () => {
       try {
+        // 判斷是否有 token
         const value = await AsyncStorage.getItem('@FoOps:token');
+        // 如果不是空值，則將暫存資料寫入到全域變數
         if (value !== null) {
           global.user_id =  await AsyncStorage.getItem('@FoOps:user_id');
           global.user_givenName =  await AsyncStorage.getItem('@FoOps:user_givenName');
@@ -57,13 +59,12 @@ export default class Login extends React.Component {
           global.last_get_time = await AsyncStorage.getItem('@FoOps:last_get_time');
           var outsource = await AsyncStorage.getItem('@FoOps:outsource');
           global.outsource = parseInt(outsource);
-          this.props.navigation.navigate('Home');
           var condition =  await AsyncStorage.getItem('@FoOps:condition');
-          console.warn("storage:"+condition);
           global.condition =  JSON.parse(condition);
-
+          // 跳往首頁
+          this.props.navigation.navigate('Home');
         }else{
-          // console.warn('show_login');
+          // 如果為空值，則顯示登入畫面
           this.setState({show_login:true},()=>this.ShowLogin());
         }
         const email = await AsyncStorage.getItem('@FoOps:email');
@@ -131,6 +132,10 @@ export default class Login extends React.Component {
           Alert.alert('⚠️ Warning','登入失敗',[{text: '您沒有權限，請洽系統管理員'}]);
           this.setState({show_loading:false});
         }
+    }).catch( err => {
+        Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+        this.setState({show_loading:false});
+        return false;
     });
   }
   //取得電動車資訊
@@ -151,7 +156,7 @@ export default class Login extends React.Component {
           var scooter_url = global.API+'/scooter/outsource?team=3';
         break;
         default:
-          var scooter_url = global.API+'/scooter';
+          var scooter_url = global.API+'/scooter?op=1';
         break;
       }
       fetch(scooter_url,{
@@ -201,7 +206,6 @@ export default class Login extends React.Component {
                 conditions.push(m);
             });
             global.condition = conditions;
-            console.warn(global.condition);
           }
       });
   }

@@ -79,7 +79,7 @@ export default class TireRecord extends React.Component {
           data:select_data
         }
         return (
-        <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#EFF1F4'  }}>
+        <SafeAreaView style={{flex: 1,width:'100%', backgroundColor: '#2F3345'  }}>
             <Header
               centerComponent={{ text: "胎壓紀錄", style: { color: '#fff' } }}
               leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.navigate('Home')}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回列表頁</Text></View></TouchableHighlight>}
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
 
   header:{
-      backgroundColor: '#ff5722',
+      backgroundColor: '#2F3345',
       justifyContent: 'space-around',
       paddingTop:-25,
       height:50

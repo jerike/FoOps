@@ -73,7 +73,7 @@ export default class Dashboard extends React.Component {
             var scooter_url = global.API+'/scooter/outsource?team=3';
           break;
           default:
-            var scooter_url = global.API+'/scooter';
+            var scooter_url = global.API+'/scooter?op=1';
           break;
         }
         fetch(scooter_url,{

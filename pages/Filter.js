@@ -323,6 +323,9 @@ export default class Filter extends React.Component {
                     
                 }.bind(this));
                 this.setState({ scooter:result });
+            }).catch( err => {
+              alert('API 更新中，請稍後再試！');
+              return false;
             });
         }
     }

@@ -107,6 +107,10 @@ export default class MapScreen extends React.Component {
             if(json.code == 1){
               this.setState({all_work_area:json.data});
             }
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({show_loading:false});
+          return false;
         });
     }
     get_geofence =()=>{
@@ -247,7 +251,7 @@ export default class MapScreen extends React.Component {
             var scooter_url = global.API+'/scooter/outsource?team=3';
           break;
           default:
-            var scooter_url = global.API+'/scooter';
+            var scooter_url = global.API+'/scooter?op=1';
           break;
         }
         fetch(scooter_url,{
@@ -273,6 +277,10 @@ export default class MapScreen extends React.Component {
           global.last_get_time =  last_get_time;
           this.setStorage(data);
           this.after_reload_scooter(data);
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({load_data:false});
+          return false;
         });
     }
     after_reload_scooter(data){
@@ -353,7 +361,7 @@ export default class MapScreen extends React.Component {
     send2Map(){
 
         var promise1 = new Promise((resolve,reject)=>{
-          setTimeout(()=>{resolve(0);},100);
+          setTimeout(()=>{resolve(0);},50);
         });
         promise1.then(value=>new Promise((resolve,reject)=>{this.setState({search:global.search},()=>this.filter_scooter_by_search())}));
       
@@ -437,10 +445,14 @@ export default class MapScreen extends React.Component {
             setTimeout(
               ()=>{
                 this.setState({show_loading:false});
-                Alert.alert('🛵 車輛訊息',msg,[{text: '好的！'}]);
+                Alert.alert('車輛訊息',msg,[{text: '好的！'}]);
               }
             ,3000);
           }
+      }).catch( err => {
+        Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+        this.setState({show_loading:false});
+        return false;
       });
     }
 
@@ -544,7 +556,6 @@ export default class MapScreen extends React.Component {
             
             
         }
-        console.warn(setPolyPath);
 
         var filter_option = {
             modalVisible:this.state.modalVisible,
@@ -569,9 +580,9 @@ export default class MapScreen extends React.Component {
         });
         var count = scooter.length;
         return (
-        <SafeAreaView style={{flex: 1,justifyContent:'center', backgroundColor: '#ff5722'}}>
+        <SafeAreaView style={{flex: 1,justifyContent:'center', backgroundColor: '#2F3345'}}>
             <Header
-              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}}  />}
+              leftComponent={<Image source={{uri: 'https://i.imgur.com/7jiVoPt.png'}} style={{width: 43,height: 35,resizeMode:'contain'}}/>}
               centerComponent={<SearchBar
                                 showLoading={this.state.search_loading}
                                 placeholder="搜尋..."
@@ -743,7 +754,7 @@ const styles = StyleSheet.create({
     width:40,height:53
   },
   search_container: {
-    backgroundColor:'#ff5722',
+    backgroundColor:'#2F3345',
     paddingTop:-50,
     
     borderWidth:0,
@@ -806,7 +817,7 @@ const styles = StyleSheet.create({
     justifyContent:'center',
     width: 50,
     height:50,
-    backgroundColor:'#f76260',
+    backgroundColor:'#2F3345',
     borderColor:'green',
     borderStyle:'solid',
     borderRadius:25,
@@ -837,7 +848,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,  
   },
   header:{
-      backgroundColor: '#ff5722',
+      backgroundColor: '#2F3345',
       justifyContent: 'space-around',
       paddingTop:-25,
       height:50

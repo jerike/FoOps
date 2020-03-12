@@ -105,6 +105,10 @@ export default class FastRecord extends React.Component {
             Alert.alert('⚠️ Warning',json.reason,[{text: '好的！'}]);
           }
           
+        }).catch( err => {
+          Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+          this.setState({btn_disabled:false,show_loading:false,sel_condition:[]});
+          return false;
         });
     }
     render() {

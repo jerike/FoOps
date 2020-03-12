@@ -110,6 +110,10 @@ export default class Violation extends React.Component {
               }else{
                 Alert.alert('⚠️ Warning',json.reason,[{text: 'OK'}]);
               }
+            }).catch( err => {
+              Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+              this.setState({show_loading:false,send_now:false});
+              return false;
             });
         }
 
@@ -235,11 +239,7 @@ export default class Violation extends React.Component {
             .then((json)=> {
               this.setState({hit_position:true});
               if(json.results.length > 0){
-                if(json.results.length == 1){
-                  this.setState({location:json.results[0].formatted_address});  
-                }else{
-                  this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
-                }
+                this.setState({location:json.results[0].formatted_address});
               }
             });
         })
@@ -254,13 +254,7 @@ export default class Violation extends React.Component {
             .then((response) => response.json())
             .then((json)=> {
               this.setState({hit_position:true});
-              if(json.results.length > 0){
-                if(json.results.length == 1){
-                  this.setState({location:json.results[0].formatted_address});  
-                }else{
-                  this.setState({location:json.results[0].formatted_address+"\n"+json.results[1].formatted_address});  
-                }
-              }
+              this.setState({location:json.results[0].formatted_address});
             });
         })
         .catch(error => console.warn(error));

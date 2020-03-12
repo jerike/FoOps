@@ -169,7 +169,7 @@ export default class Home extends React.Component {
             var scooter_url = global.API+'/scooter/outsource?team=3';
           break;
           default:
-            var scooter_url = global.API+'/scooter';
+            var scooter_url = global.API+'/scooter?op=1';
           break;
         }
         fetch(scooter_url,{
@@ -195,6 +195,10 @@ export default class Home extends React.Component {
 
         }).then(() => {
           this.setState({refreshing: false});
+        }).catch( err => {
+            Alert.alert('System',"API 更新中，請稍後再試！",[{text: '好的！'}]);
+            this.setState({refreshing: false});
+            return false;
         });
     }
     set_scooter_data(all_scooters){
@@ -398,8 +402,8 @@ export default class Home extends React.Component {
         const component1 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="filter" style={{marginRight:10}} /><Text>篩選</Text></View>
         const component2 = () => <View style={{flexDirection: 'row',justifyContent: "center", alignItems: "center"}}><Icon name="map" style={{marginRight:10}} /><Text>地圖</Text></View>
         const buttons = [{ element: component1 }, { element: component2 }]
-        var c1 = (this.state.selectedIndex2 === 0) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺車牌" : "🔻車牌") : "車牌" ;
-        var c2 = (this.state.selectedIndex2 === 1) ? ((this.state.selectedIndex2_sort == "asc") ? "🔺電量" : "🔻電量") : "電量" ;
+        var c1 = (this.state.selectedIndex2 === 0) ? ((this.state.selectedIndex2_sort == "asc") ? "▲ 車牌" : "▼ 車牌") : "車牌" ;
+        var c2 = (this.state.selectedIndex2 === 1) ? ((this.state.selectedIndex2_sort == "asc") ? "▲ 電量" : "▼ 電量") : "電量" ;
         const buttons2 = [c1, c2];
         const {selectedIndex,toSearch,selectedIndex2,items} = this.state;
         var open = this.state.open;
@@ -420,9 +424,9 @@ export default class Home extends React.Component {
 
         return (
         <SafeAreaView style={{flex: 1,justifyContent: 'center',
-        alignItems: 'center',backgroundColor: '#ff5722'}}>
+        alignItems: 'center',backgroundColor: '#2F3345'}}>
             <Header
-              leftComponent={<Avatar rounded source={{uri:'https://gokube.com/images/logo.png'}} overlayContainerStyle={{backgroundColor:'transparent'}} />}
+              leftComponent={<Image source={{uri: 'https://i.imgur.com/7jiVoPt.png'}} style={{width: 43,height: 35,resizeMode:'contain'}}/>}
               centerComponent={<SearchBar
                                 showLoading={this.state.search_loading}
                                 placeholder="搜尋..."
@@ -479,7 +483,8 @@ export default class Home extends React.Component {
                         chevron   
                         bottomDivider={true}    
                         onPress={() =>this.showDetail(item.id)}      
-                        rightTitle={"xxx"}         
+                        rightTitle={item.remark}      
+                        rightTitleStyle={{fontSize:11,color:'#E63F00'}}
                        />          
                      )}         
                     onRefresh={this._onRefresh}
