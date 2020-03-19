@@ -177,7 +177,7 @@ export default class MoveScooter extends React.Component {
           .then((json) => {
             if(json.code == 1){
               this.addRecord(this.state.scooter.id);
-              Alert.alert('系統訊息',"已完成紀錄！",[{text: '回列表頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.navigate('Home')}}]);
+              Alert.alert('系統訊息',"已完成紀錄！",[{text: '回詳細頁', onPress: () => {this.clearData();this.setState({send_now:false});this.props.navigation.goBack()}}]);
             }else{
               Alert.alert('系統訊息',json.reason,[{text: 'ok', onPress: () => {this.setState({send_now:false})}}]);
             }
@@ -228,10 +228,11 @@ export default class MoveScooter extends React.Component {
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
                   centerComponent={<View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#f00',borderBottomWidth:1}}>
-                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>違規移動</Text>
+                                    <Text style={{ color: '#fff',fontSize:15,textAlign:'center' }}>{scooter.plate} </Text>
+                                    <Text style={{ color: '#fff',fontSize:10,textAlign:'center' }}>[違規移動]</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
-                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={scooter.plate} onPress={()=>this.openRecord()}/>}
+                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={"移動紀錄"} onPress={()=>this.openRecord()}/>}
                   containerStyle={styles.header}
                 />
                 <ScooterMoveRecord onRef={this.onRef} move_record_option={move_record_option} />

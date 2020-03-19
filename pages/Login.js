@@ -195,9 +195,13 @@ export default class Login extends React.Component {
       })
       .then((json) => {
           if(json.code == 1){
-            var conditions = [];
+            var top_lvl = [];
+            var low_lvl = [];
+            var patrol_lvl=[];
+
+            var conditions=[];
             json.data.map(function(m, i){
-                if(m.id < 600 || m.status == 0 || m.status == 2){
+                if(m.id < 600 || m.status == 0){
                   return true;
                 }
                 if(m.severe_id ==4){

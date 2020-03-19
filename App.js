@@ -1,5 +1,5 @@
 import React from 'react';
-import {createStackNavigator,createAppContainer,createBottomTabNavigator,createDrawerNavigator,NavigationActions,DrawerItems,DrawerActions} from 'react-navigation';
+import {createStackNavigator,createAppContainer,createBottomTabNavigator,createMaterialTopTabNavigator,createDrawerNavigator,NavigationActions,DrawerItems,DrawerActions} from 'react-navigation';
 import {Platform,View,Text,Image,ScrollView,Dimensions } from 'react-native';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -92,6 +92,7 @@ const TabNavigator = createBottomTabNavigator({
     tabBarOptions: {
       activeTintColor: 'tomato',
       inactiveTintColor: 'gray',
+      tabBarPosition:'bottom'
     },
 });
 

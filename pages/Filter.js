@@ -72,6 +72,7 @@ export default class Filter extends React.Component {
     }
     componentDidMount(){
       // this.getStorage();
+      // console.warn(global.condition);
       if(global.condition != undefined){
         this.setState({condition:global.condition});
       }
@@ -180,23 +181,23 @@ export default class Filter extends React.Component {
         switch(value){
           case 0:
             min = 0;
-            max = 15;
+            max = 10;
           break;
           case 1:
-            min = 16;
-            max = 35;
+            min = 11;
+            max = 30;
           break;
           case 2:
-            min = 36;
-            max = 40;
+            min = 31;
+            max = 60;
           break;
           case 3:
-            min = 41;
-            max = 45;
+            min = 61;
+            max = 90;
           break;
           case 4:
-            min = 46;
-            max = 50;
+            min = 90;
+            max = 100;
           break;
           default:
             min = 0;
@@ -241,15 +242,15 @@ export default class Filter extends React.Component {
         var max = 500;
         switch(value){
           case 0:
-            min = 1;
+            min = 0;
             max = 3;
           break;
           case 1:
             min = 4;
-            max = 5;
+            max = 7;
           break;
           case 2:
-            min = 6;
+            min = 8;
             max = 10;
           break;
           case 3:
@@ -628,15 +629,29 @@ export default class Filter extends React.Component {
             scooter_status_btns.push(btn);
             
         }.bind(this));
-        var condition_btns = [];
+        var top_lvl_btns = [];
+        var low_lvl_btns = [];
+        var normal_lvl_btns = [];
         // console.warn(global.sel_scooter_condition);
         condition.map(function(m,i){
+          if(m.status == 2){
+            return true;
+          }
+          var bottom_color = "#990000"
+          switch(m.severe_id){
+            case 3:
+              bottom_color = "#EE7700";
+            break;
+            case 5:
+              bottom_color = "#00AA55";
+            break;
+          }
           var btn = <Button
               key={i}
               title={m.description}
               type="outline"
               style={styles.work_area_btn}
-              buttonStyle={{ borderColor:'#EE7700',marginRight: 10,marginBottom: 10}}
+              buttonStyle={{ borderColor:bottom_color,marginRight: 10,marginBottom: 10}}
               titleStyle={styles.titleStyle}
               onPress={()=>this.onChangeCondition(m.id)}
             />
@@ -646,15 +661,26 @@ export default class Filter extends React.Component {
                 title={m.description}
                 style={styles.work_area_btn}
                 icon={<Icon name="check-circle" size={15}  color="white" />}
-                buttonStyle={{ borderColor:'#EE7700',backgroundColor:'#EE7700'}}
+                buttonStyle={{ borderColor:bottom_color,backgroundColor:bottom_color}}
                 titleStyle={styles.titleStyleActive}
                 onPress={()=>this.onChangeCondition(m.id)}
               />
             }
-            condition_btns.push(btn);
+            switch(m.severe_id){
+              case 3:
+                low_lvl_btns.push(btn);
+              break;
+              case 5:
+                normal_lvl_btns.push(btn);
+              break;
+              default:
+                top_lvl_btns.push(btn);
+              break;
+            }
+            
         }.bind(this));
         var power_btns = [];
-        var power_types = ['<15%','~35%','~40%','~45%','~50%'];
+        var power_types = ['0~10%','11~30%','31~60%','61~90%','90~100%'];
         power_types.map(function(m,i){
             var btn = <Button
               key={"power_btn"+i}
@@ -677,7 +703,7 @@ export default class Filter extends React.Component {
             power_btns.push(btn);
         }.bind(this));
         var days_btns = [];
-        var days_types = ['~3天','~5天','~10天','Long Time'];
+        var days_types = ['0~3天','4~7天','8~10天','11天以上'];
         days_types.map(function(m,i){
             var btn = <Button
               key={"days_btn"+i}
@@ -732,17 +758,18 @@ export default class Filter extends React.Component {
               onRequestClose={()=>filter_option.setModalVisible(false)}
               >
               <SafeAreaView style={{position:'relative',flex: 1,justifyContent: "center", alignItems: "center", backgroundColor: '#fff'}}>
-                  <View style={{position:'absolute',top:5,right:5,zIndex:1001 }}>
-                     <Icon name='close' size={30}  onPress={() => {
+                  <Header
+                      centerComponent={{ text: "篩選", style: { color: '#fff' } }}
+                      containerStyle={styles.header}
+                      rightComponent={<Icon name='close' color={"#ffffff"} size={30}  onPress={() => {
                         filter_option.setModalVisible(false);
-                      }} />
-                  </View>
+                      }} />}
+                    />
+                 
                   
                   <ScrollView style={{flexDirection:'column', }}>
-                    <View style={styles.row_view}>
-                        <Text h1>篩選</Text>
-                    </View>
-                    <View style={{paddingBottom:10,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
+                   
+                    <View style={{paddingBottom:10,marginTop:20,marginLeft:20,marginRight:20,borderBottomColor: '#eeeeee',borderBottomWidth: 1,}}>
                         {global.sel_FOCP ?(
                           <Button
                             title="只需更換電池車輛"
@@ -779,7 +806,9 @@ export default class Filter extends React.Component {
                     </View>
                     <View style={styles.row_view}>
                       <View style={{width:'100%',marginBottom:5}}><Text>車況</Text></View>
-                      {condition_btns}
+                      {top_lvl_btns}
+                      {low_lvl_btns}
+                      {normal_lvl_btns}
                     </View>
                     <View style={styles.row_view}>
                       <View style={{width:'100%',marginBottom:5}}><Text>未租用天數</Text></View>
@@ -818,6 +847,12 @@ export default class Filter extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  header:{
+      backgroundColor: '#2F3345',
+      justifyContent: 'space-around',
+      paddingTop:-25,
+      height:40
+  },
   work_area_btn: {
     marginBottom:10,
     marginTop:10,

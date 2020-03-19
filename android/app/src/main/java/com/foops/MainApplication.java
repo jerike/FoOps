@@ -3,6 +3,7 @@ package com.foops;
 import android.app.Application;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactApplication;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.reactnativecommunity.rnpermissions.RNPermissionsPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
@@ -15,7 +16,6 @@ import com.actionsheet.ActionSheetPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
-import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -36,6 +36,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNGestureHandlerPackage(),
             new LinearGradientPackage(),
             new RNPermissionsPackage(),
             new RNDeviceInfo(),
@@ -48,8 +49,7 @@ public class MainApplication extends Application implements ReactApplication {
             new ImagePickerPackage(),
             new MapsPackage(),
             new VectorIconsPackage(),
-            new AsyncStoragePackage(),
-            new RNGestureHandlerPackage()
+            new AsyncStoragePackage()
       );
     }
 

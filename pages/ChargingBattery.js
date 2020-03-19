@@ -278,10 +278,11 @@ export default class ChargingBattery extends React.Component {
             <SafeAreaView style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#2F3345',color:'#fff'}}>
                 <Header
                   centerComponent={<View style={{justifyContent:'center',textAlign:'center',marginTop:10,paddingBottom:5,width:120,borderBottomColor:'#16B354',borderBottomWidth:1}}>
-                                    <Text style={{ color: '#fff',fontSize:18,textAlign:'center' }}>車輛換電</Text>
+                                    <Text style={{ color: '#fff',fontSize:15,textAlign:'center' }}>{scooter.plate} </Text>
+                                    <Text style={{ color: '#fff',fontSize:10,textAlign:'center' }}>[車輛換電]</Text>
                                   </View>}
                   leftComponent={<TouchableHighlight onPress={()=>this.props.navigation.goBack()}><View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}><Icon name="angle-left" color='#fff' size={25} /><Text style={{paddingLeft:10,color:'#fff',fontWeight:'bold',fontSize:13}}>回詳細頁</Text></View></TouchableHighlight>}
-                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={scooter.plate} onPress={()=>this.openRecord()}/>}
+                  rightComponent={<Button  titleStyle={{fontSize:11}}  title={"換電紀錄"} onPress={()=>this.openRecord()}/>}
                   containerStyle={styles.header}
                 />
                 {this.state.show_loading &&(

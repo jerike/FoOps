@@ -84,6 +84,10 @@ export default class ActionTools extends React.Component {
                         <Button  key={"abtn_6"} icon={<Icon name="clipboard" size={25} color="tan"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.BrokenTrackRecord()} />
                         <Text style={{fontSize:13}}>車損紀錄</Text>
                       </View>
+                      <View>
+                        <Button  key={"abtn_7"} icon={<Icon name="map-pin" size={25} color="#5599FF"   />}  type="outline" buttonStyle={{borderWidth:0}} onPress={()=>action_tools_option.showLocationModify()} />
+                        <Text style={{fontSize:13}}>更改定位</Text>
+                      </View>
                     </View>
                   </ScrollView>
               </View>

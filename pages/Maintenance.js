@@ -170,9 +170,17 @@ export default class Maintenance extends React.Component {
           if(sel_condition != undefined){
               checked = (sel_condition.length > 0 && sel_condition.indexOf(m.id) != -1) ? true : false;
           }
-          
+          var label_color = "#990000"
+          switch(m.severe_id){
+            case 3:
+              label_color = "#EE7700";
+            break;
+            case 5:
+              label_color = "#00AA55";
+            break;
+          }
 
-          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text >{description}</Text>{other_input}</View>}  /></View>
+          return <View key={"view"+i}><CheckBox key={"condition"+m.id}  onPress={()=>onClickCondition(m.id)} checked={checked} title={<View style={{flexDirection:'row',justifyContent: "center", alignItems: "center"}}><Text style={{color:label_color}}>{description}</Text>{other_input}</View>}  /></View>
         });
         return (
             <Modal

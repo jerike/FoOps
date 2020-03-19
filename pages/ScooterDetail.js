@@ -8,10 +8,10 @@ import '../global.js';
 import Maintenance from './Maintenance'
 import FastRecord from './FastRecord'
 import Violation from './Violation'
-import Direction from './Direction'
 import Controller from './Controller'
 import ActionTools from './ActionTools'
 import ActionSheet from 'react-native-action-sheet';
+import ChangeLocationView from './ChangeLocationView';
 const severe_title = global.severe_title;
 const scootet_status = global.scootet_status;
 const API = global.API;
@@ -27,10 +27,10 @@ export default class ScooterDetail extends React.Component {
         selectedIndex: 0,
         maintain_modal:false,
         violation_modal:false,
-        direction_modal:false,
         controller_modal:false,
         fastrecord_modal:false,
         action_tools_modal:false,
+        clv_modal:false,
         sel_condition:[],
         top_other:"",
         medium_other:"",
@@ -56,6 +56,7 @@ export default class ScooterDetail extends React.Component {
       this.selectWork=this.selectWork.bind(this);
       this.BrokenTrack=this.BrokenTrack.bind(this);
       this.BrokenTrackRecord=this.BrokenTrackRecord.bind(this);
+      this.showLocationModify=this.showLocationModify.bind(this);
     }
     componentWillMount() {
         var sid = this.props.navigation.state.params.scooter;
@@ -80,6 +81,9 @@ export default class ScooterDetail extends React.Component {
     }
     onRef1 = (e) => {
       this.modal1 = e
+    }
+    onRefLocation = (e) => {
+      this.modal_location = e
     }
 
     back2page(){
@@ -245,10 +249,10 @@ export default class ScooterDetail extends React.Component {
           [key]: true,
         });
     }
-    onClose(key){
+    onClose(key,reload=true){
         this.setState({
           [key]: false,
-        },()=>{this.newScooter(this.state.sid);});
+        },()=>{if(reload){console.warn('reload scooter');this.newScooter(this.state.sid);}});
     }
     fetch_scooters(){
         var result = []
@@ -594,6 +598,10 @@ export default class ScooterDetail extends React.Component {
       this.props.navigation.navigate("BrokenTrackRecord",{scooter:this.state.scooter});
       this.onClose('action_tools_modal');
     }
+    showLocationModify(){
+      this.modal_location.get_scooter_location(this.state.scooter);
+      this.showModal('clv_modal');
+    }
     render() {
         const {search,selectedIndex,toSearch,scooter} = this.state;
 
@@ -662,11 +670,7 @@ export default class ScooterDetail extends React.Component {
           violation_modal:this.state.violation_modal,
           scooter:this.state.scooter,
         }
-        const direction_option={
-          onClose:this.onClose,
-          direction_modal:this.state.direction_modal,
-          scooter:this.state.scooter,
-        }
+       
         const controller_option={
           onClose:this.onClose,
           controller_modal:this.state.controller_modal,
@@ -679,8 +683,14 @@ export default class ScooterDetail extends React.Component {
           BrokenTrack:this.BrokenTrack,
           BrokenTrackRecord:this.BrokenTrackRecord,
           showMaintain:this.showMaintain,
+          showLocationModify:this.showLocationModify,
           selectWork:this.selectWork
 
+        }
+        const clv_option={
+          onClose:this.onClose,
+          clv_modal:this.state.clv_modal,
+          scooter:this.state.scooter,
         }
         var tasks = this.state.task.split(',');
         var task = [];
@@ -740,9 +750,9 @@ export default class ScooterDetail extends React.Component {
             <Maintenance  maintain_option={maintain_option} onRef1={this.onRef1}/>
             <FastRecord fastrecord_option={fastrecord_option} />
             <Violation  violation_option={violation_option}/>
-            <Direction direction_option={direction_option} />
             <Controller controller_option={controller_option} />
             <ActionTools action_tools_option={action_tools_option} />
+            <ChangeLocationView clv_option={clv_option} onRefLocation={this.onRefLocation}/>
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }} style={{width:'100%',backgroundColor: '#EFF1F4'}}>
                 <ListItem
                   key={"list_0"}
