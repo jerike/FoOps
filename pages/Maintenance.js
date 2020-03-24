@@ -41,7 +41,7 @@ export default class Maintenance extends React.Component {
         SCooter_ticket = this.props.maintain_option.scooter.ticket;
         
         if(SCooter_ticket != undefined){
-          other_conditions = SCooter_ticket.other_conditions;
+          other_conditions = (SCooter_ticket.other_conditions == undefined) ? [] : SCooter_ticket.other_conditions;
           sel_condition = SCooter_ticket.scooter_conditions;
           this.setState({sel_condition:sel_condition,other_conditions:other_conditions})
         }
