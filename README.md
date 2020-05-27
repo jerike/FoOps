@@ -27,7 +27,7 @@ cd android && ./gradlew clean  && ./gradlew assembleRelease
 React-native run-android  
 adb shell input keyevent 8
 
-## **Fix compiler issue **
+## Fix compiler issue
 > Task :app:installDebug FAILED  
 >>adb uninstall "com.foops"
   
