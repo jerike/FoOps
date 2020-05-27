@@ -28,12 +28,12 @@ React-native run-android
 adb shell input keyevent 8
 
 ## **Fix compiler issue **
-> Task :app:installDebug FAILED
-adb uninstall "com.foops"
+> Task :app:installDebug FAILED  
+>>adb uninstall "com.foops"
   
-> Task :app:mergeReleaseResources FAILED
-build/generated/res/react/release
-remove {drawable} folder
+> Task :app:mergeReleaseResources FAILED  
+>> build/generated/res/react/release
+>>> remove {drawable} folder
 
 
 ## If useAndroidX , need compiler element
