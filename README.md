@@ -36,7 +36,7 @@ adb shell input keyevent 8
 >>> remove {drawable} folder
 
 
-## If useAndroidX , need compiler element
+## If use AndroidX , need compiler element
 1. npm install --save-dev jetifier  
 2. npx jetify  
 3. npx react-native run-android
